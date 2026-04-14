@@ -31,10 +31,12 @@ async function  Handelstorage (opcion,item,valor){
           const añoActual = parseInt(fechaActual.getFullYear());
           
           const nombremes=datameses.find(mesObj => mesObj.numero === mesactual)
+          
           const datadate={
-            
+            datames:mesactual,
             dataanno:añoActual,
-            dataperiodo:añoActual
+            dataperiodo:añoActual,
+            nombremesactual:nombremes.mes
           }
           const datastats={
             dataanno:añoActual
@@ -81,6 +83,7 @@ async function  Handelstorage (opcion,item,valor){
           datames: userLocalStorageDate.datames,
           dataanno: userLocalStorageDate.dataanno,
           dataperiodo: userLocalStorageDate.dataperiodo,
+          nombremesactual: userLocalStorageDate.nombremesactual,
           
           
         };

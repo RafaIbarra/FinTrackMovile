@@ -12,6 +12,12 @@ export default function Login() {
   const [verContrasena, setVerContrasena] = useState(false);
   const[mensajeerror,setMensajeerror]=useState('')
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { versionsys,setVersionsys } = useContext(AuthContext);
+  const {sesiondata, setSesiondata} = useContext(AuthContext);
+  const {sesiondatadate, setSesiondatadate} = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+  const {periodo, setPeriodo} = useContext(AuthContext);
+  const {  actualizarEstadocomponente } = useContext(AuthContext);
 
 
   const [visibledialogo, setVisibledialogo] = useState(false)
@@ -47,29 +53,36 @@ export default function Login() {
             refresh:datos['data']['refresh'],
             user_name:datos['data']['user_name'],
         }
-        
+        console.log(userdata)
         await Handelstorage('agregar',userdata,'')
         
+        
+        const datestorage=await Handelstorage('obtenerdate');
+        console.log('al loguearse -->',datos['data']['datauser'])
+        setSesiondata(datos['data']['datauser'])
+        setSesiondatadate(datestorage)
+        const anno_storage=datestorage['dataanno']
+        
+        setPeriodo(datestorage['dataperiodo'])
+        
+        actualizarEstadocomponente('DiaActual',datos['data'].dia_actual)
+        await new Promise(resolve => setTimeout(resolve, 1500))
         setActivarsesion(true)
-        // const datestorage=await Handelstorage('obtenerdate');
-        
-        // const anno_storage=datestorage['dataanno']
-        
-        // setPeriodo(datestorage['dataperiodo'])
-        
-        // actualizarEstadocomponente('DiaActual',datos['data'].dia_actual)
-        // if( anno_storage===0){
+        if( anno_storage===0){
 
-        //     await new Promise(resolve => setTimeout(resolve, 1500))
+            await new Promise(resolve => setTimeout(resolve, 1500))
             
-        //     const datestorage2=await Handelstorage('obtenerdate');
+            const datestorage2=await Handelstorage('obtenerdate');
             
-        //     setPeriodo(datestorage2['dataperiodo'])
+            setPeriodo(datestorage2['dataperiodo'])
+            setSesiondatadate(datestorage2)
 
-        // }
-        // reiniciarvalores()
+        }
+
+        reiniciarvalores()
+
         
-        // setSesiondata(datos['data']['datauser'])
+        
         // actualizarEstadocomponente('tituloloading','')
         // actualizarEstadocomponente('loading',false)
         // setActivarsesion(true)
