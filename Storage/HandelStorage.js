@@ -38,6 +38,7 @@ async function  Handelstorage (opcion,item,valor){
             dataperiodo:añoActual,
             nombremesactual:nombremes.mes
           }
+          console.log('en agregar-->',datadate)
           const datastats={
             dataanno:añoActual
           }
@@ -78,6 +79,7 @@ async function  Handelstorage (opcion,item,valor){
   const obtenerdate= async()=>{
       const valordate= await AsyncStorage.getItem("userdate");
       const userLocalStorageDate = JSON.parse(valordate);
+      console.log('en la funcion -->', userLocalStorageDate)
       if (userLocalStorageDate !== null){
         return {
           datames: userLocalStorageDate.datames,

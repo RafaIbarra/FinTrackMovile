@@ -11,6 +11,7 @@ import { AuthContext } from "../../AuthContext";
 import Procesando from "../Procesando/Procesando";
 import { useTheme } from '@react-navigation/native';
 
+import { Entypo } from '@expo/vector-icons';
 
 function DrawerContentInicio(props){
 
@@ -74,9 +75,9 @@ function DrawerContentInicio(props){
 
         const cargardatos = async()=>{
 
-            console.log('los datos de la sesion --->',sesiondata)
+            
             const datestorage=await Handelstorage('obtener');
-            console.log('los datos en el storage-->',datestorage)
+            
         }
         cargardatos()
       }, []);
@@ -87,6 +88,13 @@ function DrawerContentInicio(props){
             {guardando &&(<Procesando></Procesando>)}
             <DrawerContentScrollView {...props} scrollEnabled={false}>
                  <View style={{marginTop:5,marginLeft:20,alignItems:'flex-start',alignContent:'flex-start'}}>
+                  <View style={[styles.containerimagen,{borderColor:colors.background}]}>
+                    <Image
+                          source={require('../../assets/logoapp.png')} // Ruta de la imagen
+                          style={styles.image}
+                          resizeMode="cover" // La imagen se ajusta al tamaño del contenedor sin distorsión
+                      />
+                  </View>
                     <Text>
                          @{sesiondata[0].username}
                       </Text>
@@ -102,7 +110,25 @@ function DrawerContentInicio(props){
 
                   </View>
             </DrawerContentScrollView>
-            
+            <View style={{alignContent:'center',alignItems:'center',marginBottom:10,marginLeft:5}}>
+              <Button 
+                        style={{width:'90%',height:40,
+                          backgroundColor:colors.acctionsbotoncolor,
+                          alignContent:'center',alignItems:'center',justifyContent:'center'
+                          
+                        }} 
+                      
+                        icon={() => {return <Entypo name="log-out" size={30} color="white" />}}
+                        mode="elevated" 
+                        textColor="white"
+                        labelStyle={{
+                            fontFamily: fonts.bodybold.fontFamily, // Asigna tu fuente aquí
+                            fontSize: 16, // Ajusta el tamaño si es necesario
+                          }}
+                        onPress={cerrar}>
+                            CERRAR SESION 
+                </Button>
+            </View>
 
         </View>
       </PaperProvider>

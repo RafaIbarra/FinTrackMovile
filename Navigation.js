@@ -3,13 +3,19 @@ import { View,Text,TouchableOpacity } from "react-native";
 import { NavigationContainer,DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from '@react-navigation/native';
 import { useNavigation  } from "@react-navigation/native";
 import { AuthContext } from './AuthContext';
 
 import Login from './Componentes/Screens/Login/Login';
 import Settings from './Componentes/Screens/Settings';
+import Cargando from './Componentes/Procesando/Cargando';
 import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContentInicio';
+
+
+import Gastos from './Componentes/Screens/Gastos/Gastos';
+import Ingresos from './Componentes/Screens/Gastos/Ingresos';
 const rose= {
     'op1': '#fff1f2',
     'op2': '#ffe4e6',
@@ -117,23 +123,42 @@ function DrawerInicio({navigation}) {
     drawerContent={DrawerContentInicio}
      
     >
-      
+      <DrawerNav.Screen name="TabsGroup" component={TabsGroup} />
       <DrawerNav.Screen name="Settings" component={Settings} />
     </DrawerNav.Navigator>
   );
 }
-const Stack = createNativeStackNavigator();
 
-// export default function Navigation() {
-    
-//   return (
-//     <NavigationContainer>
-//       <Stack.Navigator screenOptions={{ headerShown: false }}>
-//         <Stack.Screen name="Login" component={Login} />
-//       </Stack.Navigator>
-//     </NavigationContainer>
-//   );
-// }
+
+const Tab = createBottomTabNavigator();
+function TabsGroup({ navigation }) {
+    const { colors } = useTheme();
+    return (
+      <Tab.Navigator 
+      initialRouteName="Gastos"
+      >
+       
+        
+        <Tab.Screen name="Gastos"
+         component={Gastos} 
+         
+         />
+         <Tab.Screen name="Ingresos"
+         component={Ingresos} 
+         
+         />
+
+        
+
+      
+
+
+      </Tab.Navigator>
+    );
+  }
+
+
+const Stack = createNativeStackNavigator();
 function NavigationLogin(){
   return (
     
@@ -157,7 +182,7 @@ function Navigation({notificationData,setNotificationData}) {
       
            
               <>
-                
+                {estadocomponente.loading && <Cargando />}
                 <DrawerInicio />
               </>
            
@@ -165,7 +190,7 @@ function Navigation({notificationData,setNotificationData}) {
 
           ) : (
             <>
-              
+              {estadocomponente.loading && <Cargando />}
               <NavigationLogin />
             </>
           )}

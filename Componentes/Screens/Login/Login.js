@@ -1,12 +1,15 @@
 import React, { useState,useEffect, useContext } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text,Keyboard,Alert } from 'react-native';
 import { TextInput, Button, Surface,Portal,Dialog,PaperProvider } from 'react-native-paper';
 import { AuthContext } from '../../../AuthContext';
 
 import Iniciarsesion from '../../../Apis/ApiInicioSesion';
 import Handelstorage from '../../../Storage/HandelStorage';
 import ComprobarStorage from '../../../Storage/VerificarStorage';
+import Generarpeticion from '../../../Apis/ApiPeticiones';
+
 export default function Login() {
+  const [ready,setReady]=useState(false)
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [verContrasena, setVerContrasena] = useState(false);
@@ -53,20 +56,21 @@ export default function Login() {
             refresh:datos['data']['refresh'],
             user_name:datos['data']['user_name'],
         }
-        console.log(userdata)
-        await Handelstorage('agregar',userdata,'')
         
+        await Handelstorage('agregar',userdata,'')
+        await new Promise(resolve => setTimeout(resolve, 1500))
         
         const datestorage=await Handelstorage('obtenerdate');
-        console.log('al loguearse -->',datos['data']['datauser'])
+        
         setSesiondata(datos['data']['datauser'])
+        
         setSesiondatadate(datestorage)
         const anno_storage=datestorage['dataanno']
         
         setPeriodo(datestorage['dataperiodo'])
         
         actualizarEstadocomponente('DiaActual',datos['data'].dia_actual)
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        
         setActivarsesion(true)
         if( anno_storage===0){
 
@@ -92,6 +96,7 @@ export default function Login() {
       
       showDialog(true)
       setMensajeerror( handleError(datos['data']['message']))
+
       // actualizarEstadocomponente('tituloloading','')
       // actualizarEstadocomponente('loading',false)
 
@@ -121,6 +126,142 @@ export default function Login() {
      
   };
 
+  const cargardatos=async()=>{
+    setReady(false)
+    const endpoint='sessions/ComprobarSession/'
+    actualizarEstadocomponente('tituloloading','Comprobando Sesion..')
+    actualizarEstadocomponente('loading',true)
+    
+    
+    try {
+
+      const result = await Generarpeticion(endpoint, 'GET', {});
+      const respuesta=result['resp']
+      const datosstarage = await ComprobarStorage()
+      const credenciales=datosstarage['datosesion']
+      if (credenciales){
+        const result = await Generarpeticion(endpoint, 'GET', {});
+        const respuesta=result['resp']
+        if (respuesta === 200) {
+          
+          setSesiondata(result['data'])
+          const datestorage=await Handelstorage('obtenerdate');
+          setSesiondatadate(datestorage)
+          setPeriodo(datestorage['dataperiodo'])
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          setActivarsesion(true)
+        }else{
+          await Handelstorage('borrar')
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          setActivarsesion(false)
+          actualizarEstadocomponente('tituloloading','')
+          actualizarEstadocomponente('loading',false)
+        }
+
+      }else{
+        setActivarsesion(false)
+          actualizarEstadocomponente('tituloloading','')
+          actualizarEstadocomponente('loading',false)
+      }
+      
+      // if (respuesta === 200) {
+        
+      //   const datosstarage = await ComprobarStorage()
+        
+      //   const credenciales=datosstarage['datosesion']
+        
+        
+      //   if (credenciales) {
+        
+            
+            
+      //       //activarspin()
+      //       actualizarEstadocomponente('tituloloading','Comprobando Sesion..')
+      //       actualizarEstadocomponente('loading',true)
+            
+      //       const body = {
+      //         version:versionsys,
+      //       };
+      //       const endpoint='ComprobarSesionUsuario/'
+      //       const result = await Comprobarsesion(endpoint, 'POST', body);
+      //       const respuesta=result['resp']
+            
+            
+      //       if (respuesta === 200){
+                
+      //           // setSesionname(datosstarage['user_name'])
+      //           const datestorage=await Handelstorage('obtenerdate');
+      //           setPeriodo(datestorage['dataanno'])
+      //           const registros=result['data']
+                
+      //           setSesiondata(registros)
+      //           actualizarEstadocomponente('DiaActual',registros[0]['dia_actual'])
+      //           actualizarEstadocomponente('tituloloading','')
+                
+      //           actualizarEstadocomponente('loading',false)
+      //           setActivarsesion(true)
+                
+      //       }else if (respuesta === 6000){
+              
+      //           actualizarEstadocomponente('tituloloading','')
+      //           actualizarEstadocomponente('loading',false)
+      //           setActivarsesion(false)
+      //       } else if (respuesta === 400){
+    
+      //         await Handelstorage('borrar')
+      //         await new Promise(resolve => setTimeout(resolve, 1000))
+      //         setActivarsesion(false)
+      //         setErrorversion(true)
+      //         setLinkdescarga(result['data']['link'])
+      //         actualizarEstadocomponente('tituloloading','')
+      //         actualizarEstadocomponente('loading',false)
+    
+      //       }else {
+              
+              
+      //         await Handelstorage('borrar')
+      //         await new Promise(resolve => setTimeout(resolve, 1000))
+      //         setActivarsesion(false)
+      //         actualizarEstadocomponente('tituloloading','')
+      //         actualizarEstadocomponente('loading',false)
+    
+      //       }
+            
+          
+      //   } else {
+          
+      //       await Handelstorage('borrar')
+      //       setActivarsesion(false)
+      //       // setSesionname('')
+      //   }
+      // }else{
+      //   const registros=result['data']['error']
+        
+      //   setErrorversion(true)
+      //   setLinkdescarga(registros.link)
+        
+      // }
+    }catch (error) {
+        
+        Alert.alert("Error", "Error al conectarse al servidor");
+        setReady(false)
+    } finally {
+        setReady(true)
+      }
+
+
+
+
+    
+}
+ useEffect(() => {
+
+    
+
+    
+    cargardatos()
+    
+  }, []);
 
   return (
     <PaperProvider>
