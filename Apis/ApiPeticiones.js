@@ -11,7 +11,8 @@ async function Generarpeticion(endpoint, metodo, bodyoptions) {
   
     const tokenstorage = datosstarage['token'];
     const sesionstorage = datosstarage['sesion'];
-  
+    // console.log(sesionstorage)
+    // console.log(tokenstorage)
     
     
   

@@ -5,12 +5,15 @@ import dayjs from 'dayjs';
 import Handelstorage from "../../../Storage/HandelStorage";
 import Generarpeticion from "../../../Apis/ApiPeticiones";
 import { AuthContext } from "../../../AuthContext";
+import { useTheme } from '@react-navigation/native';
+import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 export default function Gastos ({ navigation  }){
+     const { colors, fonts } = useTheme();
     const {sesiondatadate, setSesiondatadate} = useContext(AuthContext);
     const [dataegresos,setDataegresos]=useState([])
 
     const cargardatos=async()=>{
-        console.log(sesiondatadate)
+        
         anno_storage=sesiondatadate.dataanno
         mes_storage=sesiondatadate.datames
         const endpoint=`operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`
@@ -42,10 +45,8 @@ export default function Gastos ({ navigation  }){
        
      }, []);
     return(
-        <View style={{ flex: 1 }}>
-            <Text>
-                Listado de gastos
-            </Text>
+        <View style={{ flex: 1,backgroundColor: colors.background }}>
+            
             <FlatList 
                           data={dataegresos}
                           renderItem={({item}) =>{
@@ -56,16 +57,19 @@ export default function Gastos ({ navigation  }){
                                   
                                   >
                                       <View style={[styles.columna, { flex: 2 }]}> 
-                                          
-                                          <Text style={[styles.textocontenido]}>Fecha Gasto: {item.FechaGasto}</Text>
-                                          <Text style={[styles.textocontenido]}> Fecha Registro: {item.FechaRegistro}</Text>
+                                          <LogoEmpresa imagePath={item.LogoEmpresa}>
+
+                                          </LogoEmpresa>
+                                          <Text style={[styles.textocontenido,{fontFamily: fonts.balsamiqregular.fontFamily }]}> {item.NombreEmpresa}</Text>
+                                          <Text style={[styles.textocontenido,{fontFamily: fonts.balsamiqregular.fontFamily }]}>Fecha Gasto: {item.FechaGasto}</Text>
+                                          <Text style={[styles.textocontenido,{fontFamily: fonts.balsamiqregular.fontFamily }]}> Fecha Registro: {item.FechaRegistro}</Text>
                                           
                                           
                                       </View>
 
                                       <View style={[styles.columna, { flex: 1,marginTop:30 }]}> 
 
-                                          <Text style={[styles.textototal]}> Gs.: {Number(item.TotalMovimiento).toLocaleString('es-ES')} </Text>
+                                          <Text style={[styles.textototal,{fontFamily: fonts.balsamiqbold.fontFamily }]}> Gs.: {Number(item.TotalMovimiento).toLocaleString('es-ES')} </Text>
                                           
                                       </View>
                                   </TouchableOpacity >
@@ -93,7 +97,7 @@ const styles = StyleSheet.create({
         
     },
     textocontenido:{
-      fontSize:12.5,
+      fontSize:11,
       marginBottom:5,
       // color:'white'
     },

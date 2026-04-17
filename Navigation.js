@@ -38,10 +38,19 @@ const MyTheme = {
   
   
       regular: { fontFamily: 'SenRegular', fontWeight: 'normal' },
+      regularroboto: { fontFamily: 'RobotoRegular', fontWeight: 'normal' },
+      regularrobotobold: { fontFamily: 'RobotoBold' },
       regularbold: { fontFamily: 'SenBold', fontWeight: 'normal' }, 
       bodyregular: { fontFamily: 'bodyRegular', fontWeight: 'normal' }, 
       bodybold: { fontFamily: 'bodyBold', fontWeight: 'normal' }, 
-  
+      mirandaregular: { fontFamily: 'MirandaRegular'}, 
+      mirandabold: { fontFamily: 'MirandaBold'}, 
+      mirandaitalic: { fontFamily: 'MirandaItalic'}, 
+
+
+      balsamiqregular: { fontFamily: 'BalsamiqSansRegular'}, 
+      balsamiqtalic: { fontFamily: 'BalsamiqSansItalic'}, 
+      balsamiqbold: { fontFamily: 'BalsamiqSansBold'}, 
       // regular: { fontFamily: 'Roboto', fontWeight: 'normal' },
       // regularbold: { fontFamily: 'Roboto', fontWeight: 'bold' },
       
@@ -49,7 +58,9 @@ const MyTheme = {
       colors: {
         ...DefaultTheme.colors,
    
-        background:rose.op3,
+        // background:rose.op3,
+        background:'#F5F4F9',
+        fondoencabezado:'#3AB884',
         backgroundnotificacion:rose.op1,
         InputTextBackground:rose.op3,
         textbordercoloractive:'rgb(44,148,228)',
@@ -62,7 +73,7 @@ const MyTheme = {
         tintcolor:'gray',
         // card: 'rgb(28,44,52)', //color de la barra de navegadores
         //card: '#57DCA3', //color de la barra de navegadores UENO
-        card: rose.op5, 
+        card: '#62af8f', 
         dateseleccion:"#ff0000",
         
         
@@ -107,8 +118,8 @@ function DrawerInicio({navigation}) {
         headerShown: !estadocomponente.camaracdc, 
         headerTitle: ({}) => (
           <View style={{alignItems:'center',marginTop:10}} >
-            <Text style={{ color: colors.textcard,fontSize:30,fontFamily: fonts.regularbold.fontFamily}}>{periodo}</Text>
-            <Text style={{ marginTop:-15,color: colors.textcard,fontSize:20,fontFamily: fonts.regularbold.fontFamily}}>{sesiondatadate.nombremesactual}</Text> 
+            <Text style={{ color: colors.textcard,fontSize:30,fontFamily: fonts.balsamiqbold.fontFamily}}>{periodo}</Text>
+            <Text style={{ marginTop:-5,color: colors.textcard,fontSize:20,fontFamily: fonts.balsamiqbold.fontFamily}}>{sesiondatadate.nombremesactual}</Text> 
             
           </View>
         ),
@@ -182,7 +193,7 @@ function Navigation({notificationData,setNotificationData}) {
       
            
               <>
-                {estadocomponente.loading && <Cargando />}
+                {/* {estadocomponente.loading && <Cargando />} */}
                 <DrawerInicio />
               </>
            
@@ -190,7 +201,7 @@ function Navigation({notificationData,setNotificationData}) {
 
           ) : (
             <>
-              {estadocomponente.loading && <Cargando />}
+              {/* {estadocomponente.loading && <Cargando />} */}
               <NavigationLogin />
             </>
           )}
