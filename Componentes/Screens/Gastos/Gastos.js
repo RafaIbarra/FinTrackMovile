@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
@@ -7,8 +8,15 @@ import Generarpeticion from "../../../Apis/ApiPeticiones";
 
 export default function Gastos({ navigation }) {
   const { colors, fonts } = useTheme();
+  const { navigate } = useNavigation();
   const { sesiondatadate } = useContext(AuthContext);
   const [dataegresos, setDataegresos] = useState([]);
+
+   const datos_gastos = (item) => {
+    console.log('\n========== DATOS DEL ITEM ==========');
+    console.log('Item completo:', item);
+    console.log('=====================================\n');
+  };
 
   const cargardatos = async () => {
     const anno_storage = sesiondatadate.dataanno;
@@ -16,7 +24,7 @@ export default function Gastos({ navigation }) {
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
     const result = await Generarpeticion(endpoint, 'GET', {});
     const respuesta = result['resp'];
-    
+    console.log("PRINCIPAL GASTOS")
     if (respuesta === 200) {
       const registros = result['data'];
       if (Object.keys(registros).length > 0) {
@@ -41,7 +49,10 @@ export default function Gastos({ navigation }) {
         data={dataegresos}
         renderItem={({ item }) => {
           return (
-            <TouchableOpacity style={styles.contenedordatos}>
+            <TouchableOpacity style={styles.contenedordatos}
+            // onPress={() => datos_gastos(item)}
+            onPress={() => {navigate('GastosDetalle', { item });}}
+            >
               {/* Columna 1: Logo */}
               <View style={styles.columnaLogo}>
                 <LogoEmpresa imagePath={item.LogoEmpresa} />

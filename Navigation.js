@@ -12,6 +12,7 @@ import Login from './Componentes/Screens/Login/Login';
 import Settings from './Componentes/Screens/Settings';
 import Cargando from './Componentes/Procesando/Cargando';
 import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContentInicio';
+import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
 
 
 import Gastos from './Componentes/Screens/Gastos/Gastos';
@@ -99,7 +100,6 @@ const MyTheme = {
   };
 
 const DrawerNav = createDrawerNavigator();
-
 function DrawerInicio({navigation}) {
   const { colors,fonts } = useTheme();
   const {periodo, setPeriodo} = useContext(AuthContext);
@@ -134,11 +134,14 @@ function DrawerInicio({navigation}) {
     drawerContent={DrawerContentInicio}
      
     >
-      <DrawerNav.Screen name="TabsGroup" component={TabsGroup} />
+      <DrawerNav.Screen name="Home" component={HomeStackGroup} />
       <DrawerNav.Screen name="Settings" component={Settings} />
     </DrawerNav.Navigator>
   );
 }
+
+
+
 
 
 const Tab = createBottomTabNavigator();
@@ -154,6 +157,7 @@ function TabsGroup({ navigation }) {
          component={Gastos} 
          
          />
+         
          <Tab.Screen name="Ingresos"
          component={Ingresos} 
          
@@ -168,6 +172,17 @@ function TabsGroup({ navigation }) {
     );
   }
 
+const HomeStack = createNativeStackNavigator();
+function HomeStackGroup(){
+  return(
+    <HomeStack.Navigator >
+      <HomeStack.Screen name="TabsGroup" component={TabsGroup} options={{ headerShown: false }}/>
+      <HomeStack.Screen name="GastosDetalle" component={GastosDetalle} />
+    </HomeStack.Navigator>
+  )
+
+}
+
 
 const Stack = createNativeStackNavigator();
 function NavigationLogin(){
@@ -180,6 +195,9 @@ function NavigationLogin(){
   );
   
   }
+
+
+
 function Navigation({notificationData,setNotificationData}) {
     
     const { activarsesion, setActivarsesion } = useContext(AuthContext);
