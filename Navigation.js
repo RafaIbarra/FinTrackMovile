@@ -12,7 +12,9 @@ import Login from './Componentes/Screens/Login/Login';
 import Settings from './Componentes/Screens/Settings';
 import Cargando from './Componentes/Procesando/Cargando';
 import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContentInicio';
-import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
+//import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
+//import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop1';
+import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop3';
 
 
 import Gastos from './Componentes/Screens/Gastos/Gastos';
@@ -31,7 +33,25 @@ const rose= {
     'op11': '#4c0519',
 }
 
-
+const colores_fondos={
+  'op1':'#F5F4F9',
+  'op2':'#13161f',
+  'op3':'#1a1f2e'
+}
+const colores_cards={
+  'op1':'#62af8f',
+  'op2':'#13161f',
+  'op3':'#3AB884',
+}
+const colores_text={
+  'text_detalle':{
+    'op1':'#ffffff'
+  },
+  'text_card':{
+    'op1':'#ffffff',
+    'op2':'#3AB884'
+  },
+}
 
 const MyTheme = {
     ...DefaultTheme,
@@ -60,21 +80,21 @@ const MyTheme = {
         ...DefaultTheme.colors,
    
         // background:rose.op3,
-        background:'#F5F4F9',
+        background:colores_fondos.op2,
         fondoencabezado:'#3AB884',
         backgroundnotificacion:rose.op1,
         InputTextBackground:rose.op3,
         textbordercoloractive:'rgb(44,148,228)',
         textbordercolorinactive:'gray',
-        text:'black',
-        textcard:'white',
+        text:colores_text.text_detalle.op1,
+        textcard:colores_text.text_card.op1,
         textsub:'gray',
         color:'red',
         primary:'white',
         tintcolor:'gray',
         // card: 'rgb(28,44,52)', //color de la barra de navegadores
         //card: '#57DCA3', //color de la barra de navegadores UENO
-        card: '#62af8f', 
+        card: colores_cards.op3, 
         dateseleccion:"#ff0000",
         
         
@@ -98,6 +118,7 @@ const MyTheme = {
       },
       
   };
+
 
 const DrawerNav = createDrawerNavigator();
 function DrawerInicio({navigation}) {

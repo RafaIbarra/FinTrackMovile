@@ -12,12 +12,6 @@ export default function Gastos({ navigation }) {
   const { sesiondatadate } = useContext(AuthContext);
   const [dataegresos, setDataegresos] = useState([]);
 
-   const datos_gastos = (item) => {
-    console.log('\n========== DATOS DEL ITEM ==========');
-    console.log('Item completo:', item);
-    console.log('=====================================\n');
-  };
-
   const cargardatos = async () => {
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
@@ -49,9 +43,10 @@ export default function Gastos({ navigation }) {
         data={dataegresos}
         renderItem={({ item }) => {
           return (
-            <TouchableOpacity style={styles.contenedordatos}
-            // onPress={() => datos_gastos(item)}
-            onPress={() => {navigate('GastosDetalle', { item });}}
+            <TouchableOpacity
+              style={styles.contenedordatos}
+              onPress={() => { navigate('GastosDetalle', { item }); }}
+              activeOpacity={0.85}
             >
               {/* Columna 1: Logo */}
               <View style={styles.columnaLogo}>
@@ -90,8 +85,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
     marginHorizontal: 10,
-    marginBottom: 5,
-    backgroundColor: 'transparent',
+    marginBottom: 8,
+    borderRadius: 10,
+    backgroundColor: '#1e2336',
+
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+
+    borderRightWidth: 3,
+    borderRightColor: '#c9a84c',      // dorado derecha
+
+    borderBottomWidth: 1,
+    borderBottomColor: '#c9a84c',     // dorado inferior más delgado
   },
   columnaLogo: {
     flex: 1,

@@ -5,9 +5,11 @@ import { useRoute } from "@react-navigation/native";
 
 import Handelstorage from "../../../Storage/HandelStorage";
 import Generarpeticion from "../../../Apis/ApiPeticiones";
+import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 export default function GastosDetalle ({ navigation  }){
     const [datositem, setDatositem]=useState([])
-     const [detallegastos,setDetallegastos]=useState([])
+    const [detallegastos,setDetallegastos]=useState([])
+    const [detallemedios,setDetallemedios]=useState([])
     const {params: { item },} = useRoute();
     useEffect(() => {
 
@@ -15,6 +17,7 @@ export default function GastosDetalle ({ navigation  }){
         console.log(item)
         setDatositem(item)
         setDetallegastos(item['DetalleGastos'])
+        setDetallemedios(item['DetalleMediosPagos'])
         })
         return unsubscribe;
          }, [navigation]);
@@ -22,18 +25,19 @@ export default function GastosDetalle ({ navigation  }){
     return(
         <View style={{ flex: 1 }}>
             <Text>
-                {datositem.NombreEmpresa}
+               Empresa: {datositem.NombreEmpresa}
+            </Text>
+            <LogoEmpresa imagePath={item.LogoEmpresa} />
+            <Text>
+                Fecha gasto:{datositem.FechaGasto}
             </Text>
             <Text>
-                {datositem.FechaGasto}
+                Fecha Registro: {datositem.FechaRegistro}
             </Text>
             <Text>
-                {datositem.FechaRegistro}
+                Total Gasto: {datositem.TotalMovimiento}
             </Text>
-            <Text>
-                {datositem.TotalMovimiento}
-            </Text>
-
+            <Text>GASTOS</Text>
             {Object.keys(detallegastos).map((key) => (
                 <View  key={key} style={{flexDirection:'row',alignContent:'center',
                         alignItems:'center',justifyContent:'space-between',
@@ -46,15 +50,32 @@ export default function GastosDetalle ({ navigation  }){
             
                         Gs. {Number(detallegastos[key].MontoGasto).toLocaleString('es-ES')}
                     </Text>
-
-                    
-                    
-
-
                 </View>
                 ))
             }
+
+            <Text>MEDIOS PAGOS</Text>
+            {Object.keys(detallemedios).map((key) => (
+                <View  key={key} style={{flexDirection:'row',alignContent:'center',
+                        alignItems:'center',justifyContent:'space-between',
+                        borderBottomWidth:0.5,paddingBottom:5,borderColor:'white',
+                        marginTop:10,marginBottom:10,marginRight:5
+                        }}> 
+                    <Text style={{ width:'35%'}}>  {detallemedios[key].NombreMedioPago}</Text>
+
+                    <Text style={{ fontWeight:'bold'}}>
+            
+                        Gs. {Number(detallemedios[key].MontoMedioPago).toLocaleString('es-ES')}
+                    </Text>
+                </View>
+                ))
+            }
+
+            <Text>
+                Imagen ref: {datositem.UrlImg}
+            </Text>
         </View>
     )
 }
+
 
