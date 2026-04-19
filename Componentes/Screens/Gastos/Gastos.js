@@ -39,6 +39,32 @@ export default function Gastos({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+
+      {/* RESUMEN CARDS */}
+      <View style={styles.resumenContenedor}>
+
+        <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
+          <View style={styles.resumenFila}>
+            <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
+              <Text style={styles.resumenIconoTexto}>↓</Text>
+            </View>
+            <Text style={[styles.resumenLabel, styles.resumenLabelIngreso,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Total Income</Text>
+          </View>
+          <Text style={[styles.resumenMonto, styles.resumenMontoIngreso,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Gs. 8.500.000</Text>
+        </View>
+
+        <View style={[styles.resumenCard, styles.resumenCardGasto]}>
+          <View style={styles.resumenFila}>
+            <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
+              <Text style={styles.resumenIconoTexto}>↑</Text>
+            </View>
+            <Text style={[styles.resumenLabel, styles.resumenLabelGasto,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Total Expenses</Text>
+          </View>
+          <Text style={[styles.resumenMonto, styles.resumenMontoGasto,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Gs. 3.800.000</Text>
+        </View>
+
+      </View>
+
       <FlatList
         data={dataegresos}
         renderItem={({ item }) => {
@@ -48,12 +74,9 @@ export default function Gastos({ navigation }) {
               onPress={() => { navigate('GastosDetalle', { item }); }}
               activeOpacity={0.85}
             >
-              {/* Columna 1: Logo */}
               <View style={styles.columnaLogo}>
                 <LogoEmpresa imagePath={item.LogoEmpresa} />
               </View>
-
-              {/* Columna 2: NombreEmpresa y FechaRegistro */}
               <View style={styles.columnaInfo}>
                 <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.text }]}>
                   {item.NombreEmpresa}
@@ -62,8 +85,6 @@ export default function Gastos({ navigation }) {
                   {item.FechaRegistro}
                 </Text>
               </View>
-
-              {/* Columna 3: TotalMovimiento */}
               <View style={styles.columnaTotal}>
                 <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.text }]}>
                   Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
@@ -79,6 +100,72 @@ export default function Gastos({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+
+  // --- RESUMEN ---
+  resumenContenedor: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+    marginTop: 12,
+    marginBottom: 16,
+    gap: 10,
+  },
+  resumenCard: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+  },
+  resumenCardIngreso: {
+    backgroundColor: '#EEE9FD',
+  },
+  resumenCardGasto: {
+    backgroundColor: '#FDEEE9',
+  },
+  resumenFila: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  resumenIcono: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resumenIconoIngreso: {
+    backgroundColor: '#7B5EA7',
+  },
+  resumenIconoGasto: {
+    backgroundColor: '#E05C5C',
+  },
+  resumenIconoTexto: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  resumenLabel: {
+    fontSize: 11,
+  },
+  resumenLabelIngreso: {
+    color: '#7B5EA7',
+  },
+  resumenLabelGasto: {
+    color: '#E05C5C',
+  },
+  resumenMonto: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  resumenMontoIngreso: {
+    color: '#3D2A6E',
+  },
+  resumenMontoGasto: {
+    color: '#8B1A1A',
+  },
+
+  // --- LISTA ---
   contenedordatos: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -88,15 +175,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 10,
     backgroundColor: '#1e2336',
-
     borderTopWidth: 0,
     borderLeftWidth: 0,
-
     borderRightWidth: 3,
-    borderRightColor: '#c9a84c',      // dorado derecha
-
+    borderRightColor: '#c9a84c',
     borderBottomWidth: 1,
-    borderBottomColor: '#c9a84c',     // dorado inferior más delgado
+    borderBottomColor: '#c9a84c',
   },
   columnaLogo: {
     flex: 1,
