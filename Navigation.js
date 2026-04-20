@@ -21,6 +21,12 @@ import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop3'
 import Gastos from './Componentes/Screens/Gastos/Gastos';
 import Ingresos from './Componentes/Screens/Gastos/Ingresos';
 
+import { AntDesign } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+
 
 const colores_fondos = {
   'op1': '#F5F4F9',
@@ -165,8 +171,8 @@ const colores_temas = {
   },
 }
 
-// ← acá cambiás el tema activo con solo editar esta línea
-const tema_colores_activo = colores_temas.tema_1
+
+const tema_colores_activo = colores_temas.tema_2
 
 
 //tema_colores_activo=
@@ -259,12 +265,25 @@ function DrawerInicio({navigation}) {
     screenOptions={{
         headerShown: !estadocomponente.camaracdc, 
         headerTitle: ({}) => (
-          <View style={{alignItems:'center',height:80,marginTop:10}} >
-            <Text style={{ color: colors.textcard,fontSize:30,fontFamily: fonts.balsamiqbold.fontFamily}}>{periodo}</Text>
-            <Text style={{ marginTop:-10,color: colors.textcard,fontSize:20,fontFamily: fonts.balsamiqbold.fontFamily}}>{sesiondatadate.nombremesactual}</Text> 
-            
-          </View>
-        ),
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{
+            color: colors.textcard,
+            fontSize: 30,
+            fontFamily: fonts.balsamiqbold.fontFamily,
+            lineHeight: 36,
+          }}>
+            {periodo}
+          </Text>
+          <Text style={{
+            color: colors.textcard,
+            fontSize: 20,
+            fontFamily: fonts.balsamiqbold.fontFamily,
+            lineHeight: 24,
+          }}>
+            {sesiondatadate.nombremesactual}
+          </Text>
+        </View>
+),
        
         headerTitleAlign:'center',
         headerStyle:{elevation:0},
@@ -300,7 +319,7 @@ function TabsGroup({ navigation }) {
           paddingBottom: 8,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          position: 'absolute',
+          //position: 'absolute',
         },
         tabBarActiveTintColor: colors.textcard,
         tabBarInactiveTintColor: 'gray',
@@ -313,84 +332,89 @@ function TabsGroup({ navigation }) {
       />
 
      <Tab.Screen
-  name="Agregar"
-  component={Gastos}
-  options={{
-    headerShown: false,
-    tabBarLabel: '',
-    tabBarButton: (props) => (
-      <TouchableOpacity
-        {...props}
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
-        }}
-      >
-        {/* fila de orejas + botón */}
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          top: -4,
-          left: 0,
-          right: 0,
-        }}>
-          {/* oreja izquierda */}
-          <View style={{
-            width: 30,
-            height: 30,
-            backgroundColor: colors.background,
-          }}>
-            <View style={{
-              flex: 1,
-              borderTopRightRadius: 40,
-              backgroundColor: colors.card,
-            }} />
-          </View>
-          <View
+      name="Agregar"
+      component={Gastos}
+      options={{
+        headerShown: false,
+        tabBarLabel: '',
+        tabBarButton: (props) => (
+          <TouchableOpacity
+            {...props}
             style={{
-              backgroundColor:colors.background,
-              borderBottomLeftRadius:30,
-              borderBottomRightRadius:30
-
-            }}
-           >
-              <View style={{
-              width: 60,
-              height: 60,
-              borderRadius: 30,
-              backgroundColor: colors.card,
-              justifyContent: 'center',
               alignItems: 'center',
-              marginTop: -10,
-              borderWidth:5,
-              borderColor:colors.background
-              
-            }}>
-              {/* Aquí puedes agregar un ícono o texto */}
-              <Text style={{ color: colors.textcard, fontSize: 24 }}>+</Text>
-            </View>
-          </View>
-          {/* Botón redondo central */}
-          
-
-          {/* oreja derecha */}
-          <View style={{
-            width: 30,
-            height: 30,
-            backgroundColor: colors.background,
-          }}>
-            <View style={{
+              justifyContent: 'flex-start', 
               flex: 1,
-              borderTopLeftRadius: 40,
-              backgroundColor: colors.card,
-            }} />
-          </View>
-        </View>
-      </TouchableOpacity>
-    ),
-  }}
-/>
+            }}
+          >
+            {/* fila de orejas + botón */}
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              // top: -4,
+              left: 0,
+              right: 0,
+            }}>
+              {/* oreja izquierda */}
+              <View style={{
+                width: 30,
+                height: 30,
+                backgroundColor: colors.background,
+              }}>
+                <View style={{
+                  flex: 1,
+                  borderTopRightRadius: 40,
+                  backgroundColor: colors.card,
+                }} />
+              </View>
+              <View
+                style={{
+                  backgroundColor:colors.background,
+                  borderBottomLeftRadius:30,
+                  borderBottomRightRadius:30
+
+                }}
+              >
+                  <View style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 30,
+                  backgroundColor: colors.card,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: -10,
+                  borderWidth:5,
+                  borderColor:colors.background
+                  
+                }}>
+                  {/* Aquí puedes agregar un ícono o texto */}
+                  {/* <Text style={{ color: colors.textcard, fontSize: 30 }}>+</Text> */}
+                  {/* <MaterialIcons name="exposure-plus-1" size={24} color={colors.textcard} /> */}
+                  {/* <MaterialCommunityIcons name="bookmark-plus" size={30} color={colors.textcard} /> */}
+                  {/* <FontAwesome5 name="cart-plus" size={24}color={colors.textcard} /> */}
+                  <FontAwesome name="plus" size={30} color={colors.textcard} />
+
+                </View>
+              </View>
+              {/* Botón redondo central */}
+              
+
+              {/* oreja derecha */}
+              <View style={{
+                width: 30,
+                height: 30,
+                backgroundColor: colors.background,
+              }}>
+                <View style={{
+                  flex: 1,
+                  borderTopLeftRadius: 40,
+                  backgroundColor: colors.card,
+                }} />
+              </View>
+            </View>
+          </TouchableOpacity>
+        ),
+      }}
+    />
 
       <Tab.Screen
         name="Ingresos"
@@ -402,10 +426,42 @@ function TabsGroup({ navigation }) {
 
 const HomeStack = createNativeStackNavigator();
 function HomeStackGroup(){
+  const { colors,fonts } = useTheme();
   return(
     <HomeStack.Navigator >
       <HomeStack.Screen name="TabsGroup" component={TabsGroup} options={{ headerShown: false }}/>
-      <HomeStack.Screen name="GastosDetalle" component={GastosDetalle} />
+      <HomeStack.Screen name="GastosDetalle" 
+        component={GastosDetalle} 
+        options={({ navigation }) => ({
+          headerTitle: 'Detalle del Gasto',
+          headerTitleAlign: 'left',
+          headerStyle: {
+            height: 50,
+            backgroundColor: colors.background,
+          },
+          headerTitleStyle: {
+            fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
+            color: colors.textcard,
+            fontSize: 16,
+          },
+          headerTintColor: colors.textcard,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
+              <MaterialCommunityIcons name="backburger" size={24} color={colors.textcard} />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity style={{ marginRight: 20 }}>
+                <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
+              </TouchableOpacity>
+              <TouchableOpacity style={{ marginRight: 10 }}>
+                <AntDesign name="edit" size={24} color={colors.textcard} />
+              </TouchableOpacity>
+            </View>
+          ),
+        })}
+  />
     </HomeStack.Navigator>
   )
 
