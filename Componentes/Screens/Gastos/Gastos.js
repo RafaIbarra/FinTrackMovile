@@ -11,6 +11,7 @@ export default function Gastos({ navigation }) {
   const { navigate } = useNavigation();
   const { sesiondatadate } = useContext(AuthContext);
   const [dataegresos, setDataegresos] = useState([]);
+  const [dataresumen, setDataresumen] = useState([]);
 
   const cargardatos = async () => {
     const anno_storage = sesiondatadate.dataanno;
@@ -20,7 +21,7 @@ export default function Gastos({ navigation }) {
     const respuesta = result['resp'];
     console.log("PRINCIPAL GASTOS")
     if (respuesta === 200) {
-      const registros = result['data'];
+      const registros = result['data']['detalle'];
       if (Object.keys(registros).length > 0) {
         registros.forEach((elemento) => {
           elemento.key = elemento.Id;
@@ -28,6 +29,9 @@ export default function Gastos({ navigation }) {
         });
       }
       setDataegresos(registros);
+      setDataresumen(result['data']['resumen'])
+      console.log(result['data']['resumen'])
+
     } else {
       console.log("error en la peticion");
     }
@@ -40,69 +44,105 @@ export default function Gastos({ navigation }) {
   return (
     
 
-      <View style={{ flex: 1, backgroundColor: colors.background}}>
+      <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
 
-        {/* RESUMEN CARDS */}
-        <View style={styles.resumenContenedor}>
+        
 
-          <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
-            <View style={styles.resumenFila}>
-              <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
-                <Text style={styles.resumenIconoTexto}>↓</Text>
+         {/* // --- RESUMEN CARDS ---// */}
+
+         
+          <View style={styles.resumenContenedor}>
+            
+            <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
+              <View style={styles.resumenRow}>
+                
+                <View style={styles.resumenColumnaIcono}>
+                  <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
+                    <Text style={styles.resumenIconoTexto}>↓</Text>
+                  </View>
+                </View>
+                
+                
+                <View style={styles.resumenColumnaTextos}>
+                  <Text style={[styles.resumenLabel, styles.resumenLabelIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Total Income
+                  </Text>
+                  <Text style={[styles.resumenMonto, styles.resumenMontoIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Gs. {Number(dataresumen[0]?.TotalIngresos).toLocaleString('es-ES')}
+                  </Text>
+                  <Text style={[styles.resumenCantidad, styles.resumenCantidadIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Cant registros: {Number(dataresumen[0]?.CantidadIngresos).toLocaleString('es-ES')}
+                  </Text>
+                </View>
               </View>
-              <Text style={[styles.resumenLabel, styles.resumenLabelIngreso,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Total Income</Text>
             </View>
-            <Text style={[styles.resumenMonto, styles.resumenMontoIngreso,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Gs. 8.500.000</Text>
-          </View>
 
-          <View style={[styles.resumenCard, styles.resumenCardGasto]}>
-            <View style={styles.resumenFila}>
-              <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
-                <Text style={styles.resumenIconoTexto}>↑</Text>
+            
+            <View style={[styles.resumenCard, styles.resumenCardGasto]}>
+              <View style={styles.resumenRow}>
+                
+                <View style={styles.resumenColumnaIcono}>
+                  <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
+                    <Text style={styles.resumenIconoTexto}>↑</Text>
+                  </View>
+                </View>
+                
+                
+                <View style={styles.resumenColumnaTextos}>
+                  <Text style={[styles.resumenLabel, styles.resumenLabelGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Total Gastos
+                  </Text>
+                  <Text style={[styles.resumenMonto, styles.resumenMontoGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
+                  </Text>
+                  <Text style={[styles.resumenCantidad, styles.resumenCantidadGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                    Cant registros: {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
+                  </Text>
+                </View>
               </View>
-              <Text style={[styles.resumenLabel, styles.resumenLabelGasto,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Total Expenses</Text>
             </View>
-            <Text style={[styles.resumenMonto, styles.resumenMontoGasto,{ fontFamily: fonts.balsamiqregular.fontFamily}]}>Gs. 3.800.000</Text>
           </View>
-
-        </View>
 
         
        
 
-              <FlatList
-              
-                data={dataegresos}
-                contentContainerStyle={styles.flatlistContenido}
-                style={{ flex: 1,}}
-                renderItem={({ item }) => {
-                  return (
-                    <TouchableOpacity
-                      style={styles.contenedordatos}
-                      onPress={() => { navigate('GastosDetalle', { item }); }}
-                      activeOpacity={0.85}
-                    >
-                      <View style={styles.columnaLogo}>
-                        <LogoEmpresa imagePath={item.LogoEmpresa} />
-                      </View>
-                      <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.text }]}>
-                          {item.NombreEmpresa}
-                        </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.textsub }]}>
-                          {item.FechaRegistro}
-                        </Text>
-                      </View>
-                      <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.text }]}>
-                          Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={item => item.key}
-              />
+            <FlatList
+            
+              data={dataegresos}
+              contentContainerStyle={styles.flatlistContenido}
+              style={{ flex: 1,}}
+              renderItem={({ item }) => {
+                return (
+                  <TouchableOpacity
+                    style={[styles.contenedordatos,{
+                      backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                      borderRightColor:colors.screen_componente_estilos.color_borde_cards,
+                      borderBottomColor:colors.screen_componente_estilos.color_borde_cards
+                    }]}
+                    onPress={() => { navigate('GastosDetalle', { item }); }}
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.columnaLogo}>
+                      <LogoEmpresa imagePath={item.LogoEmpresa} />
+                    </View>
+                    <View style={styles.columnaInfo}>
+                      <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
+                        {item.NombreEmpresa}
+                      </Text>
+                      <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                        {item.FechaRegistro}
+                      </Text>
+                    </View>
+                    <View style={styles.columnaTotal}>
+                      <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                        Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
+              keyExtractor={item => item.key}
+            />
           
         
       </View>
@@ -125,6 +165,24 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 14,
+  },
+  resumenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 1,
+  },
+  resumenColumnaTextos: {
+  flex: 1, // Ocupa el resto del espacio
+},
+resumenCantidad: {
+  fontSize: 11,
+  marginTop: 4,
+  opacity: 0.8,
+},
+  resumenColumnaIcono: {
+    width: 40, // Ancho fijo para la columna del icono
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   resumenCardIngreso: {
     backgroundColor: '#EEE9FD',
@@ -185,13 +243,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 8,
     borderRadius: 10,
-    backgroundColor: '#1e2336',
+    //backgroundColor: '#1e2336',
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 3,
-    borderRightColor: '#c9a84c',
+    //borderRightColor: '#c9a84c',
     borderBottomWidth: 1,
-    borderBottomColor: '#c9a84c',
+    //borderBottomColor: '#c9a84c',
   },
   flatlistContenido: {
   paddingBottom: 16,   // espacio para el BottomTab (height 65 + margen)

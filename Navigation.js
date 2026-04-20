@@ -26,153 +26,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { tema_colores_activo } from './Utils/Temas';
 
 
-const colores_fondos = {
-  'op1': '#F5F4F9',
-  'op2': '#13161f',
-  'op3': '#1c1a17',
-  'op4': '#141b2d',
-  'op5': '#FAF7F0',
-  'op6': '#EDEEF2',
-}
-
-const colores_cards = {
-  'op1': '#62af8f',
-  'op2': '#13161f',
-  'op3': '#3AB884',
-  'op4': '#57DCA3',
-  'op5': '#D4956A',
-  'op6': '#E8B84B',
-  'op7': '#6DBF8A',
-  'op8': '#5B9CF6',
-  'op9': '#7B68EE',
-  'op10': '#38C9B0',
-  'op11': '#C47A3A',
-  'op12': '#2A7A5A',
-  'op13': '#9B59B6',
-  'op14': '#3D6B9E',
-  'op15': '#E05C5C',
-  'op16': '#3A8A5A',
-}
-
-const colores_text = {
-  'text_detalle': {
-    'op1': '#ffffff',
-    'op2': '#e41e1e',
-    'op3': '#F5D0B5',  // texto claro para fondos oscuros cálidos
-    'op4': '#B8D4FF',  // texto claro para fondos oscuros azulados
-    'op5': '#3A2A1A',  // texto oscuro para fondo crema
-    'op6': '#1A2A3A',  // texto oscuro para fondo grisáceo
-  },
-  'text_card': {
-    'op1': '#ffffff',
-    'op2': '#3AB884',
-    'op3': '#3a2a00',  // texto oscuro para cards ámbar/terracota claras
-    'op4': '#1A4A35',  // texto oscuro para cards verdes claras
-  },
-}
-
-const colores_temas = {
-  // fondos op2 existente
-  'tema_1': {
-    fondopantalla:  colores_fondos.op2,
-    cards_header:   colores_cards.op1,   // verde menta
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op1,
-  },
-  'tema_2': {
-    fondopantalla:  colores_fondos.op2,
-    cards_header:   colores_cards.op3,   // verde 3AB884
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op1,
-  },
-  'tema_3': {
-    fondopantalla:  colores_fondos.op2,
-    cards_header:   colores_cards.op4,   // verde 57DCA3
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op1,
-  },
-  // fondos op3 oscuro cálido
-  'tema_4': {
-    fondopantalla:  colores_fondos.op3,
-    cards_header:   colores_cards.op5,   // terracota
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op3,
-  },
-  'tema_5': {
-    fondopantalla:  colores_fondos.op3,
-    cards_header:   colores_cards.op6,   // ámbar
-    text_header:    colores_text.text_card.op3,
-    text_pantalla:  colores_text.text_detalle.op3,
-  },
-  'tema_6': {
-    fondopantalla:  colores_fondos.op3,
-    cards_header:   colores_cards.op7,   // verde salvia
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op3,
-  },
-  // fondos op4 oscuro azulado
-  'tema_7': {
-    fondopantalla:  colores_fondos.op4,
-    cards_header:   colores_cards.op8,   // azul cielo
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op4,
-  },
-  'tema_8': {
-    fondopantalla:  colores_fondos.op4,
-    cards_header:   colores_cards.op9,   // violeta
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op4,
-  },
-  'tema_9': {
-    fondopantalla:  colores_fondos.op4,
-    cards_header:   colores_cards.op10,  // turquesa
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op1,
-  },
-  // fondos op5 claro crema
-  'tema_10': {
-    fondopantalla:  colores_fondos.op5,
-    cards_header:   colores_cards.op11,  // ocre
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op5,
-  },
-  'tema_11': {
-    fondopantalla:  colores_fondos.op5,
-    cards_header:   colores_cards.op12,  // verde bosque
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op5,
-  },
-  'tema_12': {
-    fondopantalla:  colores_fondos.op5,
-    cards_header:   colores_cards.op13,  // púrpura
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op5,
-  },
-  // fondos op6 claro grisáceo
-  'tema_13': {
-    fondopantalla:  colores_fondos.op6,
-    cards_header:   colores_cards.op14,  // azul acero
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op6,
-  },
-  'tema_14': {
-    fondopantalla:  colores_fondos.op6,
-    cards_header:   colores_cards.op15,  // rojo coral
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op6,
-  },
-  'tema_15': {
-    fondopantalla:  colores_fondos.op6,
-    cards_header:   colores_cards.op16,  // verde menta
-    text_header:    colores_text.text_card.op1,
-    text_pantalla:  colores_text.text_detalle.op6,
-  },
-}
-
-
-const tema_colores_activo = colores_temas.tema_2
 
 
 //tema_colores_activo=
@@ -202,45 +58,9 @@ const MyTheme = {
 
         //CARDS Y TEXTO CARD
         ...DefaultTheme.colors,
-        card:  tema_colores_activo.cards_header,  // debe de tomar de tema_colores_activo
-        textcard:tema_colores_activo.text_header,// debe de tomar de tema_colores_activo
-
-        // FONDO COMPONENTES Y TEXTO COMPONENTES
-        background:tema_colores_activo.fondopantalla,// debe de tomar de tema_colores_activo
-        text:tema_colores_activo.text_pantalla,// debe de tomar de tema_colores_activo
-
-        // COLORES QUE NO USO AUN
-        fondoencabezado: colores_cards.op4,
-        backgroundnotificacion:colores_fondos.op2,
-        InputTextBackground:colores_fondos.op2,
-        textbordercoloractive:'rgb(44,148,228)',
-        textbordercolorinactive:'gray',
-        
-        
-        textsub:'gray',
-        color:'red',
-        primary:'white',
-        tintcolor:'gray',
-      
-        
-        dateseleccion:"#ff0000",
-        
-
-        commentText:'black',
-        bordercolor:'#d6d7b3',
-        iconcolor:'white',
-        botoncolor:'rgb(44,148,228)',
-        // acctionsbotoncolor:'#57DCA3',
-        acctionsbotoncolor:colores_fondos.op2,
-        
-        subtitulo:'rgba(32,93,93,255)',
-        BotonTextActive:'white',
-        BotonActive:'#db004e',
-
-        BotonTextInactive:'#db004e',
-        BotonInactive:'#5d001d'
-
-        
+        background: tema_colores_activo.screen_componente_estilos.color_fondo,
+        card:tema_colores_activo.navigation_estilos.color_fondo,
+        ...tema_colores_activo,
         
       },
       
@@ -267,7 +87,7 @@ function DrawerInicio({navigation}) {
         headerTitle: ({}) => (
         <View style={{ alignItems: 'center' }}>
           <Text style={{
-            color: colors.textcard,
+            color: colors.navigation_estilos.color_texto,
             fontSize: 30,
             fontFamily: fonts.balsamiqbold.fontFamily,
             lineHeight: 36,
@@ -275,7 +95,7 @@ function DrawerInicio({navigation}) {
             {periodo}
           </Text>
           <Text style={{
-            color: colors.textcard,
+            color: colors.navigation_estilos.color_texto,
             fontSize: 20,
             fontFamily: fonts.balsamiqbold.fontFamily,
             lineHeight: 24,
@@ -287,7 +107,7 @@ function DrawerInicio({navigation}) {
        
         headerTitleAlign:'center',
         headerStyle:{elevation:0},
-        headerTintColor: colors.textcard,
+        headerTintColor: colors.navigation_estilos.color_texto,
         drawerLabelStyle: {marginLeft: 0,fontFamily: fonts.bodybold.fontFamily},
         tabBarLabelStyle:{borderWidth:1,bordercolor:'red'},
       
@@ -313,16 +133,16 @@ function TabsGroup({ navigation }) {
       initialRouteName="Gastos"
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: colors.card,
+          backgroundColor:colors.card,
           borderTopWidth: 0,
           height: 65,
           paddingBottom: 8,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          //position: 'absolute',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          
         },
-        tabBarActiveTintColor: colors.textcard,
-        tabBarInactiveTintColor: 'gray',
+        // tabBarActiveTintColor: colors.navigation_estilos.color_texto,
+        // tabBarInactiveTintColor: 'gray',
       }}
     >
       <Tab.Screen
@@ -358,17 +178,17 @@ function TabsGroup({ navigation }) {
               <View style={{
                 width: 30,
                 height: 30,
-                backgroundColor: colors.background,
+                backgroundColor: colors.screen_componente_estilos.color_fondo,
               }}>
                 <View style={{
                   flex: 1,
                   borderTopRightRadius: 40,
-                  backgroundColor: colors.card,
+                  backgroundColor: colors.navigation_estilos.color_fondo,
                 }} />
               </View>
               <View
                 style={{
-                  backgroundColor:colors.background,
+                  backgroundColor:colors.screen_componente_estilos.color_fondo,
                   borderBottomLeftRadius:30,
                   borderBottomRightRadius:30
 
@@ -378,12 +198,12 @@ function TabsGroup({ navigation }) {
                   width: 60,
                   height: 60,
                   borderRadius: 30,
-                  backgroundColor: colors.card,
+                  backgroundColor: colors.navigation_estilos.color_fondo,
                   justifyContent: 'center',
                   alignItems: 'center',
                   marginTop: -10,
                   borderWidth:5,
-                  borderColor:colors.background
+                  borderColor:colors.screen_componente_estilos.color_fondo
                   
                 }}>
                   {/* Aquí puedes agregar un ícono o texto */}
@@ -391,7 +211,7 @@ function TabsGroup({ navigation }) {
                   {/* <MaterialIcons name="exposure-plus-1" size={24} color={colors.textcard} /> */}
                   {/* <MaterialCommunityIcons name="bookmark-plus" size={30} color={colors.textcard} /> */}
                   {/* <FontAwesome5 name="cart-plus" size={24}color={colors.textcard} /> */}
-                  <FontAwesome name="plus" size={30} color={colors.textcard} />
+                  <FontAwesome name="plus" size={30} color={colors.navigation_estilos.color_texto} />
 
                 </View>
               </View>
@@ -402,12 +222,12 @@ function TabsGroup({ navigation }) {
               <View style={{
                 width: 30,
                 height: 30,
-                backgroundColor: colors.background,
+                backgroundColor: colors.screen_componente_estilos.color_fondo,
               }}>
                 <View style={{
                   flex: 1,
                   borderTopLeftRadius: 40,
-                  backgroundColor: colors.card,
+                  backgroundColor: colors.navigation_estilos.color_fondo,
                 }} />
               </View>
             </View>
@@ -425,6 +245,7 @@ function TabsGroup({ navigation }) {
 }
 
 const HomeStack = createNativeStackNavigator();
+
 function HomeStackGroup(){
   const { colors,fonts } = useTheme();
   return(
@@ -441,13 +262,13 @@ function HomeStackGroup(){
           },
           headerTitleStyle: {
             fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
-            color: colors.textcard,
+            color: colors.navigation_estilos.color_texto,
             fontSize: 16,
           },
           headerTintColor: colors.textcard,
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-              <MaterialCommunityIcons name="backburger" size={24} color={colors.textcard} />
+              <MaterialCommunityIcons name="backburger" size={24} color={colors.navigation_estilos.color_texto} />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -466,7 +287,6 @@ function HomeStackGroup(){
   )
 
 }
-
 
 const Stack = createNativeStackNavigator();
 function NavigationLogin(){
