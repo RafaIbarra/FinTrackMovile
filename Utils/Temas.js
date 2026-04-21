@@ -78,6 +78,8 @@ const screen_componente_estilos = {
       op5: '#FAF7F0',  // crema         (claro cálido)
       op6: '#EDEEF2',  // gris frío     (claro frío)
       op7: '#1e2336',  // azul medianoche — un paso más claro que op4
+      op8: '#DDDEE6',  // gris frío medio — un paso más oscuro que op6, para cards sobre fondo grisáceo
+      op9: '#ebe7dd',  // crema         (claro cálido)
     },
     color_borde_cards: {
       // oscuros neutros — card #1e2336, borde que destaque sin gritar
@@ -339,7 +341,7 @@ const colores_temas = {
       color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
       color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op7,
       color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op10, // ocre
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op5,
+      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op1,      // #F5F4F9 gris lavanda — diferenciado del crema
       color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op10,     // ocre medio
     },
   },
@@ -357,7 +359,7 @@ const colores_temas = {
       color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
       color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op8,
       color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op11, // verde bosque
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op5,
+      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op1,      // #F5F4F9 gris lavanda — diferenciado del crema
       color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op11,     // verde bosque
     },
   },
@@ -369,14 +371,14 @@ const colores_temas = {
       color_texto:  navigation_estilos.color_texto.op1,
     },
     screen_componente_estilos: {
-      color_fondo:            screen_componente_estilos.color_fondo.op5,
-      color_texto:            screen_componente_estilos.textos.color_texto.op5,
-      color_texto_subtitulo:  screen_componente_estilos.textos.color_texto_subtitulo.op5,
-      color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
-      color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op7,
-      color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op12, // púrpura
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op5,
-      color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op12,     // púrpura
+        color_fondo:            screen_componente_estilos.color_fondo.op5,
+        color_texto:            screen_componente_estilos.textos.color_texto.op5,
+        color_texto_subtitulo:  screen_componente_estilos.textos.color_texto_subtitulo.op5,
+        color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
+        color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op7,
+        color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op12, // púrpura
+        color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op9,      // #F5F4F9 gris lavanda — diferenciado del crema
+        color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op12,
     },
   },
 
@@ -395,7 +397,7 @@ const colores_temas = {
       color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op6,
       color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op9,
       color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op13, // azul acero
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op6,
+      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op8,      // #DDDEE6 gris frío medio — diferenciado del grisáceo
       color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op13,     // azul acero
     },
   },
@@ -413,7 +415,7 @@ const colores_temas = {
       color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op6,
       color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op10,
       color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op14, // rojo coral
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op6,
+      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op8,      // #DDDEE6 gris frío medio — diferenciado del grisáceo
       color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op14,     // coral oscurecido
     },
   },
@@ -431,7 +433,7 @@ const colores_temas = {
       color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op6,
       color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op9,
       color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op15, // verde menta oscuro
-      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op6,
+      color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op8,      // #DDDEE6 gris frío medio — diferenciado del grisáceo
       color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op15,     // verde menta oscuro
     },
   },
@@ -448,7 +450,7 @@ tema_16: {
     color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
     color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op8,
     color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op2,  // menta claro
-    color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op5,     // #FDFBF5
+    color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op9,     // #F5F4F9 gris lavanda — diferenciado del crema
     color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op3,     // menta claro #57DCA3
   },
 },

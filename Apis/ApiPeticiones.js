@@ -61,6 +61,7 @@ async function Generarpeticion(endpoint, metodo, bodyoptions) {
     }
   
     datos = { data, resp };
+    
     return datos;
   }
   

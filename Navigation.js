@@ -1,5 +1,5 @@
 import React,{useContext} from 'react';
-import { View,Text,TouchableOpacity } from "react-native";
+import { View,Text,TouchableOpacity,StyleSheet } from "react-native";
 import { NavigationContainer,DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -20,13 +20,21 @@ import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop3'
 
 import Gastos from './Componentes/Screens/Gastos/Gastos';
 import Ingresos from './Componentes/Screens/Gastos/Ingresos';
+import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
 
-import { AntDesign } from '@expo/vector-icons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+
 import { tema_colores_activo } from './Utils/Temas';
+
+
+//////////////iconos///////////////////////////////
+import { Ionicons } from "@expo/vector-icons";
+import { Feather } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 
 
@@ -76,13 +84,13 @@ function DrawerInicio({navigation}) {
   const { navigate } = useNavigation();  
   const { estadocomponente } = useContext(AuthContext);
   const sizeicon=25
-    const sizefont=18
-    const div_heigth=15
-    const margin_text=-15
+  const sizefont=18
+  const div_heigth=15
+  const margin_text=-15
   // console.log(sesiondatadate)
   return (
     <DrawerNav.Navigator
-    screenOptions={{
+        screenOptions={{
         headerShown: !estadocomponente.camaracdc, 
         headerTitle: ({}) => (
         <View style={{ alignItems: 'center' }}>
@@ -103,7 +111,7 @@ function DrawerInicio({navigation}) {
             {sesiondatadate.nombremesactual}
           </Text>
         </View>
-),
+        ),
        
         headerTitleAlign:'center',
         headerStyle:{elevation:0},
@@ -112,11 +120,140 @@ function DrawerInicio({navigation}) {
         tabBarLabelStyle:{borderWidth:1,bordercolor:'red'},
       
       }}
-    drawerContent={DrawerContentInicio}
-     
+      drawerContent={DrawerContentInicio}
     >
-      <DrawerNav.Screen name="Home" component={HomeStackGroup} />
-      <DrawerNav.Screen name="Settings" component={Settings} />
+      <DrawerNav.Screen 
+        name="Home" 
+        component={HomeStackGroup} 
+        options={{
+         
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Inicio
+                      </Text>
+                    </View>)
+          },
+          
+          drawerIcon: ({size, color})=>(<AntDesign name="home" size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          
+          }}
+      />
+
+      <DrawerNav.Screen name="ConceptosIngresos" 
+        component={Ingresos}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Conceptos Ingresos
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <Feather name="trending-up"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+         }}
+
+       />
+
+      <DrawerNav.Screen name="InicioCategoriaGastos" 
+        component={Ingresos}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Categoria Gastos
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <Feather name="align-left"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+         }}
+
+      />
+
+      <DrawerNav.Screen name="GastosStackGroup" 
+        component={Ingresos}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Conceptos Gastos
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <Feather name="trending-down"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+         }}
+
+      />
+      <DrawerNav.Screen name="MediosPagosStackGroup" 
+        component={Ingresos}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Medios de Pagos
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <FontAwesome6 name="hand-holding-dollar"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+         }}
+
+       />
+      
+      <DrawerNav.Screen name="ConsultaIA" 
+        component={Ingresos}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                        Consulta a la IA
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <MaterialCommunityIcons name="robot-confused-outline"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+         }}
+
+       />
+      
     </DrawerNav.Navigator>
   );
 }
@@ -148,6 +285,11 @@ function TabsGroup({ navigation }) {
       <Tab.Screen
         name="Gastos"
         component={Gastos}
+         options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Ingresos"
+        component={Ingresos}
         options={{ headerShown: false }}
       />
 
@@ -235,11 +377,17 @@ function TabsGroup({ navigation }) {
         ),
       }}
     />
-
       <Tab.Screen
-        name="Ingresos"
+        name="Resumen"
         component={Ingresos}
+        options={{ headerShown: false }}
       />
+      <Tab.Screen
+        name="Estats"
+        component={GraficaOverview}
+        options={{ headerShown: false }}
+      />
+      
     </Tab.Navigator>
   );
 }
@@ -262,13 +410,13 @@ function HomeStackGroup(){
           },
           headerTitleStyle: {
             fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
-            color: colors.navigation_estilos.color_texto,
+            color: colors.screen_componente_estilos.color_texto,
             fontSize: 16,
           },
           headerTintColor: colors.textcard,
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-              <MaterialCommunityIcons name="backburger" size={24} color={colors.navigation_estilos.color_texto} />
+              <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -277,7 +425,7 @@ function HomeStackGroup(){
                 <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
               </TouchableOpacity>
               <TouchableOpacity style={{ marginRight: 10 }}>
-                <AntDesign name="edit" size={24} color={colors.textcard} />
+                <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
               </TouchableOpacity>
             </View>
           ),

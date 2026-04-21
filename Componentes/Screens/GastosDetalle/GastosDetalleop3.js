@@ -7,7 +7,7 @@ import { useTheme } from "@react-navigation/native";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 
 export default function GastosDetalle({ navigation }) {
-  const { fonts } = useTheme();
+  const { colors, fonts } = useTheme();
   const [datositem, setDatositem] = useState({});
   const [detallegastos, setDetallegastos] = useState([]);
   const [detallemedios, setDetallemedios] = useState([]);
@@ -27,125 +27,140 @@ export default function GastosDetalle({ navigation }) {
   const tieneComprobante = !!datositem.UrlImg;
 
   return (
-    <ScrollView style={styles.scroll} bounces={false}>
+    <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
 
-      {/* HERO */}
-      <View style={styles.hero}>
-        {/* Logo + Empresa */}
-        <View style={styles.heroTop}>
-          <View style={styles.logoWrap}>
-            <LogoEmpresa imagePath={item.LogoEmpresa} />
-          </View>
-          <View style={{ flex: 1, paddingLeft: 12 }}>
-            <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-              {datositem.NombreEmpresa}
-            </Text>
-            <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-              Reg. {datositem.FechaRegistro}
-            </Text>
-          </View>
-        </View>
+      <ScrollView style={styles.scroll} bounces={false}>
 
-        {/* Total */}
-        <View style={styles.heroTotal}>
-          <Text style={[styles.heroTotalLabel, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-            TOTAL GASTO
-          </Text>
-          <Text style={[styles.heroTotalAmount, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-            Gs. {Number(datositem.TotalMovimiento).toLocaleString("es-ES")}
-          </Text>
-          <Text style={[styles.heroFechaGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-            Gasto realizado el {datositem.FechaGasto}
-          </Text>
-        </View>
-      </View>
-
-      {/* TARJETAS */}
-      <View style={styles.cardsContainer}>
-
-        {/* CARD GASTOS */}
-        <View style={styles.card}>
-          <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-            DETALLE DE GASTOS
-          </Text>
-          {Object.keys(detallegastos).map((key, idx) => (
-            <View key={key} style={[styles.cardRow, idx > 0 && styles.cardRowBorder]}>
-              <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                {detallegastos[key].NombreGasto}
+        {/* HERO */}
+        <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+          {/* Logo + Empresa */}
+          <View style={styles.heroTop}>
+            <View style={styles.logoWrap}>
+              <LogoEmpresa imagePath={item.LogoEmpresa} />
+            </View>
+            <View style={{ flex: 1, paddingLeft: 12 }}>
+              <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                {datositem.NombreEmpresa}
               </Text>
-              <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-                Gs. {Number(detallegastos[key].MontoGasto).toLocaleString("es-ES")}
+              <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                Reg. {datositem.FechaRegistro}
               </Text>
             </View>
-          ))}
-        </View>
+          </View>
 
-        {/* CARD MEDIOS */}
-        <View style={styles.card}>
-          <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-            MEDIOS DE PAGO
-          </Text>
-          {Object.keys(detallemedios).map((key, idx) => (
-            <View key={key} style={[styles.cardRow, idx > 0 && styles.cardRowBorder]}>
-              <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                {detallemedios[key].NombreMedioPago}
-              </Text>
-              <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-                Gs. {Number(detallemedios[key].MontoMedioPago).toLocaleString("es-ES")}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* BOTÓN COMPROBANTE */}
-        {tieneComprobante && (
-          <TouchableOpacity style={styles.comprobanteBtn} onPress={() => setModalVisible(true)}>
-            <Text style={[styles.comprobanteBtnText, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-              📎 Ver comprobante adjunto
+          {/* Total */}
+          <View style={styles.heroTotal}>
+            <Text style={[styles.heroTotalLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+              TOTAL GASTO
             </Text>
-          </TouchableOpacity>
-        )}
+            <Text style={[styles.heroTotalAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_importante }]}>
+              Gs. {Number(datositem.TotalMovimiento).toLocaleString("es-ES")}
+            </Text>
+            <Text style={[styles.heroFechaGasto, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+              Gasto realizado el {datositem.FechaGasto}
+            </Text>
+          </View>
+        </View>
 
-      </View>
+        {/* TARJETAS */}
+        <View style={[styles.cardsContainer]}>
 
-      {/* MODAL IMAGEN COMPROBANTE */}
-      {tieneComprobante && (
-        <Modal visible={modalVisible} transparent animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalSheet}>
-              <View style={styles.modalHandle} />
-              <Text style={[styles.modalTitle, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-                Comprobante
-              </Text>
-              <ScrollView style={{ flex: 1 }}>
-                <Image
-                  source={{ uri: datositem.UrlImg }}
-                  style={styles.comprobanteImg}
-                  resizeMode="contain"
-                />
-              </ScrollView>
-              <TouchableOpacity style={styles.cerrarBtn} onPress={() => setModalVisible(false)}>
-                <Text style={[styles.cerrarBtnText, { fontFamily: fonts.balsamiqbold.fontFamily }]}>
-                  Cerrar
+          {/* CARD GASTOS */}
+          <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+            <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+              DETALLE DE GASTOS
+            </Text>
+            {Object.keys(detallegastos).map((key, idx) => (
+              <View key={key} style={[styles.cardRow, idx > 0 && styles.cardRowBorder]}>
+                <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  {detallegastos[key].NombreGasto}
                 </Text>
-              </TouchableOpacity>
-            </View>
+                <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  Gs. {Number(detallegastos[key].MontoGasto).toLocaleString("es-ES")}
+                </Text>
+              </View>
+            ))}
           </View>
-        </Modal>
-      )}
-    </ScrollView>
+
+          {/* CARD MEDIOS */}
+          <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+            <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+              MEDIOS DE PAGO
+            </Text>
+            {Object.keys(detallemedios).map((key, idx) => (
+              <View key={key} style={[styles.cardRow, idx > 0 && styles.cardRowBorder]}>
+                <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  {detallemedios[key].NombreMedioPago}
+                </Text>
+                <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  Gs. {Number(detallemedios[key].MontoMedioPago).toLocaleString("es-ES")}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* BOTÓN COMPROBANTE */}
+          {tieneComprobante && (
+            <TouchableOpacity style={[styles.comprobanteBtn,
+            {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
+            borderColor:colors.screen_componente_estilos.color_borde_botones
+            }]
+            } onPress={() => setModalVisible(true)}>
+              <Text style={[styles.comprobanteBtnText, 
+                { fontFamily: fonts.balsamiqregular.fontFamily,
+                color:colors.screen_componente_estilos.color_texto_importante 
+                }]}>
+                📎 Ver comprobante adjunto
+              </Text>
+            </TouchableOpacity>
+          )}
+
+        </View>
+
+        {/* MODAL IMAGEN COMPROBANTE */}
+        {tieneComprobante && (
+          <Modal visible={modalVisible} transparent animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalSheet,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+                <View style={[styles.modalHandle,{backgroundColor:colors.screen_componente_estilos.color_fondo}]} />
+                <Text style={[styles.modalTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color:colors.screen_componente_estilos.color_texto }]}>
+                  Comprobante
+                </Text>
+                <ScrollView style={{ flex: 1 }}>
+                  <Image
+                    source={{ uri: datositem.UrlImg }}
+                    style={styles.comprobanteImg}
+                    resizeMode="contain"
+                  />
+                </ScrollView>
+                <TouchableOpacity style={[styles.cerrarBtn,
+                  {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
+                  borderColor:colors.screen_componente_estilos.color_borde_botones
+                  }
+                  ]} 
+                  onPress={() => setModalVisible(false)}>
+                  <Text style={[styles.cerrarBtnText, { fontFamily: fonts.balsamiqbold.fontFamily,color:colors.screen_componente_estilos.color_texto_importante  }]}>
+                    Cerrar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#13161f',       // fondo negro azulado general
+    //backgroundColor: '#13161f',       // fondo negro azulado general
   },
 
   // ── HERO ──────────────────────────────────────────
   hero: {
-    backgroundColor: '#1a1f2e',       // negro azulado más claro para el hero
+    //backgroundColor: '#1a1f2e',       // negro azulado más claro para el hero
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 32,
@@ -162,11 +177,11 @@ const styles = StyleSheet.create({
   },
   nombreEmpresa: {
     fontSize: 15,
-    color: '#ffffff',
+    //color: '#ffffff',
   },
   fechaRegistro: {
     fontSize: 11,
-    color: '#8a8fa8',                 // gris azulado apagado
+    //color: '#8a8fa8',                 // gris azulado apagado
     marginTop: 3,
   },
   heroTotal: {
@@ -175,16 +190,16 @@ const styles = StyleSheet.create({
   heroTotalLabel: {
     fontSize: 11,
     letterSpacing: 1.2,
-    color: '#8a8fa8',                 // gris apagado
+    //color: '#8a8fa8',                 // gris apagado
   },
   heroTotalAmount: {
     fontSize: 34,
-    color: '#3AB884',                 // verde brillante
+   // color: '#3AB884',                 // verde brillante
     marginTop: 6,
   },
   heroFechaGasto: {
     fontSize: 12,
-    color: '#8a8fa8',
+    //color: '#8a8fa8',
     marginTop: 8,
   },
 
@@ -194,16 +209,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: '#1e2336',       // gris oscuro azulado para las tarjetas
+    //backgroundColor: '#1e2336',       // gris oscuro azulado para las tarjetas
     borderRadius: 14,
     borderWidth: 0.5,
-    borderColor: '#2a2f45',           // borde apenas visible
+    //borderColor: '#2a2f45',           // borde apenas visible
     padding: 14,
   },
   cardTitle: {
     fontSize: 10,
     letterSpacing: 1.1,
-    color: '#8a8fa8',                 // gris apagado
+    //color: '#8a8fa8',                 // gris apagado
     marginBottom: 10,
   },
   cardRow: {
@@ -214,21 +229,21 @@ const styles = StyleSheet.create({
   },
   cardRowBorder: {
     borderTopWidth: 0.5,
-    borderTopColor: '#2a2f45',
+    //borderTopColor: '#2a2f45',
   },
   cardRowLabel: {
     fontSize: 13,
-    color: '#ffffff',
+    //color: '#ffffff',
   },
   cardRowAmount: {
     fontSize: 13,
-    color: '#ffffff',
+    //color: '#ffffff',
   },
 
   // ── BOTÓN COMPROBANTE ─────────────────────────────
   comprobanteBtn: {
     borderWidth: 0.5,
-    borderColor: '#3AB884',
+    //borderColor: '#3AB884',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
@@ -237,7 +252,7 @@ const styles = StyleSheet.create({
   },
   comprobanteBtnText: {
     fontSize: 13,
-    color: '#3AB884',
+    //color: '#3AB884',
   },
 
   // ── MODAL ─────────────────────────────────────────
@@ -247,7 +262,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: '#1e2336',
+    //backgroundColor: '#1e2336',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
@@ -257,13 +272,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#2a2f45',
+    //backgroundColor: '#2a2f45',
     alignSelf: 'center',
     marginBottom: 16,
   },
   modalTitle: {
     fontSize: 16,
-    color: '#ffffff',
+    //color: '#ffffff',
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -274,12 +289,13 @@ const styles = StyleSheet.create({
   cerrarBtn: {
     marginTop: 16,
     borderRadius: 12,
+     borderWidth: 0.5,
     padding: 14,
     alignItems: 'center',
-    backgroundColor: '#3AB884',
+    //backgroundColor: '#3AB884',
   },
   cerrarBtnText: {
-    color: '#fff',
+    //color: '#fff',
     fontSize: 14,
   },
 });

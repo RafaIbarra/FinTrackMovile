@@ -73,65 +73,88 @@ function DrawerContentInicio(props){
 
     useEffect(() => {
 
-        const cargardatos = async()=>{
+        const cargardatos=()=>{
 
             
-            const datestorage=await Handelstorage('obtener');
-            
+           
         }
         cargardatos()
       }, []);
     return(
-      <PaperProvider >
+      
 
         <View style={{flex: 1}} >
-            {guardando &&(<Procesando></Procesando>)}
+            
             <DrawerContentScrollView {...props} scrollEnabled={false}>
-                 <View style={{marginTop:5,marginLeft:20,alignItems:'flex-start',alignContent:'flex-start'}}>
-                  <View style={[styles.containerimagen,{borderColor:colors.background}]}>
+
+                <View style={{flex:1,flexDirection:'row',borderBottomWidth:1,borderBottomColor:colors.bordercolor,paddingBottom:10}}>
+
+                  <View style={styles.containerimagen}>
                     <Image
-                          source={require('../../assets/logoapp.png')} // Ruta de la imagen
+                          source={require('../../assets/logoapp.png')}
                           style={styles.image}
                           resizeMode="cover" // La imagen se ajusta al tamaño del contenedor sin distorsión
                       />
                   </View>
-                    <Text>
-                         @{sesiondata[0].username}
+                  
+                  <View style={{marginTop:15,marginLeft:5,alignItems:'flex-start',alignContent:'flex-start',justifyContent:'space-between'}}>
+                    <Text style={[ styles.textouser, 
+                                      { fontFamily: fonts.balsamiqregular.fontFamily,
+                                      color: colors.screen_componente_estilos.color_fondo
+                                      
+                                      }]}>
+                        @{sesiondata[0].username}
                       </Text>
-                      <Text >
-                        
+                      <Text style={[ styles.textodatos,{fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo}]}>
+                        {sesiondata[0].nombre}
                       </Text>
 
-                      
+                      <Text style={[ styles.textodatos, {fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo }]}>
+                        {sesiondata[0].apellido}
+                      </Text>
 
-                      <Text >
-                        
+                      <Text style={[ styles.textodatos, {fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo }]}>
+                        {sesiondata[0].fecha_registro}
                       </Text>
 
                   </View>
+                </View>
+                <DrawerItemList {...props} />
             </DrawerContentScrollView>
+
             <View style={{alignContent:'center',alignItems:'center',marginBottom:10,marginLeft:5}}>
               <Button 
-                        style={{width:'90%',height:40,
-                          backgroundColor:colors.acctionsbotoncolor,
+                        style={{width:'70%',height:30,
+                          backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
                           alignContent:'center',alignItems:'center',justifyContent:'center'
                           
                         }} 
                       
-                        icon={() => {return <Entypo name="log-out" size={30} color="white" />}}
+                        
                         mode="elevated" 
-                        textColor="white"
+                        textColor={colors.screen_componente_estilos.color_texto_importante} 
                         labelStyle={{
-                            fontFamily: fonts.bodybold.fontFamily, // Asigna tu fuente aquí
-                            fontSize: 16, // Ajusta el tamaño si es necesario
+                            fontFamily: fonts.balsamiqbold.fontFamily, // Asigna tu fuente aquí
+                            fontSize: 12, // Ajusta el tamaño si es necesario
                           }}
                         onPress={cerrar}>
                             CERRAR SESION 
                 </Button>
+                <Text style={
+                              {
+                                color: colors.screen_componente_estilos.color_texto_subtitulo,
+                                fontFamily: fonts.balsamiqregular.fontFamily,
+                                fontSize:10,
+                                marginTop:5
+                              }
+                             }
+                  >
+                   Vérsion: {versionsys} 
+                </Text>
             </View>
 
         </View>
-      </PaperProvider>
+      
     )
 }
 
@@ -146,7 +169,7 @@ const styles = StyleSheet.create({
         borderWidth:2,
         // borderColor:'red',
         overflow: 'hidden', // Oculta el contenido que se desborda del contenedor circular
-        marginLeft:0,
+        marginLeft:5,
         marginTop:15,
         marginBottom:3,
     
@@ -157,14 +180,18 @@ const styles = StyleSheet.create({
         
       },
     textodatos:{
-      fontSize:14
+      fontSize:12
     },
     textouser:{
-      fontSize:18,
+      fontSize:16,
     //   fontWeight:'bold',
     //   fontStyle:'italic'
     }
-
+    ,
+    textoSinEspacio: {
+        marginBottom: -10,  // Ajusta según necesites
+        paddingBottom: 0,
+    },
     
   });
 
