@@ -461,3 +461,5 @@ tema_16: {
 //  TEMA ACTIVO — cambiá solo esta línea para cambiar el tema
 // ─────────────────────────────────────────────────────────────
 export const tema_colores_activo = colores_temas.tema_2
+
+// preferidos: 2,14,12,16,10

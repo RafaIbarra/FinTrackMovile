@@ -87,72 +87,81 @@ function DrawerContentInicio(props){
             
             <DrawerContentScrollView {...props} scrollEnabled={false}>
 
-                <View style={{flex:1,flexDirection:'row',borderBottomWidth:1,borderBottomColor:colors.bordercolor,paddingBottom:10}}>
+                <View style={{flex:1,flexDirection:'row',borderBottomWidth:1,borderBottomColor:colors.bordercolor,
+                        //paddingBottom:10,
+                        backgroundColor:colors.navigation_estilos.color_fondo
+                        ,marginTop:-5
+                        }}>
 
-                  <View style={styles.containerimagen}>
-                    <Image
-                          source={require('../../assets/logoapp.png')}
-                          style={styles.image}
-                          resizeMode="cover" // La imagen se ajusta al tamaño del contenedor sin distorsión
-                      />
-                  </View>
-                  
-                  <View style={{marginTop:15,marginLeft:5,alignItems:'flex-start',alignContent:'flex-start',justifyContent:'space-between'}}>
-                    <Text style={[ styles.textouser, 
-                                      { fontFamily: fonts.balsamiqregular.fontFamily,
-                                      color: colors.screen_componente_estilos.color_fondo
-                                      
-                                      }]}>
-                        @{sesiondata[0].username}
-                      </Text>
-                      <Text style={[ styles.textodatos,{fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo}]}>
-                        {sesiondata[0].nombre}
-                      </Text>
+                        <View style={styles.containerimagen}>
+                          <Image
+                                source={require('../../assets/logoapp.png')}
+                                style={styles.image}
+                                resizeMode="cover" 
+                            />
+                        </View>
+                        
+                        <View style={{height:60,marginTop:30,marginLeft:5,alignItems:'flex-start',alignContent:'flex-start',justifyContent:'space-between'}}>
+                          <Text style={[ styles.textouser, 
+                                            { fontFamily: fonts.balsamiqregular.fontFamily,
+                                            color: colors.screen_componente_estilos.color_fondo
+                                            
+                                            }]}>
+                              @{sesiondata[0].username}
+                            </Text>
+                            <Text style={[ styles.textodatos,{fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo}]}>
+                              {sesiondata[0].nombre}; {sesiondata[0].apellido}
+                            </Text>
 
-                      <Text style={[ styles.textodatos, {fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo }]}>
-                        {sesiondata[0].apellido}
-                      </Text>
+                            
 
-                      <Text style={[ styles.textodatos, {fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo }]}>
-                        {sesiondata[0].fecha_registro}
-                      </Text>
+                            <Text style={[ styles.textohora, {fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_fondo }]}>
+                              {sesiondata[0].fecha_registro}
+                            </Text>
 
-                  </View>
+                        </View>
+
+
                 </View>
                 <DrawerItemList {...props} />
             </DrawerContentScrollView>
 
-            <View style={{alignContent:'center',alignItems:'center',marginBottom:10,marginLeft:5}}>
-              <Button 
-                        style={{width:'70%',height:30,
-                          backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
-                          alignContent:'center',alignItems:'center',justifyContent:'center'
-                          
-                        }} 
-                      
-                        
-                        mode="elevated" 
-                        textColor={colors.screen_componente_estilos.color_texto_importante} 
-                        labelStyle={{
-                            fontFamily: fonts.balsamiqbold.fontFamily, // Asigna tu fuente aquí
-                            fontSize: 12, // Ajusta el tamaño si es necesario
-                          }}
-                        onPress={cerrar}>
-                            CERRAR SESION 
+            <View style={{
+                justifyContent: 'center',  // Centra verticalmente el contenedor interno
+                alignItems: 'center',      // Centra horizontalmente
+                height: 70,
+                backgroundColor: colors.navigation_estilos.color_fondo,
+                borderTopLeftRadius:30,
+                borderTopRightRadius:30,
+
+              }}>
+                <Button 
+                  style={{
+                    width: '70%',
+                    height: 30,
+                    backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
+                    alignContent: 'center',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }} 
+                  mode="elevated" 
+                  textColor={colors.screen_componente_estilos.color_texto} 
+                  labelStyle={{
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    fontSize: 12,
+                  }}
+                  onPress={cerrar}>
+                  CERRAR SESION 
                 </Button>
-                <Text style={
-                              {
-                                color: colors.screen_componente_estilos.color_texto_subtitulo,
-                                fontFamily: fonts.balsamiqregular.fontFamily,
-                                fontSize:10,
-                                marginTop:5
-                              }
-                             }
-                  >
-                   Vérsion: {versionsys} 
+                <Text style={{
+                  color: colors.screen_componente_estilos.color_texto_subtitulo,
+                  fontFamily: fonts.balsamiqregular.fontFamily,
+                  fontSize: 10,
+                  marginTop: 5
+                }}>
+                  Versión: {versionsys} 
                 </Text>
             </View>
-
         </View>
       
     )
@@ -180,7 +189,12 @@ const styles = StyleSheet.create({
         
       },
     textodatos:{
-      fontSize:12
+      fontSize:12,
+      marginLeft:15
+    },
+    textohora:{
+      fontSize:10,
+      marginLeft:15
     },
     textouser:{
       fontSize:16,

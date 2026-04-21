@@ -15,7 +15,7 @@ import Cargando from './Componentes/Procesando/Cargando';
 import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContentInicio';
 //import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
 //import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop1';
-import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop3';
+import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
 
 
 import Gastos from './Componentes/Screens/Gastos/Gastos';
@@ -87,10 +87,14 @@ function DrawerInicio({navigation}) {
   const sizefont=18
   const div_heigth=15
   const margin_text=-15
+  const color_texto=colors.screen_componente_estilos.color_texto
+  const color_icono=colors.screen_componente_estilos.color_texto
+  const color_linea=colors.screen_componente_estilos.color_texto_importante
   // console.log(sesiondatadate)
   return (
     <DrawerNav.Navigator
-        screenOptions={{
+      screenOptions={{
+        
         headerShown: !estadocomponente.camaracdc, 
         headerTitle: ({}) => (
         <View style={{ alignItems: 'center' }}>
@@ -118,6 +122,11 @@ function DrawerInicio({navigation}) {
         headerTintColor: colors.navigation_estilos.color_texto,
         drawerLabelStyle: {marginLeft: 0,fontFamily: fonts.bodybold.fontFamily},
         tabBarLabelStyle:{borderWidth:1,bordercolor:'red'},
+        backgroundColor:'red',
+        color:'red',
+        drawerStyle: {backgroundColor: colors.screen_componente_estilos.color_fondo_cards}
+        // drawerStyle: {backgroundColor:'#FAF7F0'} // posible para el tema 7
+        
       
       }}
       drawerContent={DrawerContentInicio}
@@ -133,14 +142,16 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Inicio
                       </Text>
                     </View>)
           },
           
-          drawerIcon: ({size, color})=>(<AntDesign name="home" size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerIcon: ({size, color})=>(<AntDesign name="home" size={sizeicon} color={color_icono} />),
+          drawerItemStyle:{borderBottomWidth:1,
+            borderBottomColor:color_linea,
+            marginBottom:5}
           
           }}
       />
@@ -154,15 +165,15 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Conceptos Ingresos
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <Feather name="trending-up"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+            <Feather name="trending-up"  size={sizeicon} color={color_icono} />
           ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
 
        />
@@ -176,15 +187,15 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Categoria Gastos
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <Feather name="align-left"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+            <Feather name="align-left"  size={sizeicon} color={color_icono} />
           ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
 
       />
@@ -198,15 +209,15 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Conceptos Gastos
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <Feather name="trending-down"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+            <Feather name="trending-down"  size={sizeicon} color={color_icono} />
           ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
 
       />
@@ -219,15 +230,15 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Medios de Pagos
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <FontAwesome6 name="hand-holding-dollar"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+            <FontAwesome6 name="hand-holding-dollar"  size={sizeicon} color={color_icono} />
           ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
 
        />
@@ -241,15 +252,15 @@ function DrawerInicio({navigation}) {
             familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:colors.screen_componente_estilos.color_fondo}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
                         Consulta a la IA
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <MaterialCommunityIcons name="robot-confused-outline"  size={sizeicon} color={colors.screen_componente_estilos.color_fondo} />
+            <MaterialCommunityIcons name="robot-confused-outline"  size={sizeicon} color={color_icono} />
           ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:'white',marginBottom:5}
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
 
        />
