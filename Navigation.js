@@ -468,21 +468,15 @@ function Navigation({notificationData,setNotificationData}) {
     return (
   
       <NavigationContainer theme={MyTheme }>
-        
-    {activarsesion ? (
-
-      
-           
+        {/* <Cargando /> */}
+   {activarsesion ? (
               <>
-                {/* {estadocomponente.loading && <Cargando />} */}
+                {estadocomponente.loading && <Cargando />}
                 <DrawerInicio />
               </>
-           
-
-
           ) : (
             <>
-              {/* {estadocomponente.loading && <Cargando />} */}
+              {estadocomponente.loading && <Cargando />}
               <NavigationLogin />
             </>
           )}

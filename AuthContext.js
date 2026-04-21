@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         
         
         loading:false,
-        tituloloading:'ESPERANDO TRANSCRIPCION..',
+        tituloloading:'CARGANDO..',
 
         compresumen:true,
         dataresumen:[],

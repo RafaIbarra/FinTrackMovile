@@ -2,17 +2,24 @@ import React, { useContext } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../AuthContext';
+import LottieView from 'lottie-react-native';
 function Cargando({ navigation }) {
     const { estadocomponente } = useContext(AuthContext);
     const { colors, fonts } = useTheme();
     return (
-        <View style={[styles.overlay,{backgroundColor:colors.background}]}>
-            <Text style={[styles.texto, { fontFamily: fonts.regularbold.fontFamily }]}>
+        <View style={[styles.overlay,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+            <Text style={[styles.texto, { fontFamily: fonts.balsamiqregular.fontFamily,color:colors.navigation_estilos.color_fondo }]}>
                 {estadocomponente.tituloloading}
             </Text>
 
             <View style={[styles.curvedContainer,{backgroundColor:colors.background}]}>
-                
+                <LottieView
+                    source={require('../../assets/maintenance.json')}
+                    style={styles.video}
+                    autoPlay={true}
+                    loop={true}
+                    
+                />
             </View>
         </View>
     );
@@ -47,7 +54,7 @@ const styles = StyleSheet.create({
     texto: {
         marginBottom: 20, // Espacio entre el texto y el LottieView
         fontSize:30,
-        color: '#b8860b',
+        
     },
 });
 

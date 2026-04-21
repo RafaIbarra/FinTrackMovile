@@ -87,6 +87,7 @@ export default function Login() {
     actualizarEstadocomponente('loading', true);
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       const result = await Generarpeticion(endpoint, 'GET', {});
       const respuesta = result['resp'];
       const datosstarage = await ComprobarStorage();
@@ -130,11 +131,11 @@ export default function Login() {
   const texto_normal = fonts.balsamiqregular.fontFamily;
   const texto_negrita = fonts.balsamiqbold.fontFamily;
 
-  // Theme para el label flotante del TextInput
   const inputTheme = {
     fonts: {
       bodyLarge: { fontFamily: texto_normal },
-    },
+    }
+    
   };
 
   return (
@@ -158,13 +159,12 @@ export default function Login() {
           </Dialog>
         </Portal>
 
-        {/* Título */}
         <Text
           style={[
             styles.titulo,
             {
               fontFamily: texto_negrita,
-              color: colors.screen_componente_estilos.color_texto_importante,
+              color: colors.navigation_estilos.color_fondo,
             },
           ]}
         >
@@ -182,7 +182,6 @@ export default function Login() {
           Controlá tus finanzas
         </Text>
 
-        {/* Card del formulario con imagen de fondo degradada */}
         <Surface
           style={[
             styles.card,
@@ -192,98 +191,105 @@ export default function Login() {
         >
           <ImageBackground
             source={require('../../../assets/logoapp.png')}
-            style={styles.cardBackground}
-            imageStyle={styles.cardImage}
+            style={styles.imageBackground}
+            imageStyle={styles.imageStyle}
           >
-            <Text
-              style={[
-                styles.cardTitulo,
-                {
-                  fontFamily: texto_normal,
-                  color: colors.screen_componente_estilos.color_texto,
-                },
-              ]}
-            >
-              Iniciar sesión
-            </Text>
+            <View style={styles.formContainer}>
+              <Text
+                style={[
+                  styles.cardTitulo,
+                  {
+                    fontFamily: texto_normal,
+                    color: colors.screen_componente_estilos.color_texto,
+                  },
+                ]}
+              >
+                Iniciar sesión
+              </Text>
 
-            <TextInput
-              label="Usuario"
-              value={usuario}
-              onChangeText={setUsuario}
-              mode="outlined"
-              style={styles.input}
-              contentStyle={{ fontFamily: texto_normal }}
-              theme={inputTheme}
-              outlineColor="#A78BFA"
-              activeOutlineColor="#7C3AED"
-              left={<TextInput.Icon icon="account" />}
-            />
+              <TextInput
+                label="Usuario"
+                value={usuario}
+                onChangeText={setUsuario}
+                mode="outlined"
+                style={styles.input}
+                outlineStyle={{ borderRadius: 15 }}  // ← Agrega esta línea
+                contentStyle={{ fontFamily: texto_normal }}
+                theme={inputTheme}
+                outlineColor={colors.navigation_estilos.color_fondo}
+                activeOutlineColor={colors.navigation_estilos.color_fondo}
+                left={<TextInput.Icon icon="account" />}
+              />
 
-            <TextInput
-              label="Contraseña"
-              value={contrasena}
-              onChangeText={handleContrasenaChange}
-              mode="outlined"
-              secureTextEntry={!verContrasena}
-              style={styles.input}
-              contentStyle={{ fontFamily: texto_normal }}
-              theme={inputTheme}
-              outlineColor="#A78BFA"
-              activeOutlineColor="#7C3AED"
-              left={<TextInput.Icon icon="lock" />}
-              right={
-                <TextInput.Icon
-                  icon={verContrasena ? 'eye-off' : 'eye'}
-                  onPress={() => setVerContrasena(!verContrasena)}
-                />
-              }
-            />
+              <TextInput
+                label="Contraseña"
+                value={contrasena}
+                onChangeText={handleContrasenaChange}
+                mode="outlined"
+                secureTextEntry={!verContrasena}
+                style={styles.input}
+                outlineStyle={{ borderRadius: 15 }} 
+                contentStyle={{ fontFamily: texto_normal }}
+                theme={inputTheme}
+                outlineColor={colors.navigation_estilos.color_fondo}
+                activeOutlineColor={colors.navigation_estilos.color_fondo}
+                left={<TextInput.Icon icon="lock" />}
+                right={
+                  <TextInput.Icon
+                    icon={verContrasena ? 'eye-off' : 'eye'}
+                    onPress={() => setVerContrasena(!verContrasena)}
+                  />
+                }
+              />
 
-            <Text
-              style={[
-                styles.olvidaste,
-                {
-                  fontFamily: texto_normal,
-                  color: colors.screen_componente_estilos.color_texto,
-                },
-              ]}
-            >
-              ¿Olvidaste tu contraseña?
-            </Text>
+              <Text
+                style={[
+                  styles.olvidaste,
+                  {
+                    fontFamily: texto_normal,
+                    color: colors.navigation_estilos.color_fondo,
+                  },
+                ]}
+              >
+                ¿Olvidaste tu contraseña?
+              </Text>
 
-            <Button
-              mode="contained"
-              style={{
-                borderRadius: 12,
-                marginBottom: 12,
-                backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
-                borderColor: colors.screen_componente_estilos.color_texto_importante,
-                borderWidth: 0.5,
-              }}
-              contentStyle={styles.botonContenido}
-              buttonColor="#7C3AED"
-              textColor={colors.screen_componente_estilos.color_texto}
-              labelStyle={{
-                fontFamily: texto_negrita,
-                fontSize: 16,
-                letterSpacing: 0.5,
-              }}
-              onPress={() => ingresar()}
-            >
-              Ingresar
-            </Button>
+              <Button
+                mode="contained"
+                style={
+                  {
+                    borderRadius: 12,
+                    marginBottom: 12,
+                    backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
+                    borderWidth: 0.5,
+                    borderColor:  colors.navigation_estilos.color_fondo
 
-            <Button
-              mode="text"
-              textColor={colors.screen_componente_estilos.color_texto}
-              labelStyle={{
-                fontSize: 14,
-                fontFamily: texto_negrita,
-              }}
-            >
-              ¿No tenés cuenta? Registrate
-            </Button>
+                  }
+                }
+                contentStyle={styles.botonContenido}
+                buttonColor="#7C3AED"
+                textColor={colors.screen_componente_estilos.color_texto}
+                labelStyle={{
+                  fontFamily: texto_negrita,
+                  fontSize: 16,
+                  letterSpacing: 0.5,
+                }}
+                onPress={() => ingresar()}
+              >
+                Ingresar
+              </Button>
+
+              <Button
+                mode="text"
+                textColor={ colors.navigation_estilos.color_fondo}
+                labelStyle={{
+                  fontSize: 14,
+                  fontFamily: texto_negrita,
+                }}
+              >
+                ¿No tenés cuenta? Registrate
+              </Button>
+            </View>
           </ImageBackground>
         </Surface>
       </View>
@@ -309,15 +315,18 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     borderRadius: 20,
-    overflow: 'hidden', // necesario para que la imagen respete el borderRadius
+    overflow: 'hidden',
   },
-  cardBackground: {
+  imageBackground: {
     width: '100%',
-    padding: 24,
+    height: '100%',
   },
-  cardImage: {
-    opacity: 0.50,
+  imageStyle: {
+    opacity: 0.3,
     resizeMode: 'cover',
+  },
+  formContainer: {
+    padding: 24,
   },
   cardTitulo: {
     fontSize: 22,
@@ -326,11 +335,19 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 16,
     backgroundColor: '#FFFFFF',
+    borderRadius:50
   },
   olvidaste: {
     textAlign: 'right',
     fontSize: 13,
     marginBottom: 20,
+  },
+  boton: {
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: 'transparent',
+    borderColor: '#7C3AED',
+    borderWidth: 0.5,
   },
   botonContenido: {
     paddingVertical: 6,
