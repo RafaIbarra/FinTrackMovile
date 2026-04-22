@@ -87,16 +87,16 @@ export default function Login() {
     actualizarEstadocomponente('loading', true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      
       const result = await Generarpeticion(endpoint, 'GET', {});
       const respuesta = result['resp'];
       const datosstarage = await ComprobarStorage();
       const credenciales = datosstarage['datosesion'];
-
+      actualizarEstadocomponente('loading', false);
       if (credenciales) {
         const result = await Generarpeticion(endpoint, 'GET', {});
         const respuesta = result['resp'];
-
+        
         if (respuesta === 200) {
           setSesiondata(result['data']);
           const datestorage = await Handelstorage('obtenerdate');
@@ -117,9 +117,11 @@ export default function Login() {
         actualizarEstadocomponente('loading', false);
       }
     } catch (error) {
+      actualizarEstadocomponente('loading', false);
       Alert.alert('Error', 'Error al conectarse al servidor');
       setReady(false);
     } finally {
+      actualizarEstadocomponente('loading', false);
       setReady(true);
     }
   };

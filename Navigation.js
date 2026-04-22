@@ -21,7 +21,8 @@ import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
 import Gastos from './Componentes/Screens/Gastos/Gastos';
 import Ingresos from './Componentes/Screens/Gastos/Ingresos';
 import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
-
+import Modelo from './Componentes/Screens/Modelo/Modelo';
+import GastosRegistro from './Componentes/Screens/GastosRegistro/GastosRegistro';
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -179,7 +180,7 @@ function DrawerInicio({navigation}) {
        />
 
       <DrawerNav.Screen name="InicioCategoriaGastos" 
-        component={Ingresos}
+        component={Modelo}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -306,7 +307,7 @@ function TabsGroup({ navigation }) {
 
      <Tab.Screen
       name="Agregar"
-      component={Gastos}
+      component={GastosRegistro}
       options={{
         headerShown: false,
         tabBarLabel: '',
@@ -469,7 +470,7 @@ function Navigation({notificationData,setNotificationData}) {
   
       <NavigationContainer theme={MyTheme }>
         {/* <Cargando /> */}
-   {activarsesion ? (
+        {activarsesion ? (
               <>
                 {estadocomponente.loading && <Cargando />}
                 <DrawerInicio />
