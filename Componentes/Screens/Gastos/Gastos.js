@@ -13,13 +13,18 @@ export default function Gastos({ navigation }) {
   const [dataegresos, setDataegresos] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
 
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+
   const cargardatos = async () => {
+    actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
+    actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
     const result = await Generarpeticion(endpoint, 'GET', {});
     const respuesta = result['resp'];
-    console.log("PRINCIPAL GASTOS")
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading',  false);
     if (respuesta === 200) {
       const registros = result['data']['detalle'];
       if (Object.keys(registros).length > 0) {
@@ -30,7 +35,7 @@ export default function Gastos({ navigation }) {
       }
       setDataegresos(registros);
       setDataresumen(result['data']['resumen'])
-      console.log(result['data']['resumen'])
+      
 
     } else {
       console.log("error en la peticion");
@@ -39,7 +44,7 @@ export default function Gastos({ navigation }) {
 
   useEffect(() => {
     cargardatos();
-  }, []);
+  }, [estadocomponente.bandera_registro_gasto]);
 
   return (
     

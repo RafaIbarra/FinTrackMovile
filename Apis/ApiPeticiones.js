@@ -7,6 +7,7 @@ async function Generarpeticion(endpoint, metodo, bodyoptions) {
     let datos = {};
     let requestOptions = {};
     let tiempoespera=10000
+    let resp_correcta=false
     const datosstarage = await Handelstorage('obtener');
   
     const tokenstorage = datosstarage['token'];
@@ -53,6 +54,10 @@ async function Generarpeticion(endpoint, metodo, bodyoptions) {
   
       data = await response.json();
       resp = response.status;
+      if ([200, 201].includes(resp)) {
+        resp_correcta = true;
+      }
+      
   
     } catch (error) {
       // Si ocurre un error o el tiempo expira, retornamos un error predefinido
@@ -60,7 +65,7 @@ async function Generarpeticion(endpoint, metodo, bodyoptions) {
       resp = 500;
     }
   
-    datos = { data, resp };
+    datos = { data, resp,resp_correcta };
     
     return datos;
   }

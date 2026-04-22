@@ -80,6 +80,7 @@ const screen_componente_estilos = {
       op7: '#1e2336',  // azul medianoche — un paso más claro que op4
       op8: '#DDDEE6',  // gris frío medio — un paso más oscuro que op6, para cards sobre fondo grisáceo
       op9: '#ebe7dd',  // crema         (claro cálido)
+      op10:'#3D6B9E'
     },
     color_borde_cards: {
       // oscuros neutros — card #1e2336, borde que destaque sin gritar
@@ -454,12 +455,29 @@ tema_16: {
     color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op3,     // menta claro #57DCA3
   },
 },
+
+tema_17: {
+    navigation_estilos: {
+      color_fondo:  navigation_estilos.color_fondo.op14, 
+      color_texto:  navigation_estilos.color_texto.op1,
+    },
+    screen_componente_estilos: {
+        color_fondo:            screen_componente_estilos.color_fondo.op5,
+        color_texto:            screen_componente_estilos.textos.color_texto.op5,
+        color_texto_subtitulo:  screen_componente_estilos.textos.color_texto_subtitulo.op5,
+        color_texto_importante: screen_componente_estilos.textos.color_texto_importante.op5,
+        color_fondo_botones:    screen_componente_estilos.botones.color_fondo_botones.op7,
+        color_borde_botones:    screen_componente_estilos.botones.color_borde_botones.op13, 
+        color_fondo_cards:      screen_componente_estilos.cards.color_fondo_cards.op9,   
+        color_borde_cards:      screen_componente_estilos.cards.color_borde_cards.op13,
+    },
+  },
 }
 
 
 // ─────────────────────────────────────────────────────────────
 //  TEMA ACTIVO — cambiá solo esta línea para cambiar el tema
 // ─────────────────────────────────────────────────────────────
-export const tema_colores_activo = colores_temas.tema_7
+export const tema_colores_activo = colores_temas.tema_17
 
 // preferidos: 2,14,12,16,10

@@ -23,6 +23,7 @@ import Ingresos from './Componentes/Screens/Gastos/Ingresos';
 import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
 import Modelo from './Componentes/Screens/Modelo/Modelo';
 import GastosRegistro from './Componentes/Screens/GastosRegistro/GastosRegistro';
+import GastosRegistroop1 from './Componentes/Screens/GastosRegistro/GastosRegistroop1';
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -391,7 +392,7 @@ function TabsGroup({ navigation }) {
     />
       <Tab.Screen
         name="Resumen"
-        component={Ingresos}
+        component={GastosRegistroop1}
         options={{ headerShown: false }}
       />
       <Tab.Screen

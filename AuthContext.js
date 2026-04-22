@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [sesiondata, setSesiondata] = useState();
   const [sesiondatadate, setSesiondatadate] = useState();
   const [periodo, setPeriodo] = useState(false);
+
   const [estadocomponente,setEstadocomponente]=useState({
         
         datositem:[],
@@ -16,22 +17,23 @@ export const AuthProvider = ({ children }) => {
         
         obtuvopermiso:false,
         isHeaderVisible:true,
-        
+        bandera_registro_gasto:false, 
         
         loading:false,
         tituloloading:'CARGANDO..',
 
-        compresumen:true,
-        dataresumen:[],
-        comphome:true,
-        datahome:[],
+       
         
-        diasmarcados:[],
+        
         isKeyboardVisible : false,
         TipoCambiopass:0,
         
-        IdDiaSeleccion:0,
-        DiaActual:''
+
+        alerta_estado:false,
+        alerta_componente:[],
+        alerto_tipo:'',
+        alerta_mensaje:''
+        
     
       })
   const reiniciarvalores=()=>{
@@ -56,7 +58,8 @@ export const AuthProvider = ({ children }) => {
         
     
       }
-      const recargar_componentes=()=>{
+
+  const recargar_componentes=()=>{
         
         actualizarEstadocomponente('compresumen',true)
         actualizarEstadocomponente('comphome',true)
@@ -64,8 +67,22 @@ export const AuthProvider = ({ children }) => {
         
         
       }
+  const asignar_opciones_alerta=(error,titulo,mensaje,destino,estado_actualizar,valor_estado)=>{
+  
+    const body_alerta={
+      is_error:error,
+      titulo:titulo,
+      mensaje:mensaje,
+      nav_destino:destino,
+      estado_actualizar:estado_actualizar,
+      valor_estado:valor_estado
+    }
+    
+    actualizarEstadocomponente('alerta_componente',body_alerta)
+    
+  }
 
-    const actualizarEstadocomponente = (campo, valor) => {
+  const actualizarEstadocomponente = (campo, valor) => {
         setEstadocomponente(prevState => ({
           ...prevState,
           [campo]: valor,
@@ -80,7 +97,8 @@ export const AuthProvider = ({ children }) => {
           reiniciarvalores,
           recargar_componentes,
           periodo, setPeriodo,
-          sesiondatadate, setSesiondatadate
+          sesiondatadate, setSesiondatadate,
+          asignar_opciones_alerta
       }}>
       {children}
     </AuthContext.Provider>
