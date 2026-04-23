@@ -5,6 +5,7 @@ import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import Generarpeticion from "../../../Apis/ApiPeticiones";
+import { useApi } from "../../../Apis/useApi";
 
 export default function Gastos({ navigation }) {
   const { colors, fonts } = useTheme();
@@ -14,6 +15,11 @@ export default function Gastos({ navigation }) {
   const [dataresumen, setDataresumen] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+
+
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const cargardatos = async () => {
     actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
@@ -21,12 +27,14 @@ export default function Gastos({ navigation }) {
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
-    const result = await Generarpeticion(endpoint, 'GET', {});
-    const respuesta = result['resp'];
+    // const result = await Generarpeticion(endpoint, 'GET', {});
+    const result = await apiRequest(endpoint, 'GET', {});
+    
+    
     actualizarEstadocomponente('tituloloading', '');
     actualizarEstadocomponente('loading',  false);
-    if (respuesta === 200) {
-      const registros = result['data']['detalle'];
+    if (result.resp_correcta) {
+      const registros = result.data.detalle;
       if (Object.keys(registros).length > 0) {
         registros.forEach((elemento) => {
           elemento.key = elemento.Id;
@@ -34,11 +42,14 @@ export default function Gastos({ navigation }) {
         });
       }
       setDataegresos(registros);
-      setDataresumen(result['data']['resumen'])
+      setDataresumen(result.data.resumen)
       
 
+    } else if (result.resp === 401 || result.resp === 403) {
+      // el hook ya cerró sesión, pero puedes mostrar un mensaje si quieres
+      // (o el componente ya se desmontó porque setActivarsesion(false) cambió la ruta)
     } else {
-      console.log("error en la peticion");
+      // mostrar mensaje de error desde result.data.message
     }
   };
 

@@ -1,3 +1,4 @@
+
 import Handelstorage from "../Storage/HandelStorage";
 import API_BASE from "./ApiBase";
 async function Generarpeticion(endpoint, metodo, bodyoptions) {

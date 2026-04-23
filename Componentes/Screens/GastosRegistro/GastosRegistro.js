@@ -21,6 +21,7 @@ import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
 import Alerta from '../../Procesando/Alerta';
 import Modelo from '../Modelo/Modelo';
+import { useApi } from '../../../Apis/useApi';
 
 // ─── Íconos simples con caracteres unicode / texto para no depender de libs ──
 const Icon = ({ name, size = 18, color = '#fff' }) => {
@@ -689,6 +690,11 @@ export default function GastosRegistro({ navigation }) {
   
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   const { asignar_opciones_alerta } = useContext(AuthContext);
+
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+
+
   const [mostraralerta,setMostraralerta]=useState(false)
   // ── Data referencial ──────────────────────────────────────────────────────
   const [datagastos, setDatagastos] = useState([]);
@@ -710,7 +716,7 @@ export default function GastosRegistro({ navigation }) {
   const [modalCalendario, setModalCalendario] = useState(false);
 
   const [enviando, setEnviando] = useState(false);
-
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   // ── Carga datos ───────────────────────────────────────────────────────────
   const cargardatos = async () => {
     try {
@@ -828,30 +834,29 @@ export default function GastosRegistro({ navigation }) {
       actualizarEstadocomponente('tituloloading', 'Registrando Gasto..');
       actualizarEstadocomponente('loading', true);
 
-      const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
+      // const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
+
+      const result = await apiRequest('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));  
       actualizarEstadocomponente('tituloloading', '');
       actualizarEstadocomponente('loading', false);
       
+      if (result.sessionExpired) {
+        return; // Salimos de la función
+      }
       
-      if (result['resp_correcta']) {
+      if (result.resp_correcta) {
         
         const nuevo=!estadocomponente.bandera_registro_gasto
         asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo)
-        actualizarEstadocomponente('alerta_estado', true);
-
-        
-        // actualizarEstadocomponente('bandera_registro_gasto', nuevo);
-        // navigate('Gastos')
-        // Alert.alert('Éxito', 'Movimiento registrado correctamente.', [
-        //   { text: 'OK', onPress: () => navigation.goBack() },
-        // ]);
+        actualizarEstadocomponente('alerta_estado', true);  
       } else {
-        const msj=result['data']['message']
-        asignar_opciones_alerta(true,'ERROR',msj,'Gastos','bandera_registro_gasto',false)
+        const msj = result.data?.message || 'Error en la solicitud';
+        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
         actualizarEstadocomponente('alerta_estado', true);
       }
+      
     } catch (e) {
         asignar_opciones_alerta(true,'ERROR','Ocurrió un error al guardar.','Gastos','bandera_registro_gasto',false)
         actualizarEstadocomponente('alerta_estado', true);
