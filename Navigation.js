@@ -266,6 +266,28 @@ function DrawerInicio({navigation}) {
          }}
 
        />
+
+       <DrawerNav.Screen name="ModeloScreen" 
+        component={Modelo}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
+                        Modelo pantalla
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <FontAwesome name="wpforms"  size={sizeicon} color={color_icono} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
+         }}
+
+       />
       
     </DrawerNav.Navigator>
   );
