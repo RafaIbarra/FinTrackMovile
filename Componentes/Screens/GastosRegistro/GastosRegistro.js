@@ -77,19 +77,37 @@ const Chip = ({ label, selected, onPress, estilos }) => (
 );
 
 // ─── Modal para gastos con montos (nuevo) ───────────────────────────────────
+const formatearMiles = (valor) => {
+  if (!valor && valor !== 0) return '';
+  const str = valor.toString().replace(/\D/g, '');
+  if (!str) return '';
+  return str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+const parsearMonto = (valorFormateado) => {
+  const limpio = valorFormateado.replace(/\./g, '').replace(/,/g, '');
+  const num = parseFloat(limpio);
+  return isNaN(num) ? 0 : num;
+};
+
 const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, estilos }) => {
   const [query, setQuery] = useState('');
   const [montos, setMontos] = useState({});
+  const [montosDisplay, setMontosDisplay] = useState({});
 
   // Inicializar montos: para gastos ya seleccionados usar su monto, sino 0
 useEffect(() => {
     if (visible) {
       const initialMontos = {};
+      const initialDisplay = {};
       gastosData.forEach(g => {
         const existing = selectedGastos.find(sg => sg.id === g.id);
-        initialMontos[g.id] = existing ? parseFloat(existing.monto) || 0 : 0;
+        const val = existing ? parseFloat(existing.monto) || 0 : 0;
+        initialMontos[g.id] = val;
+        initialDisplay[g.id] = val > 0 ? formatearMiles(val) : '';
       });
       setMontos(initialMontos);
+      setMontosDisplay(initialDisplay);
     }
   }, [visible, gastosData, selectedGastos]);
 
@@ -98,9 +116,13 @@ const filtered = gastosData.filter((item) =>
   );
 
   const actualizarMonto = (id, valor) => {
-    const num = parseFloat(valor);
-    setMontos(prev => ({ ...prev, [id]: isNaN(num) ? 0 : num }));
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
+    setMontos(prev => ({ ...prev, [id]: num }));
+    setMontosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
   };
+
+  const totalModal = Object.values(montos).reduce((a, b) => a + (b || 0), 0);
 
   const confirmar = () => {
     const seleccionados = gastosData
@@ -222,8 +244,7 @@ const filtered = gastosData.filter((item) =>
                     ]}
                   >
                     <TextInput
-                      // value={montos[item.id]?.toString() ?? '0'}
-                      value={montos[item.id]?.toString() === '0' ? '' : montos[item.id]?.toString() ?? ''}
+                      value={montosDisplay[item.id] ?? ''}
                       onChangeText={(v) => actualizarMonto(item.id, v)}
                       keyboardType="numeric"
                       placeholder="0"
@@ -254,6 +275,26 @@ const filtered = gastosData.filter((item) =>
                 </Text>
               }
             />
+
+            <View
+              style={[
+                distStyles.totalRow,
+                { borderTopColor: estilos.cards_color_border, marginTop: 8 },
+              ]}
+            >
+              <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>
+                Total seleccionado
+              </Text>
+              <Text
+                style={{
+                  fontFamily: estilos.font_negrita,
+                  color: estilos.font_importe_color,
+                  fontSize: 15,
+                }}
+              >
+                {totalModal.toLocaleString('es-PY')}
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={[
@@ -409,14 +450,40 @@ const EmpresaModal = ({ visible, onClose, data, onSelect, selected, title, estil
 // ─── Modal distribución de medios (sin cambios funcionales) ─────────────────
 const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, totalGastos, estilos }) => {
   const [local, setLocal] = useState({});
+  const [localDisplay, setLocalDisplay] = useState({});
 
   useEffect(() => {
-    if (visible) setLocal({ ...distribucion });
+    if (visible) {
+      const newLocal = { ...distribucion };
+      const newDisplay = {};
+      Object.entries(newLocal).forEach(([id, val]) => {
+        const num = parseFloat(val) || 0;
+        newDisplay[id] = num > 0 ? formatearMiles(num.toString()) : '';
+      });
+      setLocal(newLocal);
+      setLocalDisplay(newDisplay);
+    }
   }, [visible]);
 
   const totalDistribuido = Object.values(local).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
+  const actualizarMedioDistrib = (id, valor) => {
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
+    setLocal(prev => ({ ...prev, [id]: num > 0 ? num : undefined }));
+    setLocalDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
+  };
+
+
   const guardar = () => {
+    // Si solo hay 1 medio con monto > 0, colapsamos a medio único
+    const entradas = Object.entries(local).filter(([, v]) => parseFloat(v) > 0);
+    if (entradas.length === 1) {
+      // Volvemos a selección de medio único: limpiamos distribución
+      onUpdate({});
+      onClose();
+      return;
+    }
     onUpdate(local);
     onClose();
   };
@@ -473,8 +540,8 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
                     ]}
                   >
                     <TextInput
-                      value={local[medio.id]?.toString() ?? ''}
-                      onChangeText={(v) => setLocal((prev) => ({ ...prev, [medio.id]: v }))}
+                      value={localDisplay[medio.id] ?? ''}
+                      onChangeText={(v) => actualizarMedioDistrib(medio.id, v)}
                       keyboardType="numeric"
                       placeholder="0"
                       placeholderTextColor={estilos.font_sub_color}
@@ -719,7 +786,12 @@ export default function GastosRegistro({ navigation }) {
   const [medioSeleccionado, setMedioSeleccionado] = useState(null);   // id del medio activo (botón)
   const [distribucion, setDistribucion] = useState({});               // { idMedio: monto }
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-  const [fechaSeleccionada, setFechaSeleccionada] = useState('');
+  const hoyStr = (() => {
+    const hoy = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+  })();
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(hoyStr);
 
   // ── Modales ───────────────────────────────────────────────────────────────
   const [modalGastos, setModalGastos] = useState(false);
@@ -789,19 +861,29 @@ export default function GastosRegistro({ navigation }) {
     0
   );
 
-  // Función para confirmar gastos desde el modal (reemplaza toggleGasto)
+  const [gastosDisplay, setGastosDisplay] = useState({}); // {id: string formateado}
+
   const confirmarGastos = (nuevosGastos) => {
     setGastosSeleccionados(nuevosGastos);
+    const newDisplay = {};
+    nuevosGastos.forEach(g => {
+      newDisplay[g.id] = g.monto > 0 ? formatearMiles(g.monto.toString()) : '';
+    });
+    setGastosDisplay(newDisplay);
   };
 
   const actualizarMontoGasto = (id, valor) => {
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
     setGastosSeleccionados((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, monto: valor } : g))
+      prev.map((g) => (g.id === id ? { ...g, monto: num } : g))
     );
+    setGastosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
   };
 
   const eliminarGasto = (id) => {
     setGastosSeleccionados((prev) => prev.filter((g) => g.id !== id));
+    setGastosDisplay((prev) => { const n = { ...prev }; delete n[id]; return n; });
   };
 
   const seleccionarMedioBoton = (id) => {
@@ -839,6 +921,17 @@ export default function GastosRegistro({ navigation }) {
     return [];
   };
 
+  const resetForm = () => {
+    setGastosSeleccionados([]);
+    setGastosDisplay({});
+    setMedioSeleccionado(null);
+    setDistribucion({});
+    setEmpresaSeleccionada(dataempresas.find(e => e.id === 1) || null);
+    const hoy = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    setFechaSeleccionada(`${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`);
+  };
+
   const guardar = async () => {
     const error = validar();
     if (error) { Alert.alert('Atención', error); return; }
@@ -872,7 +965,7 @@ export default function GastosRegistro({ navigation }) {
       }
       
       if (result.resp_correcta) {
-        
+        resetForm();
         const nuevo=!estadocomponente.bandera_registro_gasto
         asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo)
         actualizarEstadocomponente('alerta_estado', true); 
@@ -964,7 +1057,7 @@ export default function GastosRegistro({ navigation }) {
                 {g.nombre}
               </Text>
               <TextInput
-                value={g.monto?.toString() ?? ''}
+                value={gastosDisplay[g.id] ?? ''}
                 onChangeText={(v) => actualizarMontoGasto(g.id, v)}
                 keyboardType="numeric"
                 placeholder="Monto"
@@ -1022,7 +1115,6 @@ export default function GastosRegistro({ navigation }) {
                 ))}
               </View>
 
-              {/* Botón distribuir */}
               <TouchableOpacity
                 style={[
                   styles.distribuirBtn,
@@ -1045,7 +1137,6 @@ export default function GastosRegistro({ navigation }) {
                 </Text>
               </TouchableOpacity>
 
-              {/* Mostrar distribución actual como lista */}
               {hayDistribucion && (
                 <View style={{ marginTop: 12 }}>
                   <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_sub_color, fontSize: 12, marginBottom: 6 }}>
@@ -1069,8 +1160,31 @@ export default function GastosRegistro({ navigation }) {
                       <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 13 }}>
                         {parseFloat(distribucion[medio.id]).toLocaleString('es-PY')}
                       </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const nueva = { ...distribucion };
+                          delete nueva[medio.id];
+                          const restantes = Object.values(nueva).filter(v => parseFloat(v) > 0);
+                          if (restantes.length === 0) {
+                            setDistribucion({});
+                          } else {
+                            setDistribucion(nueva);
+                          }
+                        }}
+                        style={{ marginLeft: 8 }}
+                      >
+                        <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+                      </TouchableOpacity>
                     </View>
                   ))}
+                  <View style={styles.totalRow}>
+                    <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 12 }}>
+                      Total distribuido
+                    </Text>
+                    <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>
+                      {Object.values(distribucion).reduce((a, v) => a + (parseFloat(v) || 0), 0).toLocaleString('es-PY')}
+                    </Text>
+                  </View>
                 </View>
               )}
             </>
