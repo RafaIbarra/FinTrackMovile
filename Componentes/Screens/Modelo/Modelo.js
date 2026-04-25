@@ -15,9 +15,10 @@ export default function Modelo({ navigation }){
     const { navigate } = useNavigation();
     const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
     const { asignar_opciones_alerta } = useContext(AuthContext);
-    
     const { activarsesion, setActivarsesion } = useContext(AuthContext);
     const { reiniciarvalores } = useContext(AuthContext);
+    
+    const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
 
     const estilos = {
@@ -49,9 +50,9 @@ export default function Modelo({ navigation }){
             console.log('respuesta correcta del backend')
             console.log(result.data) // la data del backend
         }else {
-        const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
-        actualizarEstadocomponente('alerta_estado', true);
+            const msj = result.data?.message || 'Error en la solicitud'; // toma el error
+            asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
+            actualizarEstadocomponente('alerta_estado', true);
       }
    
     }

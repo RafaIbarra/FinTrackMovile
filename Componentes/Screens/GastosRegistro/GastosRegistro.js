@@ -82,7 +82,7 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
   const [montos, setMontos] = useState({});
 
   // Inicializar montos: para gastos ya seleccionados usar su monto, sino 0
-  useEffect(() => {
+useEffect(() => {
     if (visible) {
       const initialMontos = {};
       gastosData.forEach(g => {
@@ -93,7 +93,7 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
     }
   }, [visible, gastosData, selectedGastos]);
 
-  const filtered = gastosData.filter((item) =>
+const filtered = gastosData.filter((item) =>
     item.nombre.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -146,34 +146,44 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
 
             {/* Buscador */}
             <View
-              style={[
-                modalStyles.searchBox,
-                {
-                  backgroundColor: estilos.cards_color_fondo,
-                  borderColor: estilos.cards_color_border,
-                },
-              ]}
-            >
-              <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Buscar..."
-                placeholderTextColor={estilos.font_sub_color}
-                style={{
-                  flex: 1,
-                  fontFamily: estilos.font_normal,
-                  color: estilos.font_color,
-                  fontSize: 14,
-                  paddingVertical: 0,
-                }}
-                autoFocus
-              />
-              {query.length > 0 && (
-                <TouchableOpacity onPress={() => setQuery('')}>
-                  <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-                </TouchableOpacity>
-              )}
+                style={[
+                  modalStyles.searchBox,
+                  {
+                    backgroundColor: estilos.cards_color_fondo,
+                    borderColor: estilos.cards_color_border,
+                  },
+                ]}
+              >
+                <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
+                  <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
+                </View>
+                
+                <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
+                  <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="Buscar..."
+                    placeholderTextColor={estilos.font_sub_color}
+                    style={{
+                      flex: 1,
+                      fontFamily: estilos.font_normal,
+                      color: estilos.font_color,
+                      fontSize: 14,
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                    }}
+                    underlineColorAndroid="transparent"
+                    autoFocus
+                  />
+                </View>
+                
+                {query.length > 0 && (
+                  <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => setQuery('')}>
+                      <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
             </View>
 
             {/* Lista con montos */}
@@ -212,7 +222,8 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
                     ]}
                   >
                     <TextInput
-                      value={montos[item.id]?.toString() ?? '0'}
+                      // value={montos[item.id]?.toString() ?? '0'}
+                      value={montos[item.id]?.toString() === '0' ? '' : montos[item.id]?.toString() ?? ''}
                       onChangeText={(v) => actualizarMonto(item.id, v)}
                       keyboardType="numeric"
                       placeholder="0"
@@ -223,7 +234,7 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
                         fontSize: 14,
                         minWidth: 90,
                         textAlign: 'right',
-                        paddingVertical: 6,
+                        paddingVertical: 2,
                       }}
                     />
                   </View>
@@ -690,10 +701,11 @@ export default function GastosRegistro({ navigation }) {
   
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   const { asignar_opciones_alerta } = useContext(AuthContext);
-
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
+ 
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const [mostraralerta,setMostraralerta]=useState(false)
   // ── Data referencial ──────────────────────────────────────────────────────
@@ -716,39 +728,52 @@ export default function GastosRegistro({ navigation }) {
   const [modalCalendario, setModalCalendario] = useState(false);
 
   const [enviando, setEnviando] = useState(false);
-  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+  
   // ── Carga datos ───────────────────────────────────────────────────────────
   const cargardatos = async () => {
     try {
-      const result = await Generarpeticion('operaciones/ReferencialesCargaGasto/', 'GET', {});
-      if (result['resp'] === 200) {
-        const gastos = (result['data']['Gastos'] || []).map((g) => ({
-          id: g.Id,
-          nombre: g.NombreGasto,
-          categoria: g.NombreCategoria,
-          tipo: g.NombreTipoGasto,
-        }));
-        const medios = (result['data']['MediosPagos'] || []).map((m) => ({
-          id: m.Id,
-          nombre: m.NombreMedioPago,
-        }));
-        const empresas = (result['data']['Empresa'] || []).map((e) => ({
-          id: e.Id,
-          nombre: e.NombreEmpresa,
-          urlImg: e.UrlImg,
-        }));
-        setDatagastos(gastos);
-        setDatamedios(medios);
-        setDataempresas(empresas);
-
-        // Seleccionar empresa con Id = 1 por defecto
-        const empresaPorDefecto = empresas.find(e => e.id === 1);
-        if (empresaPorDefecto) {
-          setEmpresaSeleccionada(empresaPorDefecto);
+      const endpoint = `operaciones/ReferencialesCargaGasto/`;
+      
+      const result = await apiRequest(endpoint, 'GET', {});
+      
+      if (result.sessionExpired) {
+            return; // SI LA SESION NO ES VALIDA
         }
+      if (result.resp_correcta) {
+          const gastos = (result.data.Gastos || []).map((g) => ({
+            id: g.Id,
+            nombre: g.NombreGasto,
+            categoria: g.NombreCategoria,
+            tipo: g.NombreTipoGasto,
+          }));
+          const medios = (result.data.MediosPagos || []).map((m) => ({
+            id: m.Id,
+            nombre: m.NombreMedioPago,
+          }));
+          const empresas = (result.data.Empresa || []).map((e) => ({
+            id: e.Id,
+            nombre: e.NombreEmpresa,
+            urlImg: e.UrlImg,
+          }));
+          setDatagastos(gastos);
+          setDatamedios(medios);
+          setDataempresas(empresas);
+
+          // Seleccionar empresa con Id = 1 por defecto
+          const empresaPorDefecto = empresas.find(e => e.id === 1);
+          if (empresaPorDefecto) {
+            setEmpresaSeleccionada(empresaPorDefecto);
+          }
+      }else{
+          const msj = result.data?.message || 'Error en la solicitud'; // toma el error
+          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+          actualizarEstadocomponente('alerta_estado', true);
       }
     } catch (e) {
-      Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+      // Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+          const msj = e || 'Error en la solicitud'; // toma el error
+          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+          actualizarEstadocomponente('alerta_estado', true);
     } finally {
       setCargando(false);
     }
@@ -850,7 +875,8 @@ export default function GastosRegistro({ navigation }) {
         
         const nuevo=!estadocomponente.bandera_registro_gasto
         asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo)
-        actualizarEstadocomponente('alerta_estado', true);  
+        actualizarEstadocomponente('alerta_estado', true); 
+        
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
         asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
@@ -1326,14 +1352,19 @@ const modalStyles = StyleSheet.create({
     marginBottom: 14,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
+     flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderRadius: 10,
+      marginBottom: 8,
+      paddingHorizontal: 12,
+      height: 35, // Altura fija más compacta
   },
+
+
+
+
+  
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1351,7 +1382,7 @@ const modalStyles = StyleSheet.create({
   gastoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },

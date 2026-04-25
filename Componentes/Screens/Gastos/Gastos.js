@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
+
+import Alerta from "../../Procesando/Alerta";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import Generarpeticion from "../../../Apis/ApiPeticiones";
 import { useApi } from "../../../Apis/useApi";
@@ -15,24 +17,30 @@ export default function Gastos({ navigation }) {
   const [dataresumen, setDataresumen] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { reiniciarvalores } = useContext(AuthContext);
+  const { asignar_opciones_alerta } = useContext(AuthContext);
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
 
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const cargardatos = async () => {
+    
+
     actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
     actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
-    // const result = await Generarpeticion(endpoint, 'GET', {});
+
     const result = await apiRequest(endpoint, 'GET', {});
     
     
     actualizarEstadocomponente('tituloloading', '');
     actualizarEstadocomponente('loading',  false);
+    if (result.sessionExpired) {
+            return; // SI LA SESION NO ES VALIDA
+        }
     if (result.resp_correcta) {
       const registros = result.data.detalle;
       if (Object.keys(registros).length > 0) {
@@ -45,12 +53,11 @@ export default function Gastos({ navigation }) {
       setDataresumen(result.data.resumen)
       
 
-    } else if (result.resp === 401 || result.resp === 403) {
-      // el hook ya cerró sesión, pero puedes mostrar un mensaje si quieres
-      // (o el componente ya se desmontó porque setActivarsesion(false) cambió la ruta)
-    } else {
-      // mostrar mensaje de error desde result.data.message
-    }
+    } else{
+        const msj = result.data?.message || 'Error en la solicitud'; // toma el error
+        asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false); // muestra el mensaje en la alerta personalizada
+        actualizarEstadocomponente('alerta_estado', true);
+      }
   };
 
   useEffect(() => {
@@ -62,7 +69,7 @@ export default function Gastos({ navigation }) {
 
       <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
 
-        
+        {estadocomponente.alerta_estado && <Alerta />}
 
          {/* // --- RESUMEN CARDS ---// */}
 
