@@ -296,9 +296,10 @@ function DrawerInicio({navigation}) {
 
 
 
-
+// ─── ÚNICO CAMBIO: tabBarStyle en TabsGroup ───────────────────────────────────
 const Tab = createBottomTabNavigator();
 function TabsGroup({ navigation }) {
+  
   const { colors } = useTheme();
   return (
     <Tab.Navigator
@@ -306,12 +307,8 @@ function TabsGroup({ navigation }) {
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
-          borderTopWidth: 0,
-          height: 65,
-          paddingBottom: 8,
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-          
+          height: 60,        // altura fija sin espacio extra
+          paddingBottom: 0,  // el SafeAreaView del App.js ya reservó el espacio inferior
         },
         // tabBarActiveTintColor: colors.navigation_estilos.color_texto,
         // tabBarInactiveTintColor: 'gray',
@@ -506,7 +503,7 @@ function Navigation({notificationData,setNotificationData}) {
           )}
       
   
-  
+
       </NavigationContainer>
     );
   }
