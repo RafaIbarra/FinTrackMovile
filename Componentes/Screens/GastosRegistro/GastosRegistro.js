@@ -888,7 +888,7 @@ export default function GastosRegistro({ navigation }) {
 
   const seleccionarMedioBoton = (id) => {
     setMedioSeleccionado(id);
-    // No se borra la distribución (para que siga visible)
+    setDistribucion({});
   };
 
   // ── Envío ─────────────────────────────────────────────────────────────────
