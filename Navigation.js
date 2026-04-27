@@ -8,22 +8,43 @@ import { useTheme } from '@react-navigation/native';
 import { useNavigation  } from "@react-navigation/native";
 import { AuthContext } from './AuthContext';
 
+import Svg, { Rect, Circle, Text as SvgText } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Login from './Componentes/Screens/Login/Login';
-import Settings from './Componentes/Screens/Settings';
+
+
 import Cargando from './Componentes/Procesando/Cargando';
 import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContentInicio';
-//import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
-//import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalleop1';
-import GastosDetalle from './Componentes/Screens/GastosDetalle/GastosDetalle';
 
 
-import Gastos from './Componentes/Screens/Gastos/Gastos';
-import Ingresos from './Componentes/Screens/Gastos/Ingresos';
-import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
+//Screens
+import Login from './Componentes/Screens/Login/Login';
+import Settings from './Componentes/Screens/Settings';
 import Modelo from './Componentes/Screens/Modelo/Modelo';
-import GastosRegistro from './Componentes/Screens/GastosRegistro/GastosRegistro';
-import GastosRegistroop1 from './Componentes/Screens/GastosRegistro/GastosRegistroop1';
+
+
+
+
+import ListadoMovimientosGastos from './Componentes/Screens/MovimientosGastos/ListadoMovimientosGastos';
+import DetalleMovimientoGasto from './Componentes/Screens/MovimientosGastos/DetalleMovimientoGasto';
+import RegistroMovimientoGasto from './Componentes/Screens/MovimientosGastos/RegistroMovimientoGasto';
+
+// import MovimientosIngresos from './Componentes/Screens/MovimientosIngresos/ListadoMovimientosIngresos';
+
+import ListadoMovimientosIngresos from './Componentes/Screens/MovimientosIngresos/ListadoMovimientosIngresos';
+import DetalleMovimientoIngreso from './Componentes/Screens/MovimientosIngresos/DetalleMovimientoIngreso';
+import RegistroMovimientoIngreso from './Componentes/Screens/MovimientosIngresos/RegistroMovimientoIngreso';
+
+
+
+import ResumenMovimientos from './Componentes/Screens/ResumenMovimientos/ResumenMovimientos';
+
+import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
+
+
+
+
+
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -85,10 +106,10 @@ function DrawerInicio({navigation}) {
   const {sesiondata, setSesiondata} = useContext(AuthContext);
   const { navigate } = useNavigation();  
   const { estadocomponente } = useContext(AuthContext);
-  const sizeicon=25
+  const sizeicon=18
   const sizefont=18
-  const div_heigth=15
-  const margin_text=-15
+  const div_heigth=20
+  // const margin_text=-15
   const color_texto=colors.screen_componente_estilos.color_texto
   const color_icono=colors.screen_componente_estilos.color_texto
   const color_linea=colors.screen_componente_estilos.color_texto_importante
@@ -159,7 +180,7 @@ function DrawerInicio({navigation}) {
       />
 
       <DrawerNav.Screen name="ConceptosIngresos" 
-        component={Ingresos}
+        component={Modelo}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -203,7 +224,7 @@ function DrawerInicio({navigation}) {
       />
 
       <DrawerNav.Screen name="GastosStackGroup" 
-        component={Ingresos}
+        component={Modelo}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -224,7 +245,7 @@ function DrawerInicio({navigation}) {
 
       />
       <DrawerNav.Screen name="MediosPagosStackGroup" 
-        component={Ingresos}
+        component={Modelo}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -246,7 +267,7 @@ function DrawerInicio({navigation}) {
        />
       
       <DrawerNav.Screen name="ConsultaIA" 
-        component={Ingresos}
+        component={Modelo}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -296,122 +317,129 @@ function DrawerInicio({navigation}) {
 
 
 
-// ─── ÚNICO CAMBIO: tabBarStyle en TabsGroup ───────────────────────────────────
+const BTN_R = 28;
+const OVERHANG = 27; // cuánto sobresale arriba del tab bar
+const TAB_H = 60;   // altura del tab bar
+const W = BTN_R * 4; // ancho del área SVG (112px)
+const cx = W / 2;
+
+// El círculo tiene centro en y=OVERHANG dentro del SVG
+// El SVG arranca OVERHANG px antes del tab bar (marginTop negativo)
+const CentralTabButton = ({ onPress, colors   }) => {
+  const tabColor = colors.navigation_estilos.color_fondo;
+  const iconColor = colors.navigation_estilos.color_texto;
+  const borderColor = colors.screen_componente_estilos.color_fondo;
+  const navigation = useNavigation(); 
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  
+  const handlePress = () => {
+    // Determinar a qué pantalla navegar según el componente activo
+    if (estadocomponente.ComponenteActivoBottonTab === 'ListadoMovimientosIngresos') {
+      navigation.navigate('RegistroMovimientoIngreso');
+    } else {
+      
+      navigation.navigate('RegistroMovimientoGasto');
+    }
+    
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.85}
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginTop: -10,
+        
+      }}
+    >
+      <Svg width={W} height={TAB_H + OVERHANG}>
+        {/* Fondo del tab bar dentro del SVG */}
+        <Rect
+          x={0}
+          y={OVERHANG}
+          width={W}
+          height={TAB_H}
+          fill={tabColor}
+        />
+
+        {/* Círculo con centro en y=OVERHANG → sobresale OVERHANG px arriba */}
+        <Circle
+          cx={cx}
+          cy={OVERHANG}
+          r={BTN_R}
+          fill={tabColor}
+          stroke={borderColor}
+          strokeWidth={3}
+        />
+
+        {/* Ícono + centrado en el círculo */}
+        <SvgText
+          x={cx}
+          y={OVERHANG}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fontSize={28}
+          fontWeight="bold"
+          fill={iconColor}
+        >
+          +
+        </SvgText>
+      </Svg>
+    </TouchableOpacity>
+  );
+};
+
 const Tab = createBottomTabNavigator();
 function TabsGroup({ navigation }) {
   
   const { colors } = useTheme();
   return (
     <Tab.Navigator
-      initialRouteName="Gastos"
+      initialRouteName="ListadoMovimientosGastos"
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
           height: 60,        // altura fija sin espacio extra
           paddingBottom: 0,  // el SafeAreaView del App.js ya reservó el espacio inferior
         },
-        // tabBarActiveTintColor: colors.navigation_estilos.color_texto,
-        // tabBarInactiveTintColor: 'gray',
+       
       }}
     >
       <Tab.Screen
-        name="Gastos"
-        component={Gastos}
+        name="ListadoMovimientosGastos"
+        component={ListadoMovimientosGastos}
          options={{ headerShown: false }}
       />
       <Tab.Screen
-        name="Ingresos"
-        component={Ingresos}
+        name="ListadoMovimientosIngresos"
+        component={ListadoMovimientosIngresos}
         options={{ headerShown: false }}
       />
 
-     <Tab.Screen
-      name="Agregar"
-      component={GastosRegistro}
-      options={{
-        headerShown: false,
-        tabBarLabel: '',
-        tabBarButton: (props) => (
-          <TouchableOpacity
-            {...props}
-            style={{
-              alignItems: 'center',
-              justifyContent: 'flex-start', 
-              flex: 1,
-            }}
-          >
-            {/* fila de orejas + botón */}
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              // top: -4,
-              left: 0,
-              right: 0,
-            }}>
-              {/* oreja izquierda */}
-              <View style={{
-                width: 30,
-                height: 30,
-                backgroundColor: colors.screen_componente_estilos.color_fondo,
-              }}>
-                <View style={{
-                  flex: 1,
-                  borderTopRightRadius: 40,
-                  backgroundColor: colors.navigation_estilos.color_fondo,
-                }} />
-              </View>
-              <View
-                style={{
-                  backgroundColor:colors.screen_componente_estilos.color_fondo,
-                  borderBottomLeftRadius:30,
-                  borderBottomRightRadius:30
-
-                }}
-              >
-                  <View style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 30,
-                  backgroundColor: colors.navigation_estilos.color_fondo,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: -10,
-                  borderWidth:5,
-                  borderColor:colors.screen_componente_estilos.color_fondo
-                  
-                }}>
-                  {/* Aquí puedes agregar un ícono o texto */}
-                  {/* <Text style={{ color: colors.textcard, fontSize: 30 }}>+</Text> */}
-                  {/* <MaterialIcons name="exposure-plus-1" size={24} color={colors.textcard} /> */}
-                  {/* <MaterialCommunityIcons name="bookmark-plus" size={30} color={colors.textcard} /> */}
-                  {/* <FontAwesome5 name="cart-plus" size={24}color={colors.textcard} /> */}
-                  <FontAwesome name="plus" size={30} color={colors.navigation_estilos.color_texto} />
-
-                </View>
-              </View>
-              {/* Botón redondo central */}
-              
-
-              {/* oreja derecha */}
-              <View style={{
-                width: 30,
-                height: 30,
-                backgroundColor: colors.screen_componente_estilos.color_fondo,
-              }}>
-                <View style={{
-                  flex: 1,
-                  borderTopLeftRadius: 40,
-                  backgroundColor: colors.navigation_estilos.color_fondo,
-                }} />
-              </View>
-            </View>
-          </TouchableOpacity>
-        ),
-      }}
-    />
       <Tab.Screen
-        name="Resumen"
-        component={GastosRegistroop1}
+              name="Agregar"
+              component={RegistroMovimientoGasto}
+              options={{
+                headerShown: false,
+                tabBarLabel: '',
+                tabBarButton: (props) => (
+                  <CentralTabButton
+                  onPress={props.onPress}
+                  colors={colors}
+                  
+                  
+                  />
+                ),
+              }}
+      />
+
+
+      <Tab.Screen
+        name="ResumenMovimientos"
+        component={ResumenMovimientos}
         options={{ headerShown: false }}
       />
       <Tab.Screen
@@ -428,24 +456,29 @@ const HomeStack = createNativeStackNavigator();
 
 function HomeStackGroup(){
   const { colors,fonts } = useTheme();
+  
   return(
     <HomeStack.Navigator >
       <HomeStack.Screen name="TabsGroup" component={TabsGroup} options={{ headerShown: false }}/>
-      <HomeStack.Screen name="GastosDetalle" 
-        component={GastosDetalle} 
+
+      <HomeStack.Screen name="DetalleMovimientoGasto" 
+        component={DetalleMovimientoGasto} 
         options={({ navigation }) => ({
           headerTitle: 'Detalle del Gasto',
           headerTitleAlign: 'left',
           headerStyle: {
-            height: 50,
-            backgroundColor: colors.background,
+
+            backgroundColor:colors.background,
           },
+          
           headerTitleStyle: {
             fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
             color: colors.screen_componente_estilos.color_texto,
             fontSize: 16,
+            
           },
           headerTintColor: colors.textcard,
+          
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
               <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
@@ -461,8 +494,57 @@ function HomeStackGroup(){
               </TouchableOpacity>
             </View>
           ),
+
         })}
-  />
+      /> 
+
+      <HomeStack.Screen name="RegistroMovimientoGasto" 
+        component={RegistroMovimientoGasto} 
+        options={{ headerShown: false }}
+      /> 
+
+      <HomeStack.Screen name="DetalleMovimientoIngreso" 
+        component={DetalleMovimientoIngreso} 
+        options={({ navigation }) => ({
+          headerTitle: 'Detalle del Ingreso',
+          headerTitleAlign: 'left',
+          headerStyle: {
+
+            backgroundColor:colors.background,
+          },
+          
+          headerTitleStyle: {
+            fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
+            color: colors.screen_componente_estilos.color_texto,
+            fontSize: 16,
+            
+          },
+          headerTintColor: colors.textcard,
+          
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
+              <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity style={{ marginRight: 20 }}>
+                <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
+              </TouchableOpacity>
+              <TouchableOpacity style={{ marginRight: 10 }}>
+                <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
+              </TouchableOpacity>
+            </View>
+          ),
+
+        })}
+      />
+
+      <HomeStack.Screen name="RegistroMovimientoIngreso" 
+        component={RegistroMovimientoIngreso} 
+        options={{ headerShown: false }}
+      /> 
+      
     </HomeStack.Navigator>
   )
 

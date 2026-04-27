@@ -19,7 +19,7 @@ export const useApi = (contextActions) => {
       const storageData = await Handelstorage('obtener');
       const token = storageData?.token;
       const sesion = storageData?.sesion;
-      console.log('storageData')  
+       
       const headers = {
         Authorization: `Bearer ${token}`,
         'X-SESSION-USER': sesion,

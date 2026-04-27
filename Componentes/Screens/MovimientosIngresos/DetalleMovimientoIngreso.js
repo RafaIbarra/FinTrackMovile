@@ -10,7 +10,7 @@ import { useApi } from '../../../Apis/useApi';
 
 import Alerta from '../../Procesando/Alerta';
 
-export default function Modelo({ navigation }){
+export default function DetalleMovimientoIngreso({ navigation }){
     const { colors, fonts } = useTheme();
     const { navigate } = useNavigation();
     const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
@@ -108,7 +108,7 @@ export default function Modelo({ navigation }){
             {estadocomponente.alerta_estado && <Alerta />} 
 
             <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                Texto normal
+                DETALLA MOVIMIENTO INGRESO
             </Text>
             <Text style={[,{fontFamily:estilos.font_negrita,color:estilos.font_color}]}>
                 Texto negrita

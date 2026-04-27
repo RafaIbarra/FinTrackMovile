@@ -10,7 +10,7 @@ import { useApi } from '../../../Apis/useApi';
 
 import Alerta from '../../Procesando/Alerta';
 
-export default function Modelo({ navigation }){
+export default function ListadoMovimientosIngresos({ navigation }){
     const { colors, fonts } = useTheme();
     const { navigate } = useNavigation();
     const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
@@ -92,15 +92,39 @@ export default function Modelo({ navigation }){
 
     const accion_boton=()=>{
         console.log('boton')
+        // navigate('DetalleMovimientoIngreso', { item });
+        navigate('DetalleMovimientoIngreso');
     }
 
     const cargardatos =async()=>{
         
+        
     }
 
+  
     useEffect(() => {
         cargardatos();
       }, []);
+
+    useEffect(() => {
+       
+        const unsubscribe = navigation.addListener('focus', () => {
+      
+        const asignar_componente=async()=>{
+        
+          actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosIngresos');
+
+           
+        }
+        
+        asignar_componente()
+        
+      })
+      return unsubscribe;
+
+
+      }, []);
+
 
     return(
         <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
@@ -108,7 +132,7 @@ export default function Modelo({ navigation }){
             {estadocomponente.alerta_estado && <Alerta />} 
 
             <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                Texto normal
+                MOVIMIENTOS INGRESOS
             </Text>
             <Text style={[,{fontFamily:estilos.font_negrita,color:estilos.font_color}]}>
                 Texto negrita

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,useContext } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,9 +15,14 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
+import { AuthContext } from '../../../AuthContext';
 
 import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
+import Alerta from '../../Procesando/Alerta';
+import Modelo from '../Modelo/Modelo';
+import { useApi } from '../../../Apis/useApi';
+import IcnoAtras from '../../IconoAtras/IconoAtras';
 
 // ─── Íconos simples con caracteres unicode / texto para no depender de libs ──
 const Icon = ({ name, size = 18, color = '#fff' }) => {
@@ -72,15 +77,65 @@ const Chip = ({ label, selected, onPress, estilos }) => (
   </TouchableOpacity>
 );
 
-// ─── Modal genérico con buscador ─────────────────────────────────────────────
-const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilos, multiSelect = false }) => {
+// ─── Modal para gastos con montos (nuevo) ───────────────────────────────────
+const formatearMiles = (valor) => {
+  if (!valor && valor !== 0) return '';
+  const str = valor.toString().replace(/\D/g, '');
+  if (!str) return '';
+  return str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+const parsearMonto = (valorFormateado) => {
+  const limpio = valorFormateado.replace(/\./g, '').replace(/,/g, '');
+  const num = parseFloat(limpio);
+  return isNaN(num) ? 0 : num;
+};
+
+const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, estilos }) => {
   const [query, setQuery] = useState('');
-  const filtered = data.filter((item) =>
+  const [montos, setMontos] = useState({});
+  const [montosDisplay, setMontosDisplay] = useState({});
+
+  // Inicializar montos: para gastos ya seleccionados usar su monto, sino 0
+useEffect(() => {
+    if (visible) {
+      const initialMontos = {};
+      const initialDisplay = {};
+      gastosData.forEach(g => {
+        const existing = selectedGastos.find(sg => sg.id === g.id);
+        const val = existing ? parseFloat(existing.monto) || 0 : 0;
+        initialMontos[g.id] = val;
+        initialDisplay[g.id] = val > 0 ? formatearMiles(val) : '';
+      });
+      setMontos(initialMontos);
+      setMontosDisplay(initialDisplay);
+    }
+  }, [visible, gastosData, selectedGastos]);
+
+const filtered = gastosData.filter((item) =>
     item.nombre.toLowerCase().includes(query.toLowerCase())
   );
 
-  const isSelected = (id) =>
-    multiSelect ? selected.some((s) => s.id === id) : selected?.id === id;
+  const actualizarMonto = (id, valor) => {
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
+    setMontos(prev => ({ ...prev, [id]: num }));
+    setMontosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
+  };
+
+  const totalModal = Object.values(montos).reduce((a, b) => a + (b || 0), 0);
+
+  const confirmar = () => {
+    const seleccionados = gastosData
+      .filter(g => montos[g.id] > 0)
+      .map(g => ({
+        id: g.id,
+        nombre: g.nombre,
+        monto: montos[g.id],
+      }));
+    onConfirm(seleccionados);
+    onClose();
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -92,7 +147,7 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
           <View
             style={[
               modalStyles.sheet,
-              { backgroundColor: estilos.pantalla_color_fondo },
+              { backgroundColor: estilos.pantalla_color_fondo, height: '90%' },
             ]}
           >
             {/* Header */}
@@ -105,7 +160,7 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
                   flex: 1,
                 }}
               >
-                {title}
+                Seleccionar gastos
               </Text>
               <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
@@ -113,6 +168,199 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
             </View>
 
             {/* Buscador */}
+            <View
+                style={[
+                  modalStyles.searchBox,
+                  {
+                    backgroundColor: estilos.cards_color_fondo,
+                    borderColor: estilos.cards_color_border,
+                  },
+                ]}
+              >
+                <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
+                  <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
+                </View>
+                
+                <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
+                  <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="Buscar..."
+                    placeholderTextColor={estilos.font_sub_color}
+                    style={{
+                      flex: 1,
+                      fontFamily: estilos.font_normal,
+                      color: estilos.font_color,
+                      fontSize: 14,
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                    }}
+                    underlineColorAndroid="transparent"
+                    //autoFocus
+                  />
+                </View>
+                
+                {query.length > 0 && (
+                  <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => setQuery('')}>
+                      <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+            </View>
+
+            {/* Lista con montos */}
+            <FlatList
+              data={filtered}
+              keyExtractor={(item) => String(item.id)}
+              keyboardShouldPersistTaps="handled"
+              style={{ maxHeight: 500 }}
+              renderItem={({ item }) => (
+                <View
+                  style={[
+                    modalStyles.gastoRow,
+                    {
+                      borderBottomColor: estilos.cards_color_border,
+                      backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      fontFamily: estilos.font_normal,
+                      color: estilos.font_color,
+                      flex: 1,
+                      fontSize: 14,
+                    }}
+                  >
+                    {item.nombre}
+                  </Text>
+                  <View
+                    style={[
+                      modalStyles.montoInputWrap,
+                      {
+                        backgroundColor: estilos.cards_color_fondo,
+                        borderColor: estilos.cards_color_border,
+                      },
+                    ]}
+                  >
+                    <TextInput
+                      value={montosDisplay[item.id] ?? ''}
+                      onChangeText={(v) => actualizarMonto(item.id, v)}
+                      keyboardType="numeric"
+                      placeholder="0"
+                      placeholderTextColor={estilos.font_sub_color}
+                      style={{
+                        fontFamily: estilos.font_normal,
+                        color: estilos.font_importe_color,
+                        fontSize: 14,
+                        minWidth: 90,
+                        textAlign: 'right',
+                        paddingVertical: 2,
+                      }}
+                    />
+                  </View>
+                </View>
+              )}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: estilos.font_sub_color,
+                    fontFamily: estilos.font_normal,
+                    marginTop: 24,
+                    fontSize: 13,
+                  }}
+                >
+                  Sin resultados
+                </Text>
+              }
+            />
+
+            <View
+              style={[
+                distStyles.totalRow,
+                { borderTopColor: estilos.cards_color_border, marginTop: 8 },
+              ]}
+            >
+              <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>
+                Total seleccionado
+              </Text>
+              <Text
+                style={{
+                  fontFamily: estilos.font_negrita,
+                  color: estilos.font_importe_color,
+                  fontSize: 15,
+                }}
+              >
+                {totalModal.toLocaleString('es-PY')}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                modalStyles.confirmBtn,
+                {
+                  backgroundColor: estilos.boton_color_fondo,
+                  borderColor: estilos.boton_color_borde,
+                  marginTop: 12,
+                },
+              ]}
+              onPress={confirmar}
+            >
+              <Text
+                style={{
+                  fontFamily: estilos.font_negrita,
+                  color: estilos.font_importe_color,
+                  fontSize: 14,
+                }}
+              >
+                Confirmar selección
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
+  );
+};
+
+// ─── Modal genérico para empresas (sin cambios) ─────────────────────────────
+const EmpresaModal = ({ visible, onClose, data, onSelect, selected, title, estilos }) => {
+  const [query, setQuery] = useState('');
+  const filtered = data.filter((item) =>
+    item.nombre.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={modalStyles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'flex-end' }}
+        >
+          <View
+            style={[
+              modalStyles.sheet,
+              { backgroundColor: estilos.pantalla_color_fondo, maxHeight: '85%' },
+            ]}
+          >
+            <View style={modalStyles.header}>
+              <Text
+                style={{
+                  fontFamily: estilos.font_negrita,
+                  color: estilos.font_importe_color,
+                  fontSize: 16,
+                  flex: 1,
+                }}
+              >
+                {title}
+              </Text>
+              <TouchableOpacity onPress={onClose}>
+                <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
             <View
               style={[
                 modalStyles.searchBox,
@@ -144,26 +392,23 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
               )}
             </View>
 
-            {/* Lista */}
             <FlatList
               data={filtered}
               keyExtractor={(item) => String(item.id)}
               keyboardShouldPersistTaps="handled"
               style={{ maxHeight: 380 }}
               renderItem={({ item }) => {
-                const sel = isSelected(item.id);
+                const sel = selected?.id === item.id;
                 return (
                   <TouchableOpacity
                     onPress={() => {
                       onSelect(item);
-                      if (!multiSelect) onClose();
+                      onClose();
                     }}
                     style={[
                       modalStyles.listItem,
                       {
-                        backgroundColor: sel
-                          ? estilos.boton_color_fondo
-                          : 'transparent',
+                        backgroundColor: sel ? estilos.boton_color_fondo : 'transparent',
                         borderBottomColor: estilos.cards_color_border,
                       },
                     ]}
@@ -178,9 +423,7 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
                     >
                       {item.nombre}
                     </Text>
-                    {sel && (
-                      <Text style={{ color: estilos.font_importe_color, fontSize: 14 }}>✓</Text>
-                    )}
+                    {sel && <Text style={{ color: estilos.font_importe_color, fontSize: 14 }}>✓</Text>}
                   </TouchableOpacity>
                 );
               }}
@@ -198,29 +441,6 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
                 </Text>
               }
             />
-
-            {multiSelect && (
-              <TouchableOpacity
-                style={[
-                  modalStyles.confirmBtn,
-                  {
-                    backgroundColor: estilos.boton_color_fondo,
-                    borderColor: estilos.boton_color_borde,
-                  },
-                ]}
-                onPress={onClose}
-              >
-                <Text
-                  style={{
-                    fontFamily: estilos.font_negrita,
-                    color: estilos.font_importe_color,
-                    fontSize: 14,
-                  }}
-                >
-                  Confirmar selección ({selected.length})
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -228,17 +448,43 @@ const SearchModal = ({ visible, onClose, data, onSelect, selected, title, estilo
   );
 };
 
-// ─── Modal distribución de medios ────────────────────────────────────────────
+// ─── Modal distribución de medios (sin cambios funcionales) ─────────────────
 const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, totalGastos, estilos }) => {
   const [local, setLocal] = useState({});
+  const [localDisplay, setLocalDisplay] = useState({});
 
   useEffect(() => {
-    if (visible) setLocal({ ...distribucion });
+    if (visible) {
+      const newLocal = { ...distribucion };
+      const newDisplay = {};
+      Object.entries(newLocal).forEach(([id, val]) => {
+        const num = parseFloat(val) || 0;
+        newDisplay[id] = num > 0 ? formatearMiles(num.toString()) : '';
+      });
+      setLocal(newLocal);
+      setLocalDisplay(newDisplay);
+    }
   }, [visible]);
 
   const totalDistribuido = Object.values(local).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
+  const actualizarMedioDistrib = (id, valor) => {
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
+    setLocal(prev => ({ ...prev, [id]: num > 0 ? num : undefined }));
+    setLocalDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
+  };
+
+
   const guardar = () => {
+    // Si solo hay 1 medio con monto > 0, colapsamos a medio único
+    const entradas = Object.entries(local).filter(([, v]) => parseFloat(v) > 0);
+    if (entradas.length === 1) {
+      // Volvemos a selección de medio único: limpiamos distribución
+      onUpdate({});
+      onClose();
+      return;
+    }
     onUpdate(local);
     onClose();
   };
@@ -253,7 +499,7 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
           <View
             style={[
               modalStyles.sheet,
-              { backgroundColor: estilos.pantalla_color_fondo },
+              { backgroundColor: estilos.pantalla_color_fondo, maxHeight: '85%' },
             ]}
           >
             <View style={modalStyles.header}>
@@ -295,8 +541,8 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
                     ]}
                   >
                     <TextInput
-                      value={local[medio.id]?.toString() ?? ''}
-                      onChangeText={(v) => setLocal((prev) => ({ ...prev, [medio.id]: v }))}
+                      value={localDisplay[medio.id] ?? ''}
+                      onChangeText={(v) => actualizarMedioDistrib(medio.id, v)}
                       keyboardType="numeric"
                       placeholder="0"
                       placeholderTextColor={estilos.font_sub_color}
@@ -314,7 +560,6 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
               ))}
             </ScrollView>
 
-            {/* Total */}
             <View
               style={[
                 distStyles.totalRow,
@@ -365,7 +610,7 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
   );
 };
 
-// ─── Modal calendario simple ──────────────────────────────────────────────────
+// ─── Modal calendario simple (sin cambios) ───────────────────────────────────
 const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
   const hoy = new Date();
   const [año, setAño] = useState(hoy.getFullYear());
@@ -375,7 +620,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const diasSemana = ['D','L','M','M','J','V','S'];
 
-  const primero = new Date(año, mes, 1).getDay(); // día semana del 1ero
+  const primero = new Date(año, mes, 1).getDay();
   const diasEnMes = new Date(año, mes + 1, 0).getDate();
 
   const celdas = [];
@@ -404,10 +649,9 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
           <View
             style={[
               modalStyles.sheet,
-              { backgroundColor: estilos.pantalla_color_fondo, paddingBottom: 24 },
+              { backgroundColor: estilos.pantalla_color_fondo, paddingBottom: 24, maxHeight: '85%' },
             ]}
           >
-            {/* Header */}
             <View style={modalStyles.header}>
               <Text
                 style={{
@@ -424,7 +668,6 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
               </TouchableOpacity>
             </View>
 
-            {/* Nav mes */}
             <View style={calStyles.navRow}>
               <TouchableOpacity onPress={anteriorMes} style={calStyles.navBtn}>
                 <Text style={{ color: estilos.font_color, fontSize: 18 }}>‹</Text>
@@ -437,7 +680,6 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
               </TouchableOpacity>
             </View>
 
-            {/* Días semana */}
             <View style={calStyles.weekRow}>
               {diasSemana.map((d, i) => (
                 <Text key={i} style={[calStyles.weekLabel, { color: estilos.font_sub_color, fontFamily: estilos.font_negrita }]}>
@@ -446,7 +688,6 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
               ))}
             </View>
 
-            {/* Grilla */}
             <View style={calStyles.grid}>
               {celdas.map((dia, i) => {
                 const sel = dia === diaSeleccionado;
@@ -458,9 +699,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
                     style={[
                       calStyles.celda,
                       {
-                        backgroundColor: sel
-                          ? estilos.boton_color_fondo
-                          : 'transparent',
+                        backgroundColor: sel ? estilos.boton_color_fondo : 'transparent',
                         borderColor: sel ? estilos.boton_color_borde : 'transparent',
                       },
                     ]}
@@ -468,11 +707,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
                     <Text
                       style={{
                         fontFamily: sel ? estilos.font_negrita : estilos.font_normal,
-                        color: dia
-                          ? sel
-                            ? estilos.font_importe_color
-                            : estilos.font_color
-                          : 'transparent',
+                        color: dia ? (sel ? estilos.font_importe_color : estilos.font_color) : 'transparent',
                         fontSize: 14,
                       }}
                     >
@@ -514,8 +749,9 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
-export default function GastosRegistroop1({ navigation }) {
+export default function RegistroMovimientoGasto({ navigation }) {
   const { colors, fonts } = useTheme();
+  const { navigate } = useNavigation();
 
   const estilos = {
     font_normal: fonts.balsamiqregular.fontFamily,
@@ -530,6 +766,16 @@ export default function GastosRegistroop1({ navigation }) {
     boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
   };
 
+  
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { asignar_opciones_alerta } = useContext(AuthContext);
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+
+ 
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+
+  const [mostraralerta,setMostraralerta]=useState(false)
   // ── Data referencial ──────────────────────────────────────────────────────
   const [datagastos, setDatagastos] = useState([]);
   const [datamedios, setDatamedios] = useState([]);
@@ -541,7 +787,12 @@ export default function GastosRegistroop1({ navigation }) {
   const [medioSeleccionado, setMedioSeleccionado] = useState(null);   // id del medio activo (botón)
   const [distribucion, setDistribucion] = useState({});               // { idMedio: monto }
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-  const [fechaSeleccionada, setFechaSeleccionada] = useState('');
+  const hoyStr = (() => {
+    const hoy = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+  })();
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(hoyStr);
 
   // ── Modales ───────────────────────────────────────────────────────────────
   const [modalGastos, setModalGastos] = useState(false);
@@ -550,34 +801,52 @@ export default function GastosRegistroop1({ navigation }) {
   const [modalCalendario, setModalCalendario] = useState(false);
 
   const [enviando, setEnviando] = useState(false);
-
+  
   // ── Carga datos ───────────────────────────────────────────────────────────
-  // Normaliza los campos de la API (Id, NombreGasto, etc.) a {id, nombre}
   const cargardatos = async () => {
     try {
-      const result = await Generarpeticion('operaciones/ReferencialesCargaGasto/', 'GET', {});
-      if (result['resp'] === 200) {
-        const gastos = (result['data']['Gastos'] || []).map((g) => ({
-          id: g.Id,
-          nombre: g.NombreGasto,
-          categoria: g.NombreCategoria,
-          tipo: g.NombreTipoGasto,
-        }));
-        const medios = (result['data']['MediosPagos'] || []).map((m) => ({
-          id: m.Id,
-          nombre: m.NombreMedioPago,
-        }));
-        const empresas = (result['data']['Empresa'] || []).map((e) => ({
-          id: e.Id,
-          nombre: e.NombreEmpresa,
-          urlImg: e.UrlImg,
-        }));
-        setDatagastos(gastos);
-        setDatamedios(medios);
-        setDataempresas(empresas);
+      const endpoint = `operaciones/ReferencialesCargaGasto/`;
+      
+      const result = await apiRequest(endpoint, 'GET', {});
+      
+      if (result.sessionExpired) {
+            return; // SI LA SESION NO ES VALIDA
+        }
+      if (result.resp_correcta) {
+          const gastos = (result.data.Gastos || []).map((g) => ({
+            id: g.Id,
+            nombre: g.NombreGasto,
+            categoria: g.NombreCategoria,
+            tipo: g.NombreTipoGasto,
+          }));
+          const medios = (result.data.MediosPagos || []).map((m) => ({
+            id: m.Id,
+            nombre: m.NombreMedioPago,
+          }));
+          const empresas = (result.data.Empresa || []).map((e) => ({
+            id: e.Id,
+            nombre: e.NombreEmpresa,
+            urlImg: e.UrlImg,
+          }));
+          setDatagastos(gastos);
+          setDatamedios(medios);
+          setDataempresas(empresas);
+
+          // Seleccionar empresa con Id = 1 por defecto
+          const empresaPorDefecto = empresas.find(e => e.id === 1);
+          if (empresaPorDefecto) {
+            setEmpresaSeleccionada(empresaPorDefecto);
+          }
+      }else{
+          const msj = result.data?.message || 'Error en la solicitud'; // toma el error
+          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+          actualizarEstadocomponente('alerta_estado', true);
       }
     } catch (e) {
-      Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+      // Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+          const msj = e || 'Error en la solicitud'; // toma el error
+          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+          actualizarEstadocomponente('alerta_estado', true);
     } finally {
       setCargando(false);
     }
@@ -593,22 +862,29 @@ export default function GastosRegistroop1({ navigation }) {
     0
   );
 
-  const toggleGasto = (item) => {
-    setGastosSeleccionados((prev) =>
-      prev.some((g) => g.id === item.id)
-        ? prev.filter((g) => g.id !== item.id)
-        : [...prev, { ...item, monto: '' }]
-    );
+  const [gastosDisplay, setGastosDisplay] = useState({}); // {id: string formateado}
+
+  const confirmarGastos = (nuevosGastos) => {
+    setGastosSeleccionados(nuevosGastos);
+    const newDisplay = {};
+    nuevosGastos.forEach(g => {
+      newDisplay[g.id] = g.monto > 0 ? formatearMiles(g.monto.toString()) : '';
+    });
+    setGastosDisplay(newDisplay);
   };
 
   const actualizarMontoGasto = (id, valor) => {
+    const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+    const num = soloNums ? parseFloat(soloNums) : 0;
     setGastosSeleccionados((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, monto: valor } : g))
+      prev.map((g) => (g.id === id ? { ...g, monto: num } : g))
     );
+    setGastosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
   };
 
   const eliminarGasto = (id) => {
     setGastosSeleccionados((prev) => prev.filter((g) => g.id !== id));
+    setGastosDisplay((prev) => { const n = { ...prev }; delete n[id]; return n; });
   };
 
   const seleccionarMedioBoton = (id) => {
@@ -620,8 +896,8 @@ export default function GastosRegistroop1({ navigation }) {
   const validar = () => {
     if (gastosSeleccionados.length === 0)
       return 'Seleccioná al menos un gasto.';
-    const sinMonto = gastosSeleccionados.some((g) => !g.monto || isNaN(parseFloat(g.monto)));
-    if (sinMonto) return 'Completá el monto de todos los gastos.';
+    const sinMonto = gastosSeleccionados.some((g) => !g.monto || isNaN(parseFloat(g.monto)) || parseFloat(g.monto) <= 0);
+    if (sinMonto) return 'Completá el monto de todos los gastos (mayor a 0).';
     if (datamedios.length > 1 && !medioSeleccionado && Object.keys(distribucion).length === 0)
       return 'Seleccioná o distribuí un medio de pago.';
     if (!empresaSeleccionada) return 'Seleccioná una empresa.';
@@ -633,14 +909,34 @@ export default function GastosRegistroop1({ navigation }) {
     if (datamedios.length === 1) {
       return [{ idgasto: datamedios[0].id, monto: totalGastos }];
     }
+    // Si hay distribución configurada, se usa aunque haya un medio seleccionado (prioridad distribución)
     if (Object.keys(distribucion).length > 0) {
       return Object.entries(distribucion)
         .filter(([, m]) => parseFloat(m) > 0)
         .map(([id, monto]) => ({ idgasto: parseInt(id), monto: parseFloat(monto) }));
     }
     // medio único por botón
-    return [{ idgasto: medioSeleccionado, monto: totalGastos }];
+    if (medioSeleccionado) {
+      return [{ idgasto: medioSeleccionado, monto: totalGastos }];
+    }
+    return [];
   };
+
+  const resetForm = () => {
+    setGastosSeleccionados([]);
+    setGastosDisplay({});
+    setMedioSeleccionado(null);
+    setDistribucion({});
+    setEmpresaSeleccionada(dataempresas.find(e => e.id === 1) || null);
+    const hoy = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    setFechaSeleccionada(`${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`);
+  };
+
+
+  const cancelar=()=>{
+     navigation.goBack();
+  }
 
   const guardar = async () => {
     const error = validar();
@@ -659,15 +955,36 @@ export default function GastosRegistroop1({ navigation }) {
 
     try {
       setEnviando(true);
-      const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
-      if (result['resp'] === 200) {
-        Alert.alert('Éxito', 'Movimiento registrado correctamente.', [
-          { text: 'OK', onPress: () => navigation.goBack() },
-        ]);
-      } else {
-        Alert.alert('Error', 'No se pudo registrar el movimiento.');
+      actualizarEstadocomponente('tituloloading', 'Registrando Gasto..');
+      actualizarEstadocomponente('loading', true);
+
+      // const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
+
+      const result = await apiRequest('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));  
+      actualizarEstadocomponente('tituloloading', '');
+      actualizarEstadocomponente('loading', false);
+      
+      if (result.sessionExpired) {
+        return; // Salimos de la función
       }
+      
+      if (result.resp_correcta) {
+        resetForm();
+        const nuevo=!estadocomponente.bandera_registro_gasto
+        asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','TabsGroup','ListadoMovimientosGastos','bandera_registro_gasto',nuevo)
+        actualizarEstadocomponente('alerta_estado', true); 
+        
+      } else {
+        const msj = result.data?.message || 'Error en la solicitud';
+        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
+        actualizarEstadocomponente('alerta_estado', true);
+      }
+      
     } catch (e) {
+        asignar_opciones_alerta(true,'ERROR','Ocurrió un error al guardar.','Gastos','bandera_registro_gasto',false)
+        actualizarEstadocomponente('alerta_estado', true);
       Alert.alert('Error', 'Ocurrió un error al guardar.');
     } finally {
       setEnviando(false);
@@ -686,13 +1003,17 @@ export default function GastosRegistroop1({ navigation }) {
     );
   }
 
+
+  
   const hayDistribucion = Object.values(distribucion).some((v) => parseFloat(v) > 0);
 
   return (
+    
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {estadocomponente.alerta_estado && <Alerta />}
       <ScrollView
         style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}
         contentContainerStyle={styles.scrollContent}
@@ -700,9 +1021,17 @@ export default function GastosRegistroop1({ navigation }) {
       >
 
         {/* ── TÍTULO ───────────────────────────────────────────────────── */}
-        <Text style={[styles.titulo, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
-          Nuevo gasto
-        </Text>
+        <View style={{flexDirection:'row',alignItems: 'center',marginBottom: 20,marginTop: 4, }}>
+          <TouchableOpacity onPress={cancelar}>
+              
+              <IcnoAtras></IcnoAtras>
+              
+            </TouchableOpacity>
+            <Text style={[styles.titulo, { marginLeft:20,fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
+              Nuevo gasto
+            </Text>
+            
+        </View>
 
         {/* ══ SECCIÓN: GASTOS ══════════════════════════════════════════════ */}
         <SectionCard estilos={estilos} titulo="Gastos" paso="1">
@@ -742,7 +1071,7 @@ export default function GastosRegistroop1({ navigation }) {
                 {g.nombre}
               </Text>
               <TextInput
-                value={g.monto?.toString() ?? ''}
+                value={gastosDisplay[g.id] ?? ''}
                 onChangeText={(v) => actualizarMontoGasto(g.id, v)}
                 keyboardType="numeric"
                 placeholder="Monto"
@@ -777,7 +1106,7 @@ export default function GastosRegistroop1({ navigation }) {
         {/* ══ SECCIÓN: MEDIOS DE PAGO ══════════════════════════════════════ */}
         <SectionCard estilos={estilos} titulo="Medio de pago" paso="2">
           {datamedios.length === 1 ? (
-            // Un solo medio → mostrar info + toggle
+            // Un solo medio → mostrar info
             <View style={[styles.gastoRow, { borderColor: estilos.cards_color_border, backgroundColor: estilos.cards_color_fondo }]}>
               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, flex: 1 }}>
                 {datamedios[0].nombre}
@@ -787,7 +1116,6 @@ export default function GastosRegistroop1({ navigation }) {
               </Text>
             </View>
           ) : (
-            // Múltiples medios → botones
             <>
               <View style={styles.chipRow}>
                 {datamedios.map((m) => (
@@ -801,7 +1129,6 @@ export default function GastosRegistroop1({ navigation }) {
                 ))}
               </View>
 
-              {/* Botón distribuir */}
               <TouchableOpacity
                 style={[
                   styles.distribuirBtn,
@@ -823,6 +1150,57 @@ export default function GastosRegistroop1({ navigation }) {
                   {hayDistribucion ? 'Distribución configurada ✓' : 'Distribuir entre medios'}
                 </Text>
               </TouchableOpacity>
+
+              {hayDistribucion && (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_sub_color, fontSize: 12, marginBottom: 6 }}>
+                    Distribución actual:
+                  </Text>
+                  {datamedios.filter(m => parseFloat(distribucion[m.id] || 0) > 0).map(medio => (
+                    <View
+                      key={medio.id}
+                      style={[
+                        styles.gastoRow,
+                        {
+                          borderColor: estilos.cards_color_border,
+                          backgroundColor: estilos.cards_color_fondo,
+                          marginTop: 4,
+                        },
+                      ]}
+                    >
+                      <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, flex: 1, fontSize: 13 }}>
+                        {medio.nombre}
+                      </Text>
+                      <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 13 }}>
+                        {parseFloat(distribucion[medio.id]).toLocaleString('es-PY')}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const nueva = { ...distribucion };
+                          delete nueva[medio.id];
+                          const restantes = Object.values(nueva).filter(v => parseFloat(v) > 0);
+                          if (restantes.length === 0) {
+                            setDistribucion({});
+                          } else {
+                            setDistribucion(nueva);
+                          }
+                        }}
+                        style={{ marginLeft: 8 }}
+                      >
+                        <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  <View style={styles.totalRow}>
+                    <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 12 }}>
+                      Total distribuido
+                    </Text>
+                    <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>
+                      {Object.values(distribucion).reduce((a, v) => a + (parseFloat(v) || 0), 0).toLocaleString('es-PY')}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </>
           )}
         </SectionCard>
@@ -914,18 +1292,16 @@ export default function GastosRegistroop1({ navigation }) {
       </ScrollView>
 
       {/* ── MODALES ───────────────────────────────────────────────────────── */}
-      <SearchModal
+      <GastosModal
         visible={modalGastos}
         onClose={() => setModalGastos(false)}
-        data={datagastos}
-        onSelect={toggleGasto}
-        selected={gastosSeleccionados}
-        title="Seleccionar gastos"
+        gastosData={datagastos}
+        selectedGastos={gastosSeleccionados}
+        onConfirm={confirmarGastos}
         estilos={estilos}
-        multiSelect
       />
 
-      <SearchModal
+      <EmpresaModal
         visible={modalEmpresas}
         onClose={() => setModalEmpresas(false)}
         data={dataempresas}
@@ -933,7 +1309,6 @@ export default function GastosRegistroop1({ navigation }) {
         selected={empresaSeleccionada}
         title="Seleccionar empresa"
         estilos={estilos}
-        multiSelect={false}
       />
 
       <DistribuirModal
@@ -989,8 +1364,7 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 22,
-    marginBottom: 20,
-    marginTop: 4,
+    
   },
   card: {
     borderWidth: 1,
@@ -1098,7 +1472,6 @@ const modalStyles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 32,
-    maxHeight: '85%',
   },
   header: {
     flexDirection: 'row',
@@ -1106,14 +1479,19 @@ const modalStyles = StyleSheet.create({
     marginBottom: 14,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
+     flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderRadius: 10,
+      marginBottom: 8,
+      paddingHorizontal: 12,
+      height: 35, // Altura fija más compacta
   },
+
+
+
+
+  
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1127,6 +1505,19 @@ const modalStyles = StyleSheet.create({
     padding: 14,
     alignItems: 'center',
     marginTop: 12,
+  },
+  gastoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  montoInputWrap: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
   },
 });
 

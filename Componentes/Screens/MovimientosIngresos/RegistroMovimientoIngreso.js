@@ -9,8 +9,9 @@ import Handelstorage from '../../../Storage/HandelStorage';
 import { useApi } from '../../../Apis/useApi';
 
 import Alerta from '../../Procesando/Alerta';
+import IcnoAtras from '../../IconoAtras/IconoAtras';
 
-export default function Modelo({ navigation }){
+export default function RegistroMovimientoIngreso({ navigation }){
     const { colors, fonts } = useTheme();
     const { navigate } = useNavigation();
     const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
@@ -90,8 +91,14 @@ export default function Modelo({ navigation }){
 
     }
 
+    const cancelar=()=>{
+     navigation.goBack();
+  }
+
+
     const accion_boton=()=>{
-        console.log('boton')
+        asignar_opciones_alerta(false,'REGISTRO INGRESOS','Registro correcto del movimiento','TabsGroup','ListadoMovimientosIngresos','bandera_registro_gasto',0)
+        actualizarEstadocomponente('alerta_estado', true); 
     }
 
     const cargardatos =async()=>{
@@ -107,18 +114,17 @@ export default function Modelo({ navigation }){
             {/* Para ver la alerta */}
             {estadocomponente.alerta_estado && <Alerta />} 
 
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                Texto normal
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_negrita,color:estilos.font_color}]}>
-                Texto negrita
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_sub_color}]}>
-                Sub titulo
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_importe_color}]}>
-                Texto importante
-            </Text>
+            <View style={{flexDirection:'row',alignItems: 'center',marginBottom: 20,marginTop: 4, }}>
+                <TouchableOpacity onPress={cancelar}>
+                    
+                    <IcnoAtras></IcnoAtras>
+                    
+                </TouchableOpacity>
+                <Text style={[styles.titulo, { marginLeft:20,fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
+                    Nuevo Ingreso
+                </Text>
+                
+            </View>
 
             
             <TouchableOpacity 
@@ -154,7 +160,10 @@ export default function Modelo({ navigation }){
 
 const styles = StyleSheet.create({
 
-
+ titulo: {
+    fontSize: 22,
+    
+  },
 btn: {
     borderWidth: 0.5,
     borderRadius: 12,

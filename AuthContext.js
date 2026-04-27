@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
         alerta_estado:false,
         alerta_componente:[],
         alerto_tipo:'',
-        alerta_mensaje:''
+        alerta_mensaje:'',
+        ComponenteActivoBottonTab:''
         
     
       })
@@ -67,13 +68,15 @@ export const AuthProvider = ({ children }) => {
         
         
       }
-  const asignar_opciones_alerta=(error,titulo,mensaje,destino,estado_actualizar,valor_estado)=>{
+  const asignar_opciones_alerta=(error,titulo,mensaje,grupo_destino,destino,estado_actualizar,valor_estado)=>{
   
     const body_alerta={
       is_error:error,
       titulo:titulo,
       mensaje:mensaje,
+      nav_grupo:grupo_destino,
       nav_destino:destino,
+
       estado_actualizar:estado_actualizar,
       valor_estado:valor_estado
     }

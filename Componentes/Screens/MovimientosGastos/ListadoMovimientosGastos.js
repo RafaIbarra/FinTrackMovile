@@ -9,7 +9,7 @@ import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import Generarpeticion from "../../../Apis/ApiPeticiones";
 import { useApi } from "../../../Apis/useApi";
 
-export default function Gastos({ navigation }) {
+export default function ListadoMovimientosGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
   const { sesiondatadate } = useContext(AuthContext);
@@ -26,7 +26,7 @@ export default function Gastos({ navigation }) {
 
   const cargardatos = async () => {
     
-
+    
     actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
     actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
@@ -63,6 +63,25 @@ export default function Gastos({ navigation }) {
   useEffect(() => {
     cargardatos();
   }, [estadocomponente.bandera_registro_gasto]);
+
+  useEffect(() => {
+         
+          const unsubscribe = navigation.addListener('focus', () => {
+        
+          const asignar_componente=async()=>{
+              
+            actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
+  
+             
+          }
+          
+          asignar_componente()
+          
+        })
+        return unsubscribe;
+  
+  
+        }, []);
 
   return (
     
@@ -142,7 +161,7 @@ export default function Gastos({ navigation }) {
                       borderRightColor:colors.screen_componente_estilos.color_borde_cards,
                       borderBottomColor:colors.screen_componente_estilos.color_borde_cards
                     }]}
-                    onPress={() => { navigate('GastosDetalle', { item }); }}
+                    onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
                     activeOpacity={0.85}
                   >
                     <View style={styles.columnaLogo}>

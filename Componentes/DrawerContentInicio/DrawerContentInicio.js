@@ -83,14 +83,12 @@ function DrawerContentInicio(props){
     return(
       
 
-        <View style={{flex: 1}} >
-            
-            <DrawerContentScrollView {...props} scrollEnabled={false}>
-
-                <View style={{flex:1,flexDirection:'row',borderBottomWidth:1,borderBottomColor:colors.bordercolor,
-                        //paddingBottom:10,
-                        backgroundColor:colors.navigation_estilos.color_fondo
-                        ,marginTop:-5
+        <View style={{flex: 1 }} >
+            <View style=
+                      {{
+                        flexDirection:'row',
+                        backgroundColor: colors.navigation_estilos.color_fondo,
+                        height:100,paddingLeft:15
                         }}>
 
                         <View style={styles.containerimagen}>
@@ -122,8 +120,9 @@ function DrawerContentInicio(props){
                         </View>
 
 
-                </View>
-                <DrawerItemList {...props} />
+            </View>
+            <DrawerContentScrollView {...props} scrollEnabled={false} style={{marginTop:-30,marginLeft:-5}} >
+                  <DrawerItemList {...props} />
             </DrawerContentScrollView>
 
             <View style={{
@@ -136,23 +135,24 @@ function DrawerContentInicio(props){
 
               }}>
                 <Button 
-                  style={{
-                    width: '70%',
-                    height: 30,
-                    backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
-                    alignContent: 'center',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }} 
-                  mode="elevated" 
-                  textColor={colors.screen_componente_estilos.color_texto} 
-                  labelStyle={{
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    fontSize: 12,
-                  }}
-                  onPress={cerrar}>
-                  CERRAR SESION 
-                </Button>
+  style={{
+    width: '70%',
+    height: 35, // ← Aumentar de 30 a 40 o 45
+    backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
+    justifyContent: 'center', // ← Centra el contenido verticalmente
+  }} 
+  mode="elevated" 
+  textColor={colors.screen_componente_estilos.color_texto} 
+  labelStyle={{
+    fontFamily: fonts.balsamiqbold.fontFamily,
+    fontSize: 12,
+    textAlign: 'center',
+    includeFontPadding: false, // ← Reduce padding interno
+    paddingVertical: 0, // ← Elimina padding vertical adicional
+  }}
+  onPress={cerrar}>
+  CERRAR SESION 
+</Button>
                 <Text style={{
                   color: colors.screen_componente_estilos.color_texto_subtitulo,
                   fontFamily: fonts.balsamiqregular.fontFamily,

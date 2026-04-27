@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect,useContext } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView
 } from "react-native";
@@ -11,6 +11,7 @@ import {
 } from "victory-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from '@react-navigation/native';
+import { AuthContext } from "../../../AuthContext";
 // ── Datos en duro ────────────────────────────────────────────────────────────
 const DATA_INGRESOS = [
   { x: "Sem 1", y: 2600 },
@@ -48,13 +49,27 @@ const C = {
   tabTextoInac: "#7c3aed",
 };
 
+
 export default function GraficaOverview({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
   const [tabActiva, setTabActiva] = useState("gastos");
 
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+    const { asignar_opciones_alerta } = useContext(AuthContext);
+    const { activarsesion, setActivarsesion } = useContext(AuthContext);
+    const { reiniciarvalores } = useContext(AuthContext);
+
   const totalIngresos = DATA_INGRESOS.reduce((a, b) => a + b.y, 0);
   const totalGastos   = DATA_GASTOS.reduce((a, b) => a + b.y, 0);
+
+  const cargardatos =async()=>{
+  
+  actualizarEstadocomponente('ComponenteActivoBottonTab', 'GraficaOverview');
+}
+useEffect(() => {
+        cargardatos();
+      }, []);
 
   return (
     <ScrollView style={[styles.scroll]} contentContainerStyle={styles.contenido}>

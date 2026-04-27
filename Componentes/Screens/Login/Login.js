@@ -38,10 +38,14 @@ export default function Login() {
   };
 
   const ingresar = async () => {
+    actualizarEstadocomponente('tituloloading', 'INICIANDO SESION');
+    actualizarEstadocomponente('loading', true);
     const datos = await Iniciarsesion(usuario, contrasena, '', '');
     const resp = datos['status'];
 
     if (resp === 200) {
+      console.log(datos['data']['sesion'])
+      console.log(datos['data']['token'])
       const userdata = {
         token: datos['data']['token'],
         sesion: datos['data']['sesion'],
@@ -74,6 +78,8 @@ export default function Login() {
       showDialog(true);
       setMensajeerror(handleError(datos['data']['message']));
     }
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading', false);
   };
 
   const handleContrasenaChange = (text) => {
@@ -82,48 +88,44 @@ export default function Login() {
 
   const cargardatos = async () => {
     setReady(false);
-    const endpoint = 'sessions/ComprobarSession/';
     actualizarEstadocomponente('tituloloading', 'Comprobando Sesion..');
     actualizarEstadocomponente('loading', true);
 
-    try {
-      
+    const datosstarage = await ComprobarStorage();
+    const credenciales = datosstarage['datosesion'];
+    if (credenciales){
+      const endpoint = 'sessions/ComprobarSession/';
       const result = await Generarpeticion(endpoint, 'GET', {});
       const respuesta = result['resp'];
-      const datosstarage = await ComprobarStorage();
-      const credenciales = datosstarage['datosesion'];
-      actualizarEstadocomponente('loading', false);
-      if (credenciales) {
-        const result = await Generarpeticion(endpoint, 'GET', {});
-        const respuesta = result['resp'];
-        
-        if (respuesta === 200) {
-          setSesiondata(result['data']);
-          const datestorage = await Handelstorage('obtenerdate');
-          setSesiondatadate(datestorage);
+      if (respuesta === 200) {
+          setSesiondata(result['data']); //SE TOMA LOS DATOS DE LA SESION 
+          const datestorage = await Handelstorage('obtenerdate'); // SE TOMA LOS DATOS DE LA FECHA
+          // SE ALMACENA LOS DATOS
+          setSesiondatadate(datestorage);  
           setPeriodo(datestorage['dataperiodo']);
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          setActivarsesion(true);
+
+          setActivarsesion(true); // SE ACTIVA SESION
+          actualizarEstadocomponente('tituloloading', '');
+          actualizarEstadocomponente('loading', false);
         } else {
-          await Handelstorage('borrar');
+
+          await Handelstorage('borrar'); // SE ELIMINA LOS DATOS DE STORAGE
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          setActivarsesion(false);
+          setActivarsesion(false); // SE INACTIVA LA SE SECION
           actualizarEstadocomponente('tituloloading', '');
           actualizarEstadocomponente('loading', false);
         }
-      } else {
-        setActivarsesion(false);
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
-      }
-    } catch (error) {
+
+    }else{
+      actualizarEstadocomponente('tituloloading', '');
       actualizarEstadocomponente('loading', false);
-      Alert.alert('Error', 'Error al conectarse al servidor');
-      setReady(false);
-    } finally {
-      actualizarEstadocomponente('loading', false);
-      setReady(true);
+      setActivarsesion(false); // SE INACTIVA LA SE SECION
+
     }
+    
+    
+    
   };
 
   useEffect(() => {
@@ -137,7 +139,6 @@ export default function Login() {
     fonts: {
       bodyLarge: { fontFamily: texto_normal },
     }
-    
   };
 
   return (
@@ -161,139 +162,143 @@ export default function Login() {
           </Dialog>
         </Portal>
 
-        <Text
-          style={[
-            styles.titulo,
-            {
-              fontFamily: texto_negrita,
-              color: colors.navigation_estilos.color_fondo,
-            },
-          ]}
-        >
-          FinTrack
-        </Text>
-        <Text
-          style={[
-            styles.subtitulo,
-            {
-              fontFamily: texto_normal,
-              color: colors.screen_componente_estilos.color_texto,
-            },
-          ]}
-        >
-          Controlá tus finanzas
-        </Text>
+        {/* Contenedor centrador */}
+        <View style={styles.centerContainer}>
+          {/* Encabezado separado */}
+          <View style={styles.headerContainer}>
+            <Text
+              style={[
+                styles.titulo,
+                {
+                  fontFamily: texto_negrita,
+                  color: colors.navigation_estilos.color_fondo,
+                },
+              ]}
+            >
+              FinTrack
+            </Text>
+            <Text
+              style={[
+                styles.subtitulo,
+                {
+                  fontFamily: texto_normal,
+                  color: colors.screen_componente_estilos.color_texto,
+                },
+              ]}
+            >
+              Controlá tus finanzas
+            </Text>
+          </View>
 
-        <Surface
-          style={[
-            styles.card,
-            { backgroundColor: colors.screen_componente_estilos.color_fondo_cards },
-          ]}
-          elevation={2}
-        >
-          <ImageBackground
-            source={require('../../../assets/logoapp.png')}
-            style={styles.imageBackground}
-            imageStyle={styles.imageStyle}
+          {/* Surface que ahora se ajusta al contenido */}
+          <Surface
+            style={[
+              styles.card,
+              { backgroundColor: colors.screen_componente_estilos.color_fondo_cards },
+            ]}
+            elevation={2}
           >
-            <View style={styles.formContainer}>
-              <Text
-                style={[
-                  styles.cardTitulo,
-                  {
-                    fontFamily: texto_normal,
-                    color: colors.screen_componente_estilos.color_texto,
-                  },
-                ]}
-              >
-                Iniciar sesión
-              </Text>
+            <ImageBackground
+              source={require('../../../assets/logoapp.png')}
+              style={styles.imageBackground}
+              imageStyle={styles.imageStyle}
+            >
+              <View style={styles.formContainer}>
+                <Text
+                  style={[
+                    styles.cardTitulo,
+                    {
+                      fontFamily: texto_normal,
+                      color: colors.screen_componente_estilos.color_texto,
+                    },
+                  ]}
+                >
+                  Iniciar sesión
+                </Text>
 
-              <TextInput
-                label="Usuario"
-                value={usuario}
-                onChangeText={setUsuario}
-                mode="outlined"
-                style={styles.input}
-                outlineStyle={{ borderRadius: 15 }}  // ← Agrega esta línea
-                contentStyle={{ fontFamily: texto_normal }}
-                theme={inputTheme}
-                outlineColor={colors.navigation_estilos.color_fondo}
-                activeOutlineColor={colors.navigation_estilos.color_fondo}
-                left={<TextInput.Icon icon="account" />}
-              />
+                <TextInput
+                  label="Usuario"
+                  value={usuario}
+                  onChangeText={setUsuario}
+                  mode="outlined"
+                  style={[styles.input,{backgroundColor:colors.screen_componente_estilos.color_fondo}]}
+                  outlineStyle={{ borderRadius: 15 }}
+                  contentStyle={{ fontFamily: texto_normal,color:colors.screen_componente_estilos.color_texto }}
+                  theme={inputTheme}
+                  outlineColor={colors.navigation_estilos.color_fondo}
+                  activeOutlineColor={colors.navigation_estilos.color_fondo}
+                  left={<TextInput.Icon icon="account" />}
+                />
 
-              <TextInput
-                label="Contraseña"
-                value={contrasena}
-                onChangeText={handleContrasenaChange}
-                mode="outlined"
-                secureTextEntry={!verContrasena}
-                style={styles.input}
-                outlineStyle={{ borderRadius: 15 }} 
-                contentStyle={{ fontFamily: texto_normal }}
-                theme={inputTheme}
-                outlineColor={colors.navigation_estilos.color_fondo}
-                activeOutlineColor={colors.navigation_estilos.color_fondo}
-                left={<TextInput.Icon icon="lock" />}
-                right={
-                  <TextInput.Icon
-                    icon={verContrasena ? 'eye-off' : 'eye'}
-                    onPress={() => setVerContrasena(!verContrasena)}
-                  />
-                }
-              />
+                <TextInput
+                  label="Contraseña"
+                  value={contrasena}
+                  onChangeText={handleContrasenaChange}
+                  mode="outlined"
+                  secureTextEntry={!verContrasena}
+                  style={[styles.input,{backgroundColor:colors.screen_componente_estilos.color_fondo}]}
+                  outlineStyle={{ borderRadius: 15 }}
+                  contentStyle={{ fontFamily: texto_normal,color:colors.screen_componente_estilos.color_texto }}
+                  theme={inputTheme}
+                  outlineColor={colors.navigation_estilos.color_fondo}
+                  activeOutlineColor={colors.navigation_estilos.color_fondo}
+                  left={<TextInput.Icon icon="lock" />}
+                  right={
+                    <TextInput.Icon
+                      icon={verContrasena ? 'eye-off' : 'eye'}
+                      onPress={() => setVerContrasena(!verContrasena)}
+                    />
+                  }
+                />
 
-              <Text
-                style={[
-                  styles.olvidaste,
-                  {
-                    fontFamily: texto_normal,
-                    color: colors.navigation_estilos.color_fondo,
-                  },
-                ]}
-              >
-                ¿Olvidaste tu contraseña?
-              </Text>
+                <Text
+                  style={[
+                    styles.olvidaste,
+                    {
+                      fontFamily: texto_normal,
+                      color: colors.navigation_estilos.color_fondo,
+                    },
+                  ]}
+                >
+                  ¿Olvidaste tu contraseña?
+                </Text>
 
-              <Button
-                mode="contained"
-                style={
-                  {
+                <Button
+                  mode="contained"
+                  style={{
                     borderRadius: 12,
                     marginBottom: 12,
                     backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
                     borderWidth: 0.5,
-                    borderColor:  colors.navigation_estilos.color_fondo
+                    borderColor: colors.navigation_estilos.color_fondo
+                  }}
+                  contentStyle={styles.botonContenido}
+                  buttonColor={colors.screen_componente_estilos.color_fondo_botones}
+                  textColor={colors.screen_componente_estilos.color_texto}
+                  labelStyle={{
+                    fontFamily: texto_negrita,
+                    fontSize: 16,
+                    letterSpacing: 0.5,
+                  }}
+                  onPress={() => ingresar()}
+                >
+                  Ingresar
+                </Button>
 
-                  }
-                }
-                contentStyle={styles.botonContenido}
-                buttonColor="#7C3AED"
-                textColor={colors.screen_componente_estilos.color_texto}
-                labelStyle={{
-                  fontFamily: texto_negrita,
-                  fontSize: 16,
-                  letterSpacing: 0.5,
-                }}
-                onPress={() => ingresar()}
-              >
-                Ingresar
-              </Button>
-
-              <Button
-                mode="text"
-                textColor={ colors.navigation_estilos.color_fondo}
-                labelStyle={{
-                  fontSize: 14,
-                  fontFamily: texto_negrita,
-                }}
-              >
-                ¿No tenés cuenta? Registrate
-              </Button>
-            </View>
-          </ImageBackground>
-        </Surface>
+                <Button
+                  mode="text"
+                  textColor={colors.navigation_estilos.color_fondo}
+                  labelStyle={{
+                    fontSize: 14,
+                    fontFamily: texto_negrita,
+                  }}
+                >
+                  ¿No tenés cuenta? Registrate
+                </Button>
+              </View>
+            </ImageBackground>
+          </Surface>
+        </View>
       </View>
     </PaperProvider>
   );
@@ -302,9 +307,16 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  centerContainer: {
+    flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    alignItems: 'center',
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
   },
   titulo: {
     fontSize: 42,
@@ -312,16 +324,16 @@ const styles = StyleSheet.create({
   },
   subtitulo: {
     fontSize: 16,
-    marginBottom: 32,
   },
   card: {
-    width: '100%',
+    width: '100%',            // Toma el ancho del padre, pero la altura la da el contenido
     borderRadius: 20,
     overflow: 'hidden',
+    // No se usa flex ni altura fija
   },
   imageBackground: {
     width: '100%',
-    height: '100%',
+    // No se define height para que sea determinado por el contenido
   },
   imageStyle: {
     opacity: 0.3,
@@ -333,23 +345,17 @@ const styles = StyleSheet.create({
   cardTitulo: {
     fontSize: 22,
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     marginBottom: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius:50
+    borderRadius: 50,
   },
   olvidaste: {
     textAlign: 'right',
     fontSize: 13,
     marginBottom: 20,
-  },
-  boton: {
-    borderRadius: 12,
-    marginBottom: 12,
-    backgroundColor: 'transparent',
-    borderColor: '#7C3AED',
-    borderWidth: 0.5,
   },
   botonContenido: {
     paddingVertical: 6,

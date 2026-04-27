@@ -38,7 +38,7 @@ async function  Handelstorage (opcion,item,valor){
             dataperiodo:añoActual,
             nombremesactual:nombremes.mes
           }
-          console.log('en agregar-->',datadate)
+          
           const datastats={
             dataanno:añoActual
           }

@@ -6,7 +6,7 @@ import { useRoute } from "@react-navigation/native";
 import { useTheme } from "@react-navigation/native";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 
-export default function GastosDetalle({ navigation }) {
+export default function DetalleMovimientoGasto({ navigation }) {
   const { colors, fonts } = useTheme();
   const [datositem, setDatositem] = useState({});
   const [detallegastos, setDetallegastos] = useState([]);
@@ -32,9 +32,9 @@ export default function GastosDetalle({ navigation }) {
       <ScrollView style={styles.scroll} bounces={false}>
 
         {/* HERO */}
-        <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+        <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards,borderBottomWidth: 0.5}]}>
           {/* Logo + Empresa */}
-          <View style={styles.heroTop}>
+          <View style={[styles.heroTop]}>
             <View style={styles.logoWrap}>
               <LogoEmpresa imagePath={item.LogoEmpresa} />
             </View>
@@ -49,14 +49,21 @@ export default function GastosDetalle({ navigation }) {
           </View>
 
           {/* Total */}
-          <View style={styles.heroTotal}>
-            <Text style={[styles.heroTotalLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+          <View style={[styles.heroTotal,
+                {borderBottomWidth: 2,borderBottomColor:colors.screen_componente_estilos.color_fondo,
+                  borderTopWidth:2,borderTopColor:colors.screen_componente_estilos.color_fondo
+
+                }
+                ]}>
+            <Text style={[styles.heroTotalLabel, 
+              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginTop:5 }]}>
               TOTAL GASTO
             </Text>
             <Text style={[styles.heroTotalAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_importante }]}>
               Gs. {Number(datositem.TotalMovimiento).toLocaleString("es-ES")}
             </Text>
-            <Text style={[styles.heroFechaGasto, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+            <Text style={[styles.heroFechaGasto, 
+              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginBottom:5 }]}>
               Gasto realizado el {datositem.FechaGasto}
             </Text>
           </View>
@@ -186,10 +193,13 @@ const styles = StyleSheet.create({
   },
   heroTotal: {
     alignItems: 'center',
+  
+    
   },
   heroTotalLabel: {
-    fontSize: 11,
+    fontSize: 15,
     letterSpacing: 1.2,
+    
     //color: '#8a8fa8',                 // gris apagado
   },
   heroTotalAmount: {
