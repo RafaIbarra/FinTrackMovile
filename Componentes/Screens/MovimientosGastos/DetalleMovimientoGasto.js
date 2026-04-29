@@ -1,22 +1,39 @@
 import React, { useState, useEffect } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image,StatusBar 
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useTheme } from "@react-navigation/native";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
-
+import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 export default function DetalleMovimientoGasto({ navigation }) {
   const { colors, fonts } = useTheme();
   const [datositem, setDatositem] = useState({});
   const [detallegastos, setDetallegastos] = useState([]);
   const [detallemedios, setDetallemedios] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [CompsCabecera,setCompsCabecera]=useState([])
 
   const { params: { item } } = useRoute();
 
+  const handleEdit = () => {
+    
+    const IdMovGasto=item.Id
+    console.log(IdMovGasto)
+    navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
+    
+  };
+  const handleDelete = () => {
+    // tu lógica
+    console.log('Eliminar gasto', datositem.Id);
+  };
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      
       setDatositem(item);
       setDetallegastos(item["DetalleGastos"] || []);
       setDetallemedios(item["DetalleMediosPagos"] || []);
@@ -28,7 +45,16 @@ export default function DetalleMovimientoGasto({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
-
+      
+      <CabaceraRegistros
+        title="Detalle del Gasto"
+        navigation={navigation}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+        
+      />
+      
+      
       <ScrollView style={styles.scroll} bounces={false}>
 
         {/* HERO */}
@@ -155,6 +181,13 @@ export default function DetalleMovimientoGasto({ navigation }) {
           </Modal>
         )}
       </ScrollView>
+    
+
+
+
+
+      
+      
     </View>
   );
 }
@@ -163,6 +196,11 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
     //backgroundColor: '#13161f',       // fondo negro azulado general
+  },
+   customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
   },
 
   // ── HERO ──────────────────────────────────────────

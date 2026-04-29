@@ -69,7 +69,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
           const unsubscribe = navigation.addListener('focus', () => {
         
           const asignar_componente=async()=>{
-              
+            
             actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
   
              
@@ -165,7 +165,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
                     activeOpacity={0.85}
                   >
                     <View style={styles.columnaLogo}>
-                      <LogoEmpresa imagePath={item.LogoEmpresa} />
+                      {/* <LogoEmpresa imagePath={item.LogoEmpresa} /> */}
                     </View>
                     <View style={styles.columnaInfo}>
                       <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>

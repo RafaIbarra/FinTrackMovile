@@ -6,6 +6,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from '@react-navigation/native';
 import { useNavigation  } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { AuthContext } from './AuthContext';
 
 import Svg, { Rect, Circle, Text as SvgText } from 'react-native-svg';
@@ -326,19 +327,22 @@ const cx = W / 2;
 // El círculo tiene centro en y=OVERHANG dentro del SVG
 // El SVG arranca OVERHANG px antes del tab bar (marginTop negativo)
 const CentralTabButton = ({ onPress, colors   }) => {
+  
   const tabColor = colors.navigation_estilos.color_fondo;
   const iconColor = colors.navigation_estilos.color_texto;
   const borderColor = colors.screen_componente_estilos.color_fondo;
   const navigation = useNavigation(); 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   
+  
   const handlePress = () => {
     // Determinar a qué pantalla navegar según el componente activo
     if (estadocomponente.ComponenteActivoBottonTab === 'ListadoMovimientosIngresos') {
-      navigation.navigate('RegistroMovimientoIngreso');
+      const IdMovIngreso=0
+      navigation.navigate('RegistroMovimientoIngreso',{IdMovIngreso});
     } else {
-      
-      navigation.navigate('RegistroMovimientoGasto');
+      const IdMovGasto=0
+      navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
     }
     
   };
@@ -458,44 +462,52 @@ function HomeStackGroup(){
   const { colors,fonts } = useTheme();
   
   return(
-    <HomeStack.Navigator >
-      <HomeStack.Screen name="TabsGroup" component={TabsGroup} options={{ headerShown: false }}/>
+    <HomeStack.Navigator 
+    options
+    >
+      <HomeStack.Screen name="TabsGroup" component={TabsGroup} 
+      options={{ headerShown: false }}
+      />
 
       <HomeStack.Screen name="DetalleMovimientoGasto" 
         component={DetalleMovimientoGasto} 
-        options={({ navigation }) => ({
-          headerTitle: 'Detalle del Gasto',
-          headerTitleAlign: 'left',
-          headerStyle: {
+        // options={({ navigation }) => ({
+        //   headerTitle: 'Detalle del Gasto',
+        //   headerTitleAlign: 'left',
+        //   headerStyle: {
 
-            backgroundColor:colors.background,
-          },
+        //     backgroundColor:'red',
+        //     height: 45,  
+        //   },
           
-          headerTitleStyle: {
-            fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
-            color: colors.screen_componente_estilos.color_texto,
-            fontSize: 16,
+        //   headerTitleStyle: {
+        //     fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
+        //     color: colors.screen_componente_estilos.color_texto,
+        //     fontSize: 16,
             
-          },
-          headerTintColor: colors.textcard,
-          
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-              <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity style={{ marginRight: 20 }}>
-                <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
-              </TouchableOpacity>
-              <TouchableOpacity style={{ marginRight: 10 }}>
-                <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
-              </TouchableOpacity>
-            </View>
-          ),
+        //     lineHeight: 20,
+        //   },
+        //   headerTintColor: colors.textcard,
+        //   headerLeftContainerStyle: { paddingLeft: 8 },   // ajusta márgenes
+        //   headerRightContainerStyle: { paddingRight: 8 },
+        //   headerLeft: () => (
+        //     <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
+        //       <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
+        //     </TouchableOpacity>
+        //   ),
+        //   headerRight: () => (
+        //     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        //       <TouchableOpacity style={{ marginRight: 20 }}>
+        //         <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
+        //       </TouchableOpacity>
+        //       <TouchableOpacity style={{ marginRight: 10 }}>
+        //         <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
+        //       </TouchableOpacity>
+        //     </View>
+        //   ),
 
-        })}
+        // })}
+        options={{ headerShown: false }}
       /> 
 
       <HomeStack.Screen name="RegistroMovimientoGasto" 
@@ -511,16 +523,19 @@ function HomeStackGroup(){
           headerStyle: {
 
             backgroundColor:colors.background,
+            height: 48, 
           },
           
           headerTitleStyle: {
             fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
             color: colors.screen_componente_estilos.color_texto,
-            fontSize: 16,
+            fontSize: 10,
+            lineHeight: 20,
             
           },
           headerTintColor: colors.textcard,
-          
+          headerLeftContainerStyle: { paddingLeft: 8 },   // ajusta márgenes
+          headerRightContainerStyle: { paddingRight: 8 },
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
               <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />

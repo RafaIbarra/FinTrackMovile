@@ -23,7 +23,7 @@ import Alerta from '../../Procesando/Alerta';
 import Modelo from '../Modelo/Modelo';
 import { useApi } from '../../../Apis/useApi';
 import IcnoAtras from '../../IconoAtras/IconoAtras';
-
+import { useRoute } from "@react-navigation/native";
 // ─── Íconos simples con caracteres unicode / texto para no depender de libs ──
 const Icon = ({ name, size = 18, color = '#fff' }) => {
   const map = {
@@ -774,8 +774,14 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
  
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
-
+  const { params: { IdMovGasto } } = useRoute();
+  const [titulo,setTitulo]=useState('')
   const [mostraralerta,setMostraralerta]=useState(false)
+  // ── Data registrados ──────────────────────────────────────────────────────
+  const [datagastosregistrados,setDatagastosregistrados]=useState([])
+  const [datamediosregistrados,setDatamediosregistrados]=useState([])
+  const [dataempresaregistrada,setDataempresaregistrada]=useState([])
+
   // ── Data referencial ──────────────────────────────────────────────────────
   const [datagastos, setDatagastos] = useState([]);
   const [datamedios, setDatamedios] = useState([]);
@@ -803,8 +809,54 @@ export default function RegistroMovimientoGasto({ navigation }) {
   const [enviando, setEnviando] = useState(false);
   
   // ── Carga datos ───────────────────────────────────────────────────────────
+
+  const carga_movimiento_registrado= async()=>{
+     const endpoint = `operaciones/DatosReferencialesCargosMovimiento/${IdMovGasto}/`;
+     const result = await apiRequest(endpoint, 'GET', {});
+     try {
+          if (result.sessionExpired) {
+            return; // SI LA SESION NO ES VALIDA
+            }
+          if (result.resp_correcta) {
+              
+              const gastos_reg = (result.data[0].DetalleGastos || []).map((g) => ({
+                id: g.Id,
+                montogasto: g.MontoGasto,
+                idgasto: g.GastoUsuario,
+                
+              }));
+              const medios_reg = (result.data[0].DetalleMediosPagos || []).map((m) => ({
+                id: m.Id,
+                montomedio: m.MontoMedioPago,
+                idmedio:m.MedioPago,
+              }));
+              const empresa_id = result.data[0].Empresa
+              setDatagastosregistrados(gastos_reg);
+              setDatamediosregistrados(medios_reg);
+              setDataempresaregistrada(empresa_id);
+              
+
+             
+          }else{
+              const msj = result.data?.message || 'Error en la solicitud'; // toma el error
+              asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+              actualizarEstadocomponente('alerta_estado', true);
+          }
+      } catch (e) {
+      // Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+          const msj = e || 'Error en la solicitud'; // toma el error
+          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
+          actualizarEstadocomponente('alerta_estado', true);
+    } finally {
+      setCargando(false);
+    }
+  }
+
   const cargardatos = async () => {
     try {
+      
+      
+      
       const endpoint = `operaciones/ReferencialesCargaGasto/`;
       
       const result = await apiRequest(endpoint, 'GET', {});
@@ -855,6 +907,17 @@ export default function RegistroMovimientoGasto({ navigation }) {
   useEffect(() => {
     cargardatos();
   }, []);
+
+  useEffect(() => {
+    if (IdMovGasto===0){
+          setTitulo('Nuevo Movimiento Gasto')
+      }else{
+        setTitulo(`Editar Movimiento ID: ${IdMovGasto}`)
+        carga_movimiento_registrado()
+       
+      }
+  }, []);
+  
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const totalGastos = gastosSeleccionados.reduce(
@@ -1028,7 +1091,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
               
             </TouchableOpacity>
             <Text style={[styles.titulo, { marginLeft:20,fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
-              Nuevo gasto
+              {titulo}
             </Text>
             
         </View>
