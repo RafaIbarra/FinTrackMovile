@@ -165,7 +165,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
                     activeOpacity={0.85}
                   >
                     <View style={styles.columnaLogo}>
-                      {/* <LogoEmpresa imagePath={item.LogoEmpresa} /> */}
+                      <LogoEmpresa imagePath={item.LogoEmpresa} />
                     </View>
                     <View style={styles.columnaInfo}>
                       <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
@@ -173,6 +173,9 @@ export default function ListadoMovimientosGastos({ navigation }) {
                       </Text>
                       <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
                         {item.FechaRegistro}
+                      </Text>
+                      <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                        ID: {item.Id}
                       </Text>
                     </View>
                     <View style={styles.columnaTotal}>
@@ -280,7 +283,7 @@ resumenCantidad: {
   contenedordatos: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 10,
     marginHorizontal: 10,
     marginBottom: 8,
@@ -319,6 +322,9 @@ resumenCantidad: {
   },
   fechaRegistro: {
     fontSize: 11,
+  },
+  idRegistro: {
+    fontSize: 9,
   },
   totalMovimiento: {
     fontSize: 13,

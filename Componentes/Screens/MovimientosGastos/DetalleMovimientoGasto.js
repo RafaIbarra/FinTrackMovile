@@ -22,7 +22,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
   const handleEdit = () => {
     
     const IdMovGasto=item.Id
-    console.log(IdMovGasto)
+    
     navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
     
   };

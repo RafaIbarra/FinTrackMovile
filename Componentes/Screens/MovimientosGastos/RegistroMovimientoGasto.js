@@ -920,6 +920,68 @@ export default function RegistroMovimientoGasto({ navigation }) {
        
       }
   }, []);
+
+  // ── Prellenar selecciones cuando los datos registrados y referenciales estén disponibles ──
+  useEffect(() => {
+    if (IdMovGasto === 0) return;
+    // Necesitamos que ambas fuentes estén cargadas
+    if (datagastos.length === 0 || datagastosregistrados.length === 0) return;
+
+    // ── Gastos ────────────────────────────────────────────────────────────────
+    const gastosParaCargar = datagastosregistrados
+      .map((gr) => {
+        const ref = datagastos.find((g) => g.id === gr.idgasto);
+        if (!ref) return null;
+        return { id: ref.id, nombre: ref.nombre, monto: gr.montogasto };
+      })
+      .filter(Boolean);
+
+    if (gastosParaCargar.length > 0) {
+      setGastosSeleccionados(gastosParaCargar);
+      const newDisplay = {};
+      gastosParaCargar.forEach((g) => {
+        newDisplay[g.id] = g.monto > 0 ? formatearMiles(g.monto.toString()) : '';
+      });
+      setGastosDisplay(newDisplay);
+    }
+  }, [datagastos, datagastosregistrados]);
+
+  useEffect(() => {
+    if (IdMovGasto === 0) return;
+    if (datamedios.length === 0 || datamediosregistrados.length === 0) return;
+
+    // ── Medios ────────────────────────────────────────────────────────────────
+    if (datamediosregistrados.length === 1) {
+      // Medio único → seleccionar el chip
+      setMedioSeleccionado(datamediosregistrados[0].idmedio);
+      setDistribucion({});
+    } else if (datamediosregistrados.length > 1) {
+      // Distribución entre varios medios
+      const dist = {};
+      datamediosregistrados.forEach((mr) => {
+        dist[mr.idmedio] = mr.montomedio;
+      });
+      setDistribucion(dist);
+      setMedioSeleccionado(null);
+    }
+  }, [datamedios, datamediosregistrados]);
+
+  useEffect(() => {
+    if (IdMovGasto === 0) return;
+    if (dataempresas.length === 0 || !dataempresaregistrada) return;
+
+    // ── Empresa ───────────────────────────────────────────────────────────────
+    const empRef = dataempresas.find((e) => e.id === dataempresaregistrada);
+    if (empRef) setEmpresaSeleccionada(empRef);
+  }, [dataempresas, dataempresaregistrada]);
+
+  useEffect(() => {
+    if (IdMovGasto === 0) return;
+    if (!fechamovimiento) return;
+
+    // ── Fecha ─────────────────────────────────────────────────────────────────
+    setFechaSeleccionada(fechamovimiento);
+  }, [fechamovimiento]);
   
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -973,17 +1035,17 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
   const construirMedios = () => {
     if (datamedios.length === 1) {
-      return [{ idgasto: datamedios[0].id, monto: totalGastos }];
+      return [{ idmedio: datamedios[0].id, monto: totalGastos }];
     }
     // Si hay distribución configurada, se usa aunque haya un medio seleccionado (prioridad distribución)
     if (Object.keys(distribucion).length > 0) {
       return Object.entries(distribucion)
         .filter(([, m]) => parseFloat(m) > 0)
-        .map(([id, monto]) => ({ idgasto: parseInt(id), monto: parseFloat(monto) }));
+        .map(([id, monto]) => ({ idmedio: parseInt(id), monto: parseFloat(monto) }));
     }
     // medio único por botón
     if (medioSeleccionado) {
-      return [{ idgasto: medioSeleccionado, monto: totalGastos }];
+      return [{ idmedio: medioSeleccionado, monto: totalGastos }];
     }
     return [];
   };
@@ -1008,6 +1070,8 @@ export default function RegistroMovimientoGasto({ navigation }) {
     const error = validar();
     if (error) { Alert.alert('Atención', error); return; }
 
+    const esEdicion = IdMovGasto > 0;
+
     const body = {
       gastos: gastosSeleccionados.map((g) => ({
         idgasto: g.id,
@@ -1017,16 +1081,18 @@ export default function RegistroMovimientoGasto({ navigation }) {
       fecha: fechaSeleccionada,
       empresa: empresaSeleccionada.id,
       imagen: null,
+      ...(esEdicion && { IdMovGasto }),
     };
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', 'Registrando Gasto..');
+      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..');
       actualizarEstadocomponente('loading', true);
-
-      // const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
-      const endpoint = `operaciones/DatosReferencialesCargosMovimiento/`;
-      const result = await apiRequest(endpoint, 'POST', body);
+      
+      //const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
+      const endpoint = esEdicion ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/` :`operaciones/RegistroMovimientoGastoUser/`
+      const metodo = esEdicion ? 'PUT' : 'POST';
+      const result = await apiRequest(endpoint, metodo, body);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));  
       actualizarEstadocomponente('tituloloading', '');
@@ -1037,9 +1103,10 @@ export default function RegistroMovimientoGasto({ navigation }) {
       }
       
       if (result.resp_correcta) {
-        resetForm();
-        const nuevo=!estadocomponente.bandera_registro_gasto
-        asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','TabsGroup','ListadoMovimientosGastos','bandera_registro_gasto',nuevo)
+        if (!esEdicion) resetForm();
+        const nuevo = !estadocomponente.bandera_registro_gasto;
+        const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
+        asignar_opciones_alerta(false, 'REGISTRO GASTOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosGastos', 'bandera_registro_gasto', nuevo);
         actualizarEstadocomponente('alerta_estado', true); 
         
       } else {
@@ -1049,7 +1116,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
       }
       
     } catch (e) {
-        asignar_opciones_alerta(true,'ERROR','Ocurrió un error al guardar.','Gastos','bandera_registro_gasto',false)
+        asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'Gastos', 'bandera_registro_gasto', false);
         actualizarEstadocomponente('alerta_estado', true);
       Alert.alert('Error', 'Ocurrió un error al guardar.');
     } finally {
@@ -1350,7 +1417,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
             <ActivityIndicator color={estilos.font_importe_color} />
           ) : (
             <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>
-              Registrar movimiento
+              {IdMovGasto > 0 ? 'Actualizar movimiento' : 'Registrar movimiento'}
             </Text>
           )}
         </TouchableOpacity>
