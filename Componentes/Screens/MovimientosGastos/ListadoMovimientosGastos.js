@@ -20,13 +20,13 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const { asignar_opciones_alerta } = useContext(AuthContext);
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
-
+  const [ready,setReady]=useState(false)
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const cargardatos = async () => {
     
-    
+    setReady(false)
     actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
     actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
@@ -36,8 +36,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
     const result = await apiRequest(endpoint, 'GET', {});
     
     
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading',  false);
+    
     if (result.sessionExpired) {
             return; // SI LA SESION NO ES VALIDA
         }
@@ -58,6 +57,9 @@ export default function ListadoMovimientosGastos({ navigation }) {
         asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false); // muestra el mensaje en la alerta personalizada
         actualizarEstadocomponente('alerta_estado', true);
       }
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading',  false);
+    setReady(true)
   };
 
   useEffect(() => {
@@ -83,116 +85,118 @@ export default function ListadoMovimientosGastos({ navigation }) {
   
         }, []);
 
-  return (
-    
-
-      <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
-
-        {estadocomponente.alerta_estado && <Alerta />}
-
-         {/* // --- RESUMEN CARDS ---// */}
-
-         
-          <View style={styles.resumenContenedor}>
-            
-            <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
-              <View style={styles.resumenRow}>
-                
-                <View style={styles.resumenColumnaIcono}>
-                  <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
-                    <Text style={styles.resumenIconoTexto}>↓</Text>
+  if(ready){
+    return (
+      
+  
+        <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
+  
+          {estadocomponente.alerta_estado && <Alerta />}
+  
+           {/* // --- RESUMEN CARDS ---// */}
+  
+           
+            <View style={styles.resumenContenedor}>
+              
+              <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
+                <View style={styles.resumenRow}>
+                  
+                  <View style={styles.resumenColumnaIcono}>
+                    <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
+                      <Text style={styles.resumenIconoTexto}>↓</Text>
+                    </View>
+                  </View>
+                  
+                  
+                  <View style={styles.resumenColumnaTextos}>
+                    <Text style={[styles.resumenLabel, styles.resumenLabelIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Total Income
+                    </Text>
+                    <Text style={[styles.resumenMonto, styles.resumenMontoIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Gs. {Number(dataresumen[0]?.TotalIngresos).toLocaleString('es-ES')}
+                    </Text>
+                    <Text style={[styles.resumenCantidad, styles.resumenCantidadIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Cant registros: {Number(dataresumen[0]?.CantidadIngresos).toLocaleString('es-ES')}
+                    </Text>
                   </View>
                 </View>
-                
-                
-                <View style={styles.resumenColumnaTextos}>
-                  <Text style={[styles.resumenLabel, styles.resumenLabelIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Total Income
-                  </Text>
-                  <Text style={[styles.resumenMonto, styles.resumenMontoIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Gs. {Number(dataresumen[0]?.TotalIngresos).toLocaleString('es-ES')}
-                  </Text>
-                  <Text style={[styles.resumenCantidad, styles.resumenCantidadIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Cant registros: {Number(dataresumen[0]?.CantidadIngresos).toLocaleString('es-ES')}
-                  </Text>
+              </View>
+  
+              
+              <View style={[styles.resumenCard, styles.resumenCardGasto]}>
+                <View style={styles.resumenRow}>
+                  
+                  <View style={styles.resumenColumnaIcono}>
+                    <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
+                      <Text style={styles.resumenIconoTexto}>↑</Text>
+                    </View>
+                  </View>
+                  
+                  
+                  <View style={styles.resumenColumnaTextos}>
+                    <Text style={[styles.resumenLabel, styles.resumenLabelGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Total Gastos
+                    </Text>
+                    <Text style={[styles.resumenMonto, styles.resumenMontoGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
+                    </Text>
+                    <Text style={[styles.resumenCantidad, styles.resumenCantidadGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Cant registros: {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </View>
-
-            
-            <View style={[styles.resumenCard, styles.resumenCardGasto]}>
-              <View style={styles.resumenRow}>
-                
-                <View style={styles.resumenColumnaIcono}>
-                  <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
-                    <Text style={styles.resumenIconoTexto}>↑</Text>
-                  </View>
-                </View>
-                
-                
-                <View style={styles.resumenColumnaTextos}>
-                  <Text style={[styles.resumenLabel, styles.resumenLabelGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Total Gastos
-                  </Text>
-                  <Text style={[styles.resumenMonto, styles.resumenMontoGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
-                  </Text>
-                  <Text style={[styles.resumenCantidad, styles.resumenCantidadGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                    Cant registros: {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-        
-       
-
-            <FlatList
-            
-              data={dataegresos}
-              contentContainerStyle={styles.flatlistContenido}
-              style={{ flex: 1,}}
-              renderItem={({ item }) => {
-                return (
-                  <TouchableOpacity
-                    style={[styles.contenedordatos,{
-                      backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                      borderRightColor:colors.screen_componente_estilos.color_borde_cards,
-                      borderBottomColor:colors.screen_componente_estilos.color_borde_cards
-                    }]}
-                    onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
-                    activeOpacity={0.85}
-                  >
-                    <View style={styles.columnaLogo}>
-                      <LogoEmpresa imagePath={item.LogoEmpresa} />
-                    </View>
-                    <View style={styles.columnaInfo}>
-                      <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
-                        {item.NombreEmpresa}
-                      </Text>
-                      <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                        {item.FechaRegistro}
-                      </Text>
-                      <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                        ID: {item.Id}
-                      </Text>
-                    </View>
-                    <View style={styles.columnaTotal}>
-                      <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
-                        Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={item => item.key}
-            />
+  
           
-        
-      </View>
-    
-  );
+         
+  
+              <FlatList
+              
+                data={dataegresos}
+                contentContainerStyle={styles.flatlistContenido}
+                style={{ flex: 1,}}
+                renderItem={({ item }) => {
+                  return (
+                    <TouchableOpacity
+                      style={[styles.contenedordatos,{
+                        backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                        borderRightColor:colors.screen_componente_estilos.color_borde_cards,
+                        borderBottomColor:colors.screen_componente_estilos.color_borde_cards
+                      }]}
+                      onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
+                      activeOpacity={0.85}
+                    >
+                      <View style={styles.columnaLogo}>
+                        <LogoEmpresa imagePath={item.LogoEmpresa} />
+                      </View>
+                      <View style={styles.columnaInfo}>
+                        <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
+                          {item.NombreEmpresa}
+                        </Text>
+                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                          {item.FechaRegistro}
+                        </Text>
+                        <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                          ID: {item.Id}
+                        </Text>
+                      </View>
+                      <View style={styles.columnaTotal}>
+                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                          Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+                keyExtractor={item => item.key}
+              />
+            
+          
+        </View>
+      
+    );
+  }
 }
 
 const styles = StyleSheet.create({

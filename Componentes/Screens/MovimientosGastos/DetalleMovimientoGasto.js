@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image,StatusBar 
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useTheme } from "@react-navigation/native";
+
+import { useApi } from "../../../Apis/useApi";
+import { AuthContext } from "../../../AuthContext";
+
+
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
+import Confirmacion from "../../Procesando/Confirmacion";
+import Alerta from "../../Procesando/Alerta";
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
+
+
+
 export default function DetalleMovimientoGasto({ navigation }) {
   const { colors, fonts } = useTheme();
   const [datositem, setDatositem] = useState({});
@@ -16,6 +27,17 @@ export default function DetalleMovimientoGasto({ navigation }) {
   const [detallemedios, setDetallemedios] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [CompsCabecera,setCompsCabecera]=useState([])
+
+  const [showconfirmacion,setShowconfirmacion]=useState(false)
+  const [mensajeconfirmacion,setMensajeconfirmacion]=useState(false)
+  const [confirmaciondelete,setConfirmaciondelete]=useState(false)
+
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { asignar_opciones_alerta } = useContext(AuthContext);
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const { params: { item } } = useRoute();
 
@@ -26,11 +48,49 @@ export default function DetalleMovimientoGasto({ navigation }) {
     navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
     
   };
+  
+  const handleyes=()=>{
+    setShowconfirmacion(false)
+    setConfirmaciondelete(true)
+  }
+  const handleno=()=>{
+    setShowconfirmacion(false)
+    setConfirmaciondelete(false)
+  }
   const handleDelete = () => {
-    // tu lógica
-    console.log('Eliminar gasto', datositem.Id);
+    const id_del= datositem.Id
+    setMensajeconfirmacion(`Desea eliminar el movimiento con ID ${id_del}?`)
+    setShowconfirmacion(true)
+    
   };
 
+  const eliminar_registro =async()=>{
+    const id_del= datositem.Id
+    actualizarEstadocomponente('tituloloading', 'Eliminando Gasto..');
+    actualizarEstadocomponente('loading', true);
+    
+    const endpoint = `operaciones/EliminarMovimientoGastoUser/${id_del}/` 
+    const metodo = 'DELETE'
+    const result = await apiRequest(endpoint, metodo, {});
+    if (result.sessionExpired) {
+        return; // Salimos de la función
+      }
+    if (result.resp_correcta) {
+        
+        const nuevo = !estadocomponente.bandera_registro_gasto;
+        const mensajeExito =  'Movimiento Gasto Eliminado';
+        asignar_opciones_alerta(false, 'REGISTRO GASTOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosGastos', 'bandera_registro_gasto', nuevo);
+        actualizarEstadocomponente('alerta_estado', true); 
+        
+      } else {
+        const msj = result.data?.message || 'Error en la solicitud';
+        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
+        actualizarEstadocomponente('alerta_estado', true);
+      }
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading', false);
+
+  }
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       
@@ -40,26 +100,44 @@ export default function DetalleMovimientoGasto({ navigation }) {
     });
     return unsubscribe;
   }, [navigation]);
-
+  useEffect(() => {
+        if(confirmaciondelete){
+          eliminar_registro();
+        }
+          
+  }, [confirmaciondelete]);
   const tieneComprobante = !!datositem.UrlImg;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
-      
+      {estadocomponente.alerta_estado && <Alerta />}
+
+      {showconfirmacion &&
+          <Confirmacion
+            title="Detalle del Gasto"
+            question={mensajeconfirmacion}
+            navigation={navigation}
+            onYes={handleyes}
+            onNo={handleno}
+            
+            
+          />
+      }
       <CabaceraRegistros
-        title="Detalle del Gasto"
+        title={`Detalle del Gasto`}
         navigation={navigation}
         onDelete={handleDelete}
         onEdit={handleEdit}
+        showbottons={true}
         
       />
       
       
       <ScrollView style={styles.scroll} bounces={false}>
 
-        {/* HERO */}
+        
         <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards,borderBottomWidth: 0.5}]}>
-          {/* Logo + Empresa */}
+          
           <View style={[styles.heroTop]}>
             <View style={styles.logoWrap}>
               <LogoEmpresa imagePath={item.LogoEmpresa} />
@@ -74,7 +152,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
             </View>
           </View>
 
-          {/* Total */}
+          
           <View style={[styles.heroTotal,
                 {borderBottomWidth: 2,borderBottomColor:colors.screen_componente_estilos.color_fondo,
                   borderTopWidth:2,borderTopColor:colors.screen_componente_estilos.color_fondo
@@ -95,10 +173,10 @@ export default function DetalleMovimientoGasto({ navigation }) {
           </View>
         </View>
 
-        {/* TARJETAS */}
+        
         <View style={[styles.cardsContainer]}>
 
-          {/* CARD GASTOS */}
+          
           <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
             <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
               DETALLE DE GASTOS
@@ -115,7 +193,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
             ))}
           </View>
 
-          {/* CARD MEDIOS */}
+          
           <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
             <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
               MEDIOS DE PAGO
@@ -132,7 +210,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
             ))}
           </View>
 
-          {/* BOTÓN COMPROBANTE */}
+          
           {tieneComprobante && (
             <TouchableOpacity style={[styles.comprobanteBtn,
             {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
@@ -150,7 +228,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
 
         </View>
 
-        {/* MODAL IMAGEN COMPROBANTE */}
+        
         {tieneComprobante && (
           <Modal visible={modalVisible} transparent animationType="slide">
             <View style={styles.modalOverlay}>

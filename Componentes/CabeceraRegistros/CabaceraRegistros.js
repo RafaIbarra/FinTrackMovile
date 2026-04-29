@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function CabeceraRegistros({ title, navigation, onDelete, onEdit }) {
+export default function CabeceraRegistros({ title, navigation, onDelete, onEdit,showbottons }) {
     const { colors, fonts } = useTheme();
     
     const estilos = {
@@ -40,6 +40,7 @@ export default function CabeceraRegistros({ title, navigation, onDelete, onEdit 
             </Text>
             
             {/* Contenedor derecho: el 35% restante, distribuido entre los iconos */}
+            { showbottons && 
             <View style={styles.rightContainer}>
                 <TouchableOpacity onPress={onDelete} style={styles.btnAction}>
                     <AntDesign name="delete" size={estilos.size_icon} color="rgb(205,92,92)" />
@@ -48,6 +49,7 @@ export default function CabeceraRegistros({ title, navigation, onDelete, onEdit 
                     <AntDesign name="edit" size={estilos.size_icon} color={estilos.font_color} />
                 </TouchableOpacity>
             </View>
+            }
         </View>
     );
 }

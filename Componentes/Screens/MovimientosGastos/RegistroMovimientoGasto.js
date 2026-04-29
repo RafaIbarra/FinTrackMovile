@@ -21,6 +21,7 @@ import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
 import Alerta from '../../Procesando/Alerta';
 import Modelo from '../Modelo/Modelo';
+import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
 import { useApi } from '../../../Apis/useApi';
 import IcnoAtras from '../../IconoAtras/IconoAtras';
 import { useRoute } from "@react-navigation/native";
@@ -1136,7 +1137,6 @@ export default function RegistroMovimientoGasto({ navigation }) {
     );
   }
 
-
   
   const hayDistribucion = Object.values(distribucion).some((v) => parseFloat(v) > 0);
 
@@ -1147,6 +1147,14 @@ export default function RegistroMovimientoGasto({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {estadocomponente.alerta_estado && <Alerta />}
+      <CabeceraRegistros
+                title={titulo}
+                navigation={navigation}
+                onDelete={() => {}}
+                onEdit={() => {}}
+                showbottons={false}
+                
+              />
       <ScrollView
         style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}
         contentContainerStyle={styles.scrollContent}
@@ -1154,7 +1162,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
       >
 
         {/* ── TÍTULO ───────────────────────────────────────────────────── */}
-        <View style={{flexDirection:'row',alignItems: 'center',marginBottom: 20,marginTop: 4, }}>
+        {/* <View style={{flexDirection:'row',alignItems: 'center',marginBottom: 20,marginTop: 4, }}>
           <TouchableOpacity onPress={cancelar}>
               
               <IcnoAtras></IcnoAtras>
@@ -1164,7 +1172,8 @@ export default function RegistroMovimientoGasto({ navigation }) {
               {titulo}
             </Text>
             
-        </View>
+        </View> */}
+        
 
         {/* ══ SECCIÓN: GASTOS ══════════════════════════════════════════════ */}
         <SectionCard estilos={estilos} titulo="Gastos" paso="1">

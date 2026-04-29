@@ -17,6 +17,10 @@ export default function ListadoMovimientosIngresos({ navigation }){
     const { asignar_opciones_alerta } = useContext(AuthContext);
     const { activarsesion, setActivarsesion } = useContext(AuthContext);
     const { reiniciarvalores } = useContext(AuthContext);
+
+    const { sesiondatadate } = useContext(AuthContext);
+
+    const [ready,setReady]=useState(false)
     
     const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -35,10 +39,15 @@ export default function ListadoMovimientosIngresos({ navigation }){
 
 
     };
-    const peticion_get =async()=>{
-        actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
+    const cargardatos =async()=>{
+        setReady(false)
+        actualizarEstadocomponente('tituloloading', 'CARGANDO INGRESOS');
         actualizarEstadocomponente('loading', true);
-        const endpoint = `operaciones/ListadoMovimientoGastosMesUser/`;
+        
+        const anno_storage = sesiondatadate.dataanno;
+        const mes_storage = sesiondatadate.datames;
+
+        const endpoint = `operaciones/ListadoMovimientosIngresosMesUser/${anno_storage}/${mes_storage}/`;
     
         const result = await apiRequest(endpoint, 'GET', {});
         actualizarEstadocomponente('tituloloading', '');
@@ -96,10 +105,6 @@ export default function ListadoMovimientosIngresos({ navigation }){
         navigate('DetalleMovimientoIngreso');
     }
 
-    const cargardatos =async()=>{
-        
-        
-    }
 
   
     useEffect(() => {

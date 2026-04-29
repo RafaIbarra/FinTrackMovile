@@ -408,6 +408,8 @@ function TabsGroup({ navigation }) {
           backgroundColor:colors.card,
           height: 60,        // altura fija sin espacio extra
           paddingBottom: 0,  // el SafeAreaView del App.js ya reservó el espacio inferior
+          borderTopLeftRadius:30,
+          borderTopRightRadius:30,
         },
        
       }}
@@ -471,42 +473,6 @@ function HomeStackGroup(){
 
       <HomeStack.Screen name="DetalleMovimientoGasto" 
         component={DetalleMovimientoGasto} 
-        // options={({ navigation }) => ({
-        //   headerTitle: 'Detalle del Gasto',
-        //   headerTitleAlign: 'left',
-        //   headerStyle: {
-
-        //     backgroundColor:'red',
-        //     height: 45,  
-        //   },
-          
-        //   headerTitleStyle: {
-        //     fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
-        //     color: colors.screen_componente_estilos.color_texto,
-        //     fontSize: 16,
-            
-        //     lineHeight: 20,
-        //   },
-        //   headerTintColor: colors.textcard,
-        //   headerLeftContainerStyle: { paddingLeft: 8 },   // ajusta márgenes
-        //   headerRightContainerStyle: { paddingRight: 8 },
-        //   headerLeft: () => (
-        //     <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-        //       <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
-        //     </TouchableOpacity>
-        //   ),
-        //   headerRight: () => (
-        //     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        //       <TouchableOpacity style={{ marginRight: 20 }}>
-        //         <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
-        //       </TouchableOpacity>
-        //       <TouchableOpacity style={{ marginRight: 10 }}>
-        //         <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
-        //       </TouchableOpacity>
-        //     </View>
-        //   ),
-
-        // })}
         options={{ headerShown: false }}
       /> 
 
