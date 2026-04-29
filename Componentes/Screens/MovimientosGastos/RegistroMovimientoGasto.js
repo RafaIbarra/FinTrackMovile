@@ -780,7 +780,8 @@ export default function RegistroMovimientoGasto({ navigation }) {
   // ── Data registrados ──────────────────────────────────────────────────────
   const [datagastosregistrados,setDatagastosregistrados]=useState([])
   const [datamediosregistrados,setDatamediosregistrados]=useState([])
-  const [dataempresaregistrada,setDataempresaregistrada]=useState([])
+  const [dataempresaregistrada,setDataempresaregistrada]=useState()
+  const [fechamovimiento,setFechamovimiento]=useState()
 
   // ── Data referencial ──────────────────────────────────────────────────────
   const [datagastos, setDatagastos] = useState([]);
@@ -831,9 +832,11 @@ export default function RegistroMovimientoGasto({ navigation }) {
                 idmedio:m.MedioPago,
               }));
               const empresa_id = result.data[0].Empresa
+              const fecha_mov = result.data[0].FechaGasto
               setDatagastosregistrados(gastos_reg);
               setDatamediosregistrados(medios_reg);
               setDataempresaregistrada(empresa_id);
+              setFechamovimiento(fecha_mov)
               
 
              
@@ -1022,8 +1025,8 @@ export default function RegistroMovimientoGasto({ navigation }) {
       actualizarEstadocomponente('loading', true);
 
       // const result = await Generarpeticion('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
-
-      const result = await apiRequest('operaciones/RegistroMovimientoGastoUser/', 'POST', body);
+      const endpoint = `operaciones/DatosReferencialesCargosMovimiento/`;
+      const result = await apiRequest(endpoint, 'POST', body);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));  
       actualizarEstadocomponente('tituloloading', '');
