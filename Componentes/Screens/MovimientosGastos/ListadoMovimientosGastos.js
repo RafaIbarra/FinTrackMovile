@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity,TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
@@ -14,6 +14,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const { navigate } = useNavigation();
   const { sesiondatadate } = useContext(AuthContext);
   const [dataegresos, setDataegresos] = useState([]);
+  const [dataegresosresult, setDataegresosresult] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
@@ -21,8 +22,23 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready,setReady]=useState(false)
+  const [query, setQuery] = useState('');
+
+  
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+  const estilos = {
+    font_normal: fonts.balsamiqregular.fontFamily,
+    font_negrita: fonts.balsamiqbold.fontFamily,
+    font_color: colors.screen_componente_estilos.color_texto,
+    font_importe_color: colors.screen_componente_estilos.color_texto_importante,
+    font_sub_color: colors.screen_componente_estilos.color_texto_subtitulo,
+    pantalla_color_fondo: colors.screen_componente_estilos.color_fondo,
+    cards_color_fondo: colors.screen_componente_estilos.color_fondo_cards,
+    cards_color_border: colors.screen_componente_estilos.color_borde_cards,
+    boton_color_fondo: colors.screen_componente_estilos.color_fondo_botones,
+    boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
+  };
 
   const cargardatos = async () => {
     
@@ -49,6 +65,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
         });
       }
       setDataegresos(registros);
+      setDataegresosresult(registros)
       setDataresumen(result.data.resumen)
       
 
@@ -85,6 +102,36 @@ export default function ListadoMovimientosGastos({ navigation }) {
   
         }, []);
 
+  const buscarEgresos = (texto) => {
+  setQuery(texto);
+  
+  if (!texto.trim()) {
+    setDataegresosresult(dataegresos);
+    return;
+  }
+
+  const termino = texto.toLowerCase().trim();
+
+  const filtrados = dataegresos.filter((item) => {
+    // 1) Coincidencia en empresa
+    const matchEmpresa = item.NombreEmpresa?.toLowerCase().includes(termino);
+
+    // 2) Coincidencia en algún gasto del detalle
+    const matchGasto = item.DetalleGastos?.some((g) =>
+      g.NombreGasto?.toLowerCase().includes(termino)
+    );
+
+    // 3) Coincidencia en algún medio de pago del detalle
+    const matchMedio = item.DetalleMediosPagos?.some((m) =>
+      m.NombreMedioPago?.toLowerCase().includes(termino)
+    );
+
+    return matchEmpresa || matchGasto || matchMedio;
+  });
+
+  setDataegresosresult(filtrados);
+};
+
   if(ready){
     return (
       
@@ -97,32 +144,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
   
            
             <View style={styles.resumenContenedor}>
-              
-              <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
-                <View style={styles.resumenRow}>
-                  
-                  <View style={styles.resumenColumnaIcono}>
-                    <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
-                      <Text style={styles.resumenIconoTexto}>↓</Text>
-                    </View>
-                  </View>
-                  
-                  
-                  <View style={styles.resumenColumnaTextos}>
-                    <Text style={[styles.resumenLabel, styles.resumenLabelIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Total Income
-                    </Text>
-                    <Text style={[styles.resumenMonto, styles.resumenMontoIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Gs. {Number(dataresumen[0]?.TotalIngresos).toLocaleString('es-ES')}
-                    </Text>
-                    <Text style={[styles.resumenCantidad, styles.resumenCantidadIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Cant registros: {Number(dataresumen[0]?.CantidadIngresos).toLocaleString('es-ES')}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-  
-              
+            
               <View style={[styles.resumenCard, styles.resumenCardGasto]}>
                 <View style={styles.resumenRow}>
                   
@@ -148,12 +170,40 @@ export default function ListadoMovimientosGastos({ navigation }) {
               </View>
             </View>
   
-          
+              <View
+                style={[
+                styles.searchBox,
+                {
+                  backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                  borderColor: colors.screen_componente_estilos.color_borde_cards,
+                },
+              ]}
+              >
+                <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+                  <TextInput
+                    value={query}
+                    onChangeText={buscarEgresos}
+                    placeholder="Por empresa, concepto, medio pago..."
+                    underlineColorAndroid="transparent" 
+                    placeholderTextColor={estilos.font_sub_color}
+                    style={{
+                      // flex: 1,
+                      fontFamily: estilos.font_normal,
+                      color: estilos.font_color,
+                      flex: 1, paddingVertical: 2, 
+                      height: '70%',
+                      paddingLeft:5,
+                      
+                    }}
+                    
+                  />
+                
+              </View>
          
   
               <FlatList
               
-                data={dataegresos}
+                data={dataegresosresult}
                 contentContainerStyle={styles.flatlistContenido}
                 style={{ flex: 1,}}
                 renderItem={({ item }) => {
@@ -203,16 +253,18 @@ const styles = StyleSheet.create({
 
   // --- RESUMEN ---
   resumenContenedor: {
-    flexDirection: 'row',
-    marginHorizontal: 10,
+    paddingHorizontal:10,
+    paddingBottom:5,
     marginTop: 12,
-    marginBottom: 16,
+    marginBottom: 10,
     gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   resumenCard: {
     flex: 1,
     borderRadius: 14,
-    paddingVertical: 14,
+    paddingVertical: 7,
     paddingHorizontal: 14,
   },
   resumenRow: {
@@ -281,6 +333,18 @@ resumenCantidad: {
   },
   resumenMontoGasto: {
     color: '#8B1A1A',
+  },
+  //--- BUSCADOR
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    height: 35,
+    marginLeft:12,
+    marginRight:12
   },
 
   // --- LISTA ---

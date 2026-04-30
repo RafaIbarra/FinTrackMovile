@@ -486,42 +486,7 @@ function HomeStackGroup(){
 
       <HomeStack.Screen name="DetalleMovimientoIngreso" 
         component={DetalleMovimientoIngreso} 
-        options={({ navigation }) => ({
-          headerTitle: 'Detalle del Ingreso',
-          headerTitleAlign: 'left',
-          headerStyle: {
-
-            backgroundColor:colors.background,
-            height: 48, 
-          },
-          
-          headerTitleStyle: {
-            fontFamily: fonts.balsamiqregular.fontFamily,  // ← acá va la fuente
-            color: colors.screen_componente_estilos.color_texto,
-            fontSize: 10,
-            lineHeight: 20,
-            
-          },
-          headerTintColor: colors.textcard,
-          headerLeftContainerStyle: { paddingLeft: 8 },   // ajusta márgenes
-          headerRightContainerStyle: { paddingRight: 8 },
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-              <MaterialCommunityIcons name="backburger" size={24} color={colors.screen_componente_estilos.color_texto} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity style={{ marginRight: 20 }}>
-                <AntDesign name="delete" size={24} color="rgb(205,92,92)" />
-              </TouchableOpacity>
-              <TouchableOpacity style={{ marginRight: 10 }}>
-                <AntDesign name="edit" size={24} color={colors.screen_componente_estilos.color_texto} />
-              </TouchableOpacity>
-            </View>
-          ),
-
-        })}
+        options={{ headerShown: false }}
       />
 
       <HomeStack.Screen name="RegistroMovimientoIngreso" 

@@ -1,182 +1,415 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Text, Alert, ImageBackground,TouchableOpacity } from 'react-native';
-import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
-import { useTheme } from '@react-navigation/native';
-import { AuthContext } from '../../../AuthContext';
+import React, { useState, useEffect,useContext } from "react";
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image,StatusBar 
+} from "react-native";
+import { useRoute } from "@react-navigation/native";
+import { useTheme } from "@react-navigation/native";
 
-import Handelstorage from '../../../Storage/HandelStorage';
-import { useApi } from '../../../Apis/useApi';
+import { useApi } from "../../../Apis/useApi";
+import { AuthContext } from "../../../AuthContext";
 
-import Alerta from '../../Procesando/Alerta';
 
-export default function DetalleMovimientoIngreso({ navigation }){
-    const { colors, fonts } = useTheme();
-    const { navigate } = useNavigation();
-    const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-    const { asignar_opciones_alerta } = useContext(AuthContext);
-    const { activarsesion, setActivarsesion } = useContext(AuthContext);
-    const { reiniciarvalores } = useContext(AuthContext);
+import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
+import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
+import Confirmacion from "../../Procesando/Confirmacion";
+import Alerta from "../../Procesando/Alerta";
+
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+
+
+
+export default function DetalleMovimientoIngreso({ navigation }) {
+  const { colors, fonts } = useTheme();
+  const [datositem, setDatositem] = useState({});
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [CompsCabecera,setCompsCabecera]=useState([])
+
+  const [showconfirmacion,setShowconfirmacion]=useState(false)
+  const [mensajeconfirmacion,setMensajeconfirmacion]=useState(false)
+  const [confirmaciondelete,setConfirmaciondelete]=useState(false)
+
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { asignar_opciones_alerta } = useContext(AuthContext);
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+
+  const { params: { item } } = useRoute();
+
+  const handleEdit = () => {
     
-    const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
-
-
-    const estilos = {
-        font_normal: fonts.balsamiqregular.fontFamily,
-        font_negrita: fonts.balsamiqbold.fontFamily,
-        font_color: colors.screen_componente_estilos.color_texto,
-        font_importe_color: colors.screen_componente_estilos.color_texto_importante,
-        font_sub_color: colors.screen_componente_estilos.color_texto_subtitulo,
-        pantalla_color_fondo: colors.screen_componente_estilos.color_fondo,
-        cards_color_fondo: colors.screen_componente_estilos.color_fondo_cards,
-        cards_color_border: colors.screen_componente_estilos.color_borde_cards,
-        boton_color_fondo: colors.screen_componente_estilos.color_fondo_botones,
-        boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
-
-
-    };
-    const peticion_get =async()=>{
-        actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
-        actualizarEstadocomponente('loading', true);
-        const endpoint = `operaciones/ListadoMovimientoGastosMesUser/`;
+    const IdMovIngreso=item.Id
     
-        const result = await apiRequest(endpoint, 'GET', {});
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading',  false);
-        if (result.sessionExpired) {
-            return; // SI LA SESION NO ES VALIDA
-        }
-        if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
-        }else {
-            const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-            asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
-            actualizarEstadocomponente('alerta_estado', true);
+    navigation.navigate('RegistroMovimientoIngreso',{IdMovIngreso});
+    
+  };
+  
+  const handleyes=()=>{
+    setShowconfirmacion(false)
+    setConfirmaciondelete(true)
+  }
+  const handleno=()=>{
+    setShowconfirmacion(false)
+    setConfirmaciondelete(false)
+  }
+  const handleDelete = () => {
+    const id_del= datositem.Id
+    setMensajeconfirmacion(`Desea eliminar el movimiento con ID ${id_del}?`)
+    setShowconfirmacion(true)
+    
+  };
+
+  const eliminar_registro =async()=>{
+    const id_del= datositem.Id
+    actualizarEstadocomponente('tituloloading', 'Eliminando Gasto..');
+    actualizarEstadocomponente('loading', true);
+    
+    const endpoint = `operaciones/EliminarMovimientoIngresoUser/${id_del}/` 
+    const metodo = 'DELETE'
+    const result = await apiRequest(endpoint, metodo, {});
+    if (result.sessionExpired) {
+        return; // Salimos de la función
       }
-   
-    }
-
-
-
-    const peticion_body =async()=>{
-        const body = {
-      
-        };
-        actualizarEstadocomponente('tituloloading', 'Registrando');
-        actualizarEstadocomponente('loading', true);
-
-        const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
-        const result = await apiRequest(endpoint, 'POST', body);
-
-        await new Promise((resolve) => setTimeout(resolve, 1500));  // para añadir tiempo de espera opcional
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
-
-        if (result.sessionExpired) {
-            return; // SI LA SESION NO ES VALIDA
-        }
-        if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
-            const nuevo_valor_bandera=!estadocomponente.bandera_registro_gasto // ES PARA CONTROLAR EL ESTADO DEL COMPONENTE PARA SU ACTUALIZACION
-            asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo_valor_bandera)
-            actualizarEstadocomponente('alerta_estado', true);
-        }else {
-        const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
+    if (result.resp_correcta) {
+        
+        const nuevo = !estadocomponente.bandera_registro_gasto;
+        const mensajeExito =  'Movimiento Ingreso Eliminado';
+        asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosIngresos', 'bandera_registro_ingreso', nuevo);
+        actualizarEstadocomponente('alerta_estado', true); 
+        
+      } else {
+        const msj = result.data?.message || 'Error en la solicitud';
+        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_ingreso', false);
         actualizarEstadocomponente('alerta_estado', true);
       }
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading', false);
 
-    }
+  }
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      
+      setDatositem(item);
+      
+      
+      
+    });
+    return unsubscribe;
+  }, [navigation]);
+  useEffect(() => {
+        if(confirmaciondelete){
+          eliminar_registro();
+        }
+          
+  }, [confirmaciondelete]);
+  const tieneComprobante = !!datositem.UrlImg;
 
-    const accion_boton=()=>{
-        console.log('boton')
-    }
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
+      {estadocomponente.alerta_estado && <Alerta />}
 
-    const cargardatos =async()=>{
+      {showconfirmacion &&
+          <Confirmacion
+            title="Detalle del Ingreso"
+            question={mensajeconfirmacion}
+            navigation={navigation}
+            onYes={handleyes}
+            onNo={handleno}
+            
+            
+          />
+      }
+      <CabaceraRegistros
+        title={`Detalle del Ingreso`}
+        navigation={navigation}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+        showbottons={true}
         
-    }
+      />
+      
+      
+      <ScrollView style={styles.scroll} bounces={false}>
 
-    useEffect(() => {
-        cargardatos();
-      }, []);
+        
+        <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards,borderBottomWidth: 0.5}]}>
+          
+          <View style={[styles.heroTop]}>
+            <View style={styles.logoWrap}>
+              <LogoEmpresa imagePath={item.LogoEmpresa} />
+            </View>
+            <View style={{ flex: 1, paddingLeft: 12 }}>
+              <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                {datositem.NombreEmpresa}
+              </Text>
+              <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                Reg. {datositem.FechaRegistro}
+              </Text>
+            </View>
+          </View>
 
-    return(
-        <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
-            {/* Para ver la alerta */}
-            {estadocomponente.alerta_estado && <Alerta />} 
+          
+          <View style={[styles.heroTotal,
+                {borderBottomWidth: 2,borderBottomColor:colors.screen_componente_estilos.color_fondo,
+                  borderTopWidth:2,borderTopColor:colors.screen_componente_estilos.color_fondo
 
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                DETALLA MOVIMIENTO INGRESO
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_negrita,color:estilos.font_color}]}>
-                Texto negrita
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_sub_color}]}>
-                Sub titulo
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_importe_color}]}>
-                Texto importante
-            </Text>
-
-            
-            <TouchableOpacity 
-                style={[styles.btn,
-                {backgroundColor: estilos.boton_color_fondo,
-                borderColor: estilos.boton_color_borde
                 }
-                ]} 
-                onPress={() => accion_boton()}
-            >
-                <Text style={[{ fontFamily: estilos.font_normal, color: estilos.font_importe_color}]}>
-                BOTON
-                </Text>
-            </TouchableOpacity>
-                
-            <Surface
-                style={[
-                    styles.card,
-                    { backgroundColor: estilos.cards_color_fondo,
-                      borderColor:estilos.cards_color_border
-                     },
-                ]}
-                    elevation={5} // para sombreado en los bordes
-            >
-                <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                    Contenido Card
-                </Text>
-            </Surface>
-            
+                ]}>
+            <Text style={[styles.heroTotalLabel, 
+              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginTop:5 }]}>
+              TOTAL INGRESO
+            </Text>
+            <Text style={[styles.heroTotalAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_importante }]}>
+              Gs. {Number(datositem.MontoIngreso).toLocaleString("es-ES")}
+            </Text>
+            <Text style={[styles.heroFechaGasto, 
+              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginBottom:5 }]}>
+              Ingreso recibido el {datositem.FechaIngreso}
+            </Text>
+          </View>
         </View>
-    )
+
+        
+        <View style={[styles.cardsContainer]}>
+
+          
+          <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+            <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+              DETALLE DEL INGRESO
+            </Text>
+            
+              <View  style={[styles.cardRow, 1 > 0 && styles.cardRowBorder]}>
+                <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  {datositem.NombreIngreso}
+                </Text>
+                <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
+                  Gs. {Number(datositem.MontoIngreso).toLocaleString("es-ES")}
+                </Text>
+              </View>
+        </View>
+            
+          
+
+          
+          
+
+          
+          {tieneComprobante && (
+            <TouchableOpacity style={[styles.comprobanteBtn,
+            {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
+            borderColor:colors.screen_componente_estilos.color_borde_botones
+            }]
+            } onPress={() => setModalVisible(true)}>
+              <Text style={[styles.comprobanteBtnText, 
+                { fontFamily: fonts.balsamiqregular.fontFamily,
+                color:colors.screen_componente_estilos.color_texto_importante 
+                }]}>
+                📎 Ver comprobante adjunto
+              </Text>
+            </TouchableOpacity>
+          )}
+
+        </View>
+
+        
+        {tieneComprobante && (
+          <Modal visible={modalVisible} transparent animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalSheet,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+                <View style={[styles.modalHandle,{backgroundColor:colors.screen_componente_estilos.color_fondo}]} />
+                <Text style={[styles.modalTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color:colors.screen_componente_estilos.color_texto }]}>
+                  Comprobante
+                </Text>
+                <ScrollView style={{ flex: 1 }}>
+                  <Image
+                    source={{ uri: datositem.UrlImg }}
+                    style={styles.comprobanteImg}
+                    resizeMode="contain"
+                  />
+                </ScrollView>
+                <TouchableOpacity style={[styles.cerrarBtn,
+                  {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
+                  borderColor:colors.screen_componente_estilos.color_borde_botones
+                  }
+                  ]} 
+                  onPress={() => setModalVisible(false)}>
+                  <Text style={[styles.cerrarBtnText, { fontFamily: fonts.balsamiqbold.fontFamily,color:colors.screen_componente_estilos.color_texto_importante  }]}>
+                    Cerrar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
+      </ScrollView>
+    
+
+
+
+
+      
+      
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+    //backgroundColor: '#13161f',       // fondo negro azulado general
+  },
+   customHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
 
+  // ── HERO ──────────────────────────────────────────
+  hero: {
+    //backgroundColor: '#1a1f2e',       // negro azulado más claro para el hero
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 32,
+  },
+  heroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  logoWrap: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  nombreEmpresa: {
+    fontSize: 15,
+    //color: '#ffffff',
+  },
+  fechaRegistro: {
+    fontSize: 11,
+    //color: '#8a8fa8',                 // gris azulado apagado
+    marginTop: 3,
+  },
+  heroTotal: {
+    alignItems: 'center',
+  
+    
+  },
+  heroTotalLabel: {
+    fontSize: 15,
+    letterSpacing: 1.2,
+    
+    //color: '#8a8fa8',                 // gris apagado
+  },
+  heroTotalAmount: {
+    fontSize: 34,
+   // color: '#3AB884',                 // verde brillante
+    marginTop: 6,
+  },
+  heroFechaGasto: {
+    fontSize: 12,
+    //color: '#8a8fa8',
+    marginTop: 8,
+  },
 
-btn: {
+  // ── TARJETAS ──────────────────────────────────────
+  cardsContainer: {
+    padding: 14,
+    gap: 12,
+  },
+  card: {
+    //backgroundColor: '#1e2336',       // gris oscuro azulado para las tarjetas
+    borderRadius: 14,
     borderWidth: 0.5,
+    //borderColor: '#2a2f45',           // borde apenas visible
+    padding: 14,
+  },
+  cardTitle: {
+    fontSize: 10,
+    letterSpacing: 1.1,
+    //color: '#8a8fa8',                 // gris apagado
+    marginBottom: 10,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 9,
+  },
+  cardRowBorder: {
+    borderTopWidth: 0.5,
+    //borderTopColor: '#2a2f45',
+  },
+  cardRowLabel: {
+    fontSize: 13,
+    //color: '#ffffff',
+  },
+  cardRowAmount: {
+    fontSize: 13,
+    //color: '#ffffff',
+  },
+
+  // ── BOTÓN COMPROBANTE ─────────────────────────────
+  comprobanteBtn: {
+    borderWidth: 0.5,
+    //borderColor: '#3AB884',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
-     width:200,
+    backgroundColor: 'transparent',
     marginTop: 4,
-    left:10,
-    right:10,
-},
-card:{
-    height:100,
-    width:200,
-    left:10,
-    right:10,
-    borderRadius:20,
-    
-    
-    justifyContent: 'center',    // Centrado vertical
-    alignItems: 'center',        // Centrado horizontal
+  },
+  comprobanteBtnText: {
+    fontSize: 13,
+    //color: '#3AB884',
+  },
 
-    borderWidth:0.5,
-    marginTop:10
-}
+  // ── MODAL ─────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    //backgroundColor: '#1e2336',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    height: '88%',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    //backgroundColor: '#2a2f45',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 16,
+    //color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  comprobanteImg: {
+    width: '100%',
+  height: 460,                 // se respetará si el ScrollView tiene altura suficiente
+  resizeMode: 'contain',
+  },
+  cerrarBtn: {
+    marginTop: 16,
+    borderRadius: 12,
+     borderWidth: 0.5,
+    padding: 14,
+    alignItems: 'center',
+    //backgroundColor: '#3AB884',
+  },
+  cerrarBtnText: {
+    //color: '#fff',
+    fontSize: 14,
+  },
 });

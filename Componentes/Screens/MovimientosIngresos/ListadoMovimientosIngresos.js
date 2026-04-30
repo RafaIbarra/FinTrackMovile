@@ -1,211 +1,337 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Text, Alert, ImageBackground,TouchableOpacity } from 'react-native';
-import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
+import React, { useState, useEffect, useContext } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
-import { AuthContext } from '../../../AuthContext';
 
-import Handelstorage from '../../../Storage/HandelStorage';
-import { useApi } from '../../../Apis/useApi';
+import Alerta from "../../Procesando/Alerta";
+import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
+import Generarpeticion from "../../../Apis/ApiPeticiones";
+import { useApi } from "../../../Apis/useApi";
 
-import Alerta from '../../Procesando/Alerta';
+export default function ListadoMovimientosIngresos({ navigation }) {
+  const { colors, fonts } = useTheme();
+  const { navigate } = useNavigation();
+  const { sesiondatadate } = useContext(AuthContext);
+  const [dataingresos, setDataingresos] = useState([]);
+  const [dataresumen, setDataresumen] = useState([]);
 
-export default function ListadoMovimientosIngresos({ navigation }){
-    const { colors, fonts } = useTheme();
-    const { navigate } = useNavigation();
-    const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-    const { asignar_opciones_alerta } = useContext(AuthContext);
-    const { activarsesion, setActivarsesion } = useContext(AuthContext);
-    const { reiniciarvalores } = useContext(AuthContext);
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { asignar_opciones_alerta } = useContext(AuthContext);
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+  const [ready,setReady]=useState(false)
 
-    const { sesiondatadate } = useContext(AuthContext);
+  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
-    const [ready,setReady]=useState(false)
+  const cargardatos = async () => {
     
-    const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+    setReady(false)
+    actualizarEstadocomponente('tituloloading', 'CARGANDO INGRESOS');
+    actualizarEstadocomponente('loading', true);
+    const anno_storage = sesiondatadate.dataanno;
+    const mes_storage = sesiondatadate.datames;
+    const endpoint = `operaciones/ListadoMovimientosIngresosMesUser/${anno_storage}/${mes_storage}/`;
 
-
-    const estilos = {
-        font_normal: fonts.balsamiqregular.fontFamily,
-        font_negrita: fonts.balsamiqbold.fontFamily,
-        font_color: colors.screen_componente_estilos.color_texto,
-        font_importe_color: colors.screen_componente_estilos.color_texto_importante,
-        font_sub_color: colors.screen_componente_estilos.color_texto_subtitulo,
-        pantalla_color_fondo: colors.screen_componente_estilos.color_fondo,
-        cards_color_fondo: colors.screen_componente_estilos.color_fondo_cards,
-        cards_color_border: colors.screen_componente_estilos.color_borde_cards,
-        boton_color_fondo: colors.screen_componente_estilos.color_fondo_botones,
-        boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
-
-
-    };
-    const cargardatos =async()=>{
-        setReady(false)
-        actualizarEstadocomponente('tituloloading', 'CARGANDO INGRESOS');
-        actualizarEstadocomponente('loading', true);
-        
-        const anno_storage = sesiondatadate.dataanno;
-        const mes_storage = sesiondatadate.datames;
-
-        const endpoint = `operaciones/ListadoMovimientosIngresosMesUser/${anno_storage}/${mes_storage}/`;
+    const result = await apiRequest(endpoint, 'GET', {});
     
-        const result = await apiRequest(endpoint, 'GET', {});
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading',  false);
-        if (result.sessionExpired) {
+    
+    
+    if (result.sessionExpired) {
             return; // SI LA SESION NO ES VALIDA
         }
-        if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
-        }else {
-            const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-            asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
-            actualizarEstadocomponente('alerta_estado', true);
+    if (result.resp_correcta) {
+      const registros = result.data.detalle;
+      if (Object.keys(registros).length > 0) {
+        registros.forEach((elemento) => {
+          elemento.key = elemento.Id;
+          elemento.recarga = 'no';
+        });
       }
-   
-    }
-
-
-
-    const peticion_body =async()=>{
-        const body = {
+      setDataingresos(registros);
+      setDataresumen(result.data.resumen)
       
-        };
-        actualizarEstadocomponente('tituloloading', 'Registrando');
-        actualizarEstadocomponente('loading', true);
 
-        const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
-        const result = await apiRequest(endpoint, 'POST', body);
-
-        await new Promise((resolve) => setTimeout(resolve, 1500));  // para añadir tiempo de espera opcional
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
-
-        if (result.sessionExpired) {
-            return; // SI LA SESION NO ES VALIDA
-        }
-        if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
-            const nuevo_valor_bandera=!estadocomponente.bandera_registro_gasto // ES PARA CONTROLAR EL ESTADO DEL COMPONENTE PARA SU ACTUALIZACION
-            asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo_valor_bandera)
-            actualizarEstadocomponente('alerta_estado', true);
-        }else {
+    } else{
         const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
+        asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false); // muestra el mensaje en la alerta personalizada
         actualizarEstadocomponente('alerta_estado', true);
       }
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading',  false);
+    setReady(true)
+  };
 
-    }
+  useEffect(() => {
+    cargardatos();
+  }, [estadocomponente.bandera_registro_ingreso]);
 
-    const accion_boton=()=>{
-        console.log('boton')
-        // navigate('DetalleMovimientoIngreso', { item });
-        navigate('DetalleMovimientoIngreso');
-    }
-
-
+  useEffect(() => {
+         
+          const unsubscribe = navigation.addListener('focus', () => {
+        
+          const asignar_componente=async()=>{
+            
+            actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosIngresos');
   
-    useEffect(() => {
-        cargardatos();
-      }, []);
+             
+          }
+          
+          asignar_componente()
+          
+        })
+        return unsubscribe;
+  
+  
+        }, []);
 
-    useEffect(() => {
-       
-        const unsubscribe = navigation.addListener('focus', () => {
+  if(ready){
+    return (
       
-        const asignar_componente=async()=>{
-        
-          actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosIngresos');
-
+  
+        <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
+  
+          {estadocomponente.alerta_estado && <Alerta />}
+  
+           {/* // --- RESUMEN CARDS ---// */}
+  
            
-        }
-        
-        asignar_componente()
-        
-      })
-      return unsubscribe;
-
-
-      }, []);
-
-
-    return(
-        <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
-            {/* Para ver la alerta */}
-            {estadocomponente.alerta_estado && <Alerta />} 
-
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                MOVIMIENTOS INGRESOS
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_negrita,color:estilos.font_color}]}>
-                Texto negrita
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_sub_color}]}>
-                Sub titulo
-            </Text>
-            <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_importe_color}]}>
-                Texto importante
-            </Text>
-
+            <View style={styles.resumenContenedor}>
+              
+              <View style={[styles.resumenCard, styles.resumenCardIngreso]}>
+                <View style={styles.resumenRow}>
+                  
+                  <View style={styles.resumenColumnaIcono}>
+                    <View style={[styles.resumenIcono, styles.resumenIconoIngreso]}>
+                      <Text style={styles.resumenIconoTexto}>↓</Text>
+                    </View>
+                  </View>
+                  
+                  
+                  <View style={styles.resumenColumnaTextos}>
+                    <Text style={[styles.resumenLabel, styles.resumenLabelIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Total Income
+                    </Text>
+                    <Text style={[styles.resumenMonto, styles.resumenMontoIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Gs. {Number(dataresumen[0]?.TotalIngresos).toLocaleString('es-ES')}
+                    </Text>
+                    <Text style={[styles.resumenCantidad, styles.resumenCantidadIngreso, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Cant registros: {Number(dataresumen[0]?.CantidadIngresos).toLocaleString('es-ES')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+  
+              
+              <View style={[styles.resumenCard, styles.resumenCardGasto]}>
+                <View style={styles.resumenRow}>
+                  
+                  <View style={styles.resumenColumnaIcono}>
+                    <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
+                      <Text style={styles.resumenIconoTexto}>↑</Text>
+                    </View>
+                  </View>
+                  
+                  
+                  <View style={styles.resumenColumnaTextos}>
+                    <Text style={[styles.resumenLabel, styles.resumenLabelGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Total Gastos
+                    </Text>
+                    <Text style={[styles.resumenMonto, styles.resumenMontoGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
+                    </Text>
+                    <Text style={[styles.resumenCantidad, styles.resumenCantidadGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
+                      Cant registros: {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+  
+          
+         
+  
+              <FlatList
+              
+                data={dataingresos}
+                contentContainerStyle={styles.flatlistContenido}
+                style={{ flex: 1,}}
+                renderItem={({ item }) => {
+                  return (
+                    <TouchableOpacity
+                      style={[styles.contenedordatos,{
+                        backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                        borderRightColor:colors.screen_componente_estilos.color_borde_cards,
+                        borderBottomColor:colors.screen_componente_estilos.color_borde_cards
+                      }]}
+                      onPress={() => { navigate('DetalleMovimientoIngreso', { item }); }}
+                      activeOpacity={0.85}
+                    >
+                      <View style={styles.columnaLogo}>
+                        <LogoEmpresa imagePath={item.LogoEmpresa} />
+                      </View>
+                      <View style={styles.columnaInfo}>
+                        <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
+                          {item.NombreEmpresa}
+                        </Text>
+                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                          {item.FechaRegistro}
+                        </Text>
+                        <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                          ID: {item.Id}
+                        </Text>
+                      </View>
+                      <View style={styles.columnaTotal}>
+                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                          Gs. {Number(item.MontoIngreso).toLocaleString('es-ES')}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+                keyExtractor={item => item.key}
+              />
             
-            <TouchableOpacity 
-                style={[styles.btn,
-                {backgroundColor: estilos.boton_color_fondo,
-                borderColor: estilos.boton_color_borde
-                }
-                ]} 
-                onPress={() => accion_boton()}
-            >
-                <Text style={[{ fontFamily: estilos.font_normal, color: estilos.font_importe_color}]}>
-                BOTON
-                </Text>
-            </TouchableOpacity>
-                
-            <Surface
-                style={[
-                    styles.card,
-                    { backgroundColor: estilos.cards_color_fondo,
-                      borderColor:estilos.cards_color_border
-                     },
-                ]}
-                    elevation={5} // para sombreado en los bordes
-            >
-                <Text style={[,{fontFamily:estilos.font_normal,color:estilos.font_color}]}>
-                    Contenido Card
-                </Text>
-            </Surface>
-            
+          
         </View>
-    )
+      
+    );
+  }
 }
 
 const styles = StyleSheet.create({
 
-
-btn: {
-    borderWidth: 0.5,
-    borderRadius: 12,
-    padding: 14,
+  // --- RESUMEN ---
+  resumenContenedor: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+    marginTop: 12,
+    marginBottom: 16,
+    gap: 10,
+  },
+  resumenCard: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+  },
+  resumenRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-     width:200,
-    marginTop: 4,
-    left:10,
-    right:10,
+    gap: 1,
+  },
+  resumenColumnaTextos: {
+  flex: 1, // Ocupa el resto del espacio
 },
-card:{
-    height:100,
-    width:200,
-    left:10,
-    right:10,
-    borderRadius:20,
-    
-    
-    justifyContent: 'center',    // Centrado vertical
-    alignItems: 'center',        // Centrado horizontal
+resumenCantidad: {
+  fontSize: 11,
+  marginTop: 4,
+  opacity: 0.8,
+},
+  resumenColumnaIcono: {
+    width: 40, // Ancho fijo para la columna del icono
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resumenCardIngreso: {
+    backgroundColor: '#EEE9FD',
+  },
+  resumenCardGasto: {
+    backgroundColor: '#FDEEE9',
+  },
+  resumenFila: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  resumenIcono: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resumenIconoIngreso: {
+    backgroundColor: '#7B5EA7',
+  },
+  resumenIconoGasto: {
+    backgroundColor: '#E05C5C',
+  },
+  resumenIconoTexto: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  resumenLabel: {
+    fontSize: 11,
+  },
+  resumenLabelIngreso: {
+    color: '#7B5EA7',
+  },
+  resumenLabelGasto: {
+    color: '#E05C5C',
+  },
+  resumenMonto: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  resumenMontoIngreso: {
+    color: '#3D2A6E',
+  },
+  resumenMontoGasto: {
+    color: '#8B1A1A',
+  },
 
-    borderWidth:0.5,
-    marginTop:10
-}
+  // --- LISTA ---
+  contenedordatos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginHorizontal: 10,
+    marginBottom: 8,
+    borderRadius: 10,
+    //backgroundColor: '#1e2336',
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 3,
+    //borderRightColor: '#c9a84c',
+    borderBottomWidth: 1,
+    //borderBottomColor: '#c9a84c',
+  },
+  flatlistContenido: {
+  paddingBottom: 16,   // espacio para el BottomTab (height 65 + margen)
+  paddingTop: 4,       // pequeño respiro del resumen cards
+  
+},
+  columnaLogo: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  columnaInfo: {
+    flex: 2,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  columnaTotal: {
+    flex: 1.5,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  nombreEmpresa: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  fechaRegistro: {
+    fontSize: 11,
+  },
+  idRegistro: {
+    fontSize: 9,
+  },
+  totalMovimiento: {
+    fontSize: 13,
+    textAlign: 'right',
+  },
 });
