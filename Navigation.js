@@ -43,6 +43,9 @@ import ResumenMovimientos from './Componentes/Screens/ResumenMovimientos/Resumen
 import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
 
 
+import CameraScreen from './Componentes/Screens/Camerascreen/Camarascreen';
+
+import PickerScreen from './Componentes/Screens/Pickerscreen/Pickerscreen';
 
 
 
@@ -445,12 +448,12 @@ function TabsGroup({ navigation }) {
 
       <Tab.Screen
         name="ResumenMovimientos"
-        component={ResumenMovimientos}
+        component={CameraScreen}
         options={{ headerShown: false }}
       />
       <Tab.Screen
         name="Estats"
-        component={GraficaOverview}
+        component={PickerScreen}
         options={{ headerShown: false }}
       />
       

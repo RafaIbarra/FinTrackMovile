@@ -1,27 +1,24 @@
 import React, { useState, useEffect, useCallback,useContext } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Modal,
-  FlatList,
-  Platform,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-  Alert,
+import {View,StyleSheet,Text,TouchableOpacity,ScrollView,
+  TextInput,Modal,FlatList,Platform,KeyboardAvoidingView,
+  ActivityIndicator,Alert,Image
 } from 'react-native';
+
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
+
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 
 import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
+
 import Alerta from '../../Procesando/Alerta';
 import Modelo from '../Modelo/Modelo';
 import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
+import CameraScreen from '../Camerascreen/Camarascreen';
+
 import { useApi } from '../../../Apis/useApi';
 import IcnoAtras from '../../IconoAtras/IconoAtras';
 import { useRoute } from "@react-navigation/native";
@@ -809,7 +806,62 @@ export default function RegistroMovimientoGasto({ navigation }) {
   const [modalCalendario, setModalCalendario] = useState(false);
 
   const [enviando, setEnviando] = useState(false);
+
+  //── CAMARA ───────────────────────────────────────────────────────────────
+  const [imageUri, setImageUri] = useState(null);
+  // --- Tomar foto con la cámara ---
+  const tomarFoto = async () => {
+      const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+      if (!granted) {
+        Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara.');
+        return;
+      }
   
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.85,
+      });
+  
+      if (result.canceled) return;
+  
+      const uri = result.assets[0].uri;
+      setImageUri(uri);
+  
+      // Guardar en galería (opcional)
+      const { granted: mediaGranted } = await MediaLibrary.requestPermissionsAsync();
+      if (mediaGranted) {
+        await MediaLibrary.saveToLibraryAsync(uri);
+      }
+    };
+  
+    // --- Seleccionar foto de la galería ---
+  const seleccionarDeGaleria = async () => {
+      const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!granted) {
+        Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería.');
+        return;
+      }
+  
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.85,
+      });
+  
+      if (result.canceled) return;
+  
+      setImageUri(result.assets[0].uri);
+    };
+
+
+
+  const handleActivarCamara=()=>{
+    setActivarcamara(true)
+  }
+  const handleDesactivarCamara=()=>{
+    setActivarcamara(false)
+  }
+
+
   // ── Carga datos ───────────────────────────────────────────────────────────
 
   const carga_movimiento_registrado= async()=>{
@@ -838,6 +890,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
               setDatamediosregistrados(medios_reg);
               setDataempresaregistrada(empresa_id);
               setFechamovimiento(fecha_mov)
+              setImageUri(result.data[0].UrlImg)
               
 
              
@@ -1081,9 +1134,36 @@ export default function RegistroMovimientoGasto({ navigation }) {
       medios: construirMedios(),
       fecha: fechaSeleccionada,
       empresa: empresaSeleccionada.id,
-      imagen: null,
+      imagen: { uri: imageUri, type: 'image/jpeg', name: 'foto.jpg' },
       ...(esEdicion && { IdMovGasto }),
     };
+
+    const formData = new FormData();
+    formData.append('gastos', JSON.stringify(gastosSeleccionados.map(g => ({
+      idgasto: g.id,
+      monto: parseFloat(g.monto),
+    }))));
+    formData.append('medios', JSON.stringify(construirMedios()));
+    formData.append('fecha', fechaSeleccionada);
+    formData.append('empresa', empresaSeleccionada.id);
+    if (esEdicion) formData.append('IdMovGasto', IdMovGasto);
+
+    // Agregar la imagen como archivo (objeto con uri, type, name)
+    // formData.append('imagen', {
+    //   uri: imageUri,
+    //   type: 'image/jpeg',
+    //   name: 'foto.jpg',
+    // });
+    if (imageUri) {
+        formData.append('imagen', {
+          uri: imageUri,
+          type: 'image/jpeg',
+          name: 'foto.jpg',
+        });
+      } else {
+        formData.append('imagen', '');   // string vacío para indicar "sin imagen"
+      }
+
 
     try {
       setEnviando(true);
@@ -1093,7 +1173,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
       //const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
       const endpoint = esEdicion ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/` :`operaciones/RegistroMovimientoGastoUser/`
       const metodo = esEdicion ? 'PUT' : 'POST';
-      const result = await apiRequest(endpoint, metodo, body);
+      const result = await apiRequest(endpoint, metodo, formData);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));  
       actualizarEstadocomponente('tituloloading', '');
@@ -1161,18 +1241,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
 
-        {/* ── TÍTULO ───────────────────────────────────────────────────── */}
-        {/* <View style={{flexDirection:'row',alignItems: 'center',marginBottom: 20,marginTop: 4, }}>
-          <TouchableOpacity onPress={cancelar}>
-              
-              <IcnoAtras></IcnoAtras>
-              
-            </TouchableOpacity>
-            <Text style={[styles.titulo, { marginLeft:20,fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
-              {titulo}
-            </Text>
-            
-        </View> */}
+
         
 
         {/* ══ SECCIÓN: GASTOS ══════════════════════════════════════════════ */}
@@ -1388,26 +1457,46 @@ export default function RegistroMovimientoGasto({ navigation }) {
         </SectionCard>
 
         {/* ══ SECCIÓN: IMAGEN ══════════════════════════════════════════════ */}
+        
         <SectionCard estilos={estilos} titulo="Comprobante" paso="5">
-          <TouchableOpacity
-            style={[
-              styles.camaraBtn,
-              {
-                borderColor: estilos.cards_color_border,
-                backgroundColor: estilos.cards_color_fondo,
-              },
-            ]}
-            disabled
-          >
-            <Text style={{ fontSize: 28 }}>📷</Text>
-            <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13, marginTop: 6 }}>
-              Adjuntar imagen
-            </Text>
-            <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 11, marginTop: 2, opacity: 0.6 }}>
-              (próximamente)
-            </Text>
-          </TouchableOpacity>
+          
+          <View style={camaraStyles.container_camara}>
+          
+                {/* Botones */}
+                <View style={camaraStyles.buttons_camara}>
+                  <TouchableOpacity style={camaraStyles.btn_camara} onPress={tomarFoto}>
+                    <Text style={camaraStyles.btnText_camara}>📷 Cámara</Text>
+                  </TouchableOpacity>
+          
+                  <TouchableOpacity style={[camaraStyles.btn_camara, camaraStyles.btnSecondary_camara]} onPress={seleccionarDeGaleria}>
+                    <Text style={camaraStyles.btnText_camara}>🖼️ Galería</Text>
+                  </TouchableOpacity>
+                </View>
+          
+                {/* Preview de la imagen */}
+                {imageUri && (
+                  <>
+                    
+
+                    <View style={camaraStyles.contenedor_img}>
+
+                      <Image source={{ uri: imageUri }} style={camaraStyles.image_camara} />
+                       <TouchableOpacity style={camaraStyles.btnEliminar} onPress={() => setImageUri(null)}>
+                          <Text style={camaraStyles.btnEliminarTexto}>✕</Text>
+                      </TouchableOpacity>
+                     
+                    </View>
+                     
+                  </>
+                )}
+          
+          </View>
+
+
         </SectionCard>
+
+
+
 
         {/* ══ BOTÓN GUARDAR ════════════════════════════════════════════════ */}
         <TouchableOpacity
@@ -1720,3 +1809,77 @@ const calStyles = StyleSheet.create({
     marginVertical: 2,
   },
 });
+
+const camaraStyles=StyleSheet.create({
+  container_camara: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    padding: 24,
+  },
+  buttons_camara: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  btn_camara: {
+    backgroundColor: '#1a73e8',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  btnSecondary_camara: {
+    backgroundColor: '#555',
+  },
+  btnText_camara: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  contenedor_img:{
+   position: 'relative',
+    width: '100%',
+    height: 300,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    padding: 10,
+    borderRadius: 12, // opcional para redondear borde del contenedor
+  }
+  ,
+  image_camara: {
+    
+    // width: '100%',
+    // height: 280,
+    // aspectRatio: 1,  // o la proporción que necesites (ej. 16/9)
+    // borderRadius: 12,
+    // resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    resizeMode: 'cover',
+    
+    
+  },
+btnEliminar: {
+    position: 'absolute',
+    top: 15, // ajustar según el padding
+    right: 15,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+},
+btnEliminarTexto: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 20,
+},
+  uri_camara: {
+    fontSize: 11,
+    color: '#888',
+    textAlign: 'center',
+  },
+})

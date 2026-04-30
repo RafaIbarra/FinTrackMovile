@@ -97,6 +97,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
       setDatositem(item);
       setDetallegastos(item["DetalleGastos"] || []);
       setDetallemedios(item["DetalleMediosPagos"] || []);
+      
     });
     return unsubscribe;
   }, [navigation]);
@@ -392,7 +393,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
-    maxHeight: '88%',
+    height: '88%',
   },
   modalHandle: {
     width: 40,
@@ -410,7 +411,8 @@ const styles = StyleSheet.create({
   },
   comprobanteImg: {
     width: '100%',
-    height: 460,
+  height: 460,                 // se respetará si el ScrollView tiene altura suficiente
+  resizeMode: 'contain',
   },
   cerrarBtn: {
     marginTop: 16,

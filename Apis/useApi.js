@@ -19,21 +19,34 @@ export const useApi = (contextActions) => {
       const storageData = await Handelstorage('obtener');
       const token = storageData?.token;
       const sesion = storageData?.sesion;
-       
+
+      const isFormData = body instanceof FormData;
+
       const headers = {
         Authorization: `Bearer ${token}`,
         'X-SESSION-USER': sesion,
       };
+      // if (method.toUpperCase() !== 'GET') {
+      //   headers['Content-Type'] = 'application/json';
+      // }
       if (method.toUpperCase() !== 'GET') {
-        headers['Content-Type'] = 'application/json';
+        if (isFormData) {
+          // No establecer Content-Type para FormData (fetch lo completa con boundary)
+          // No se hace nada con headers['Content-Type']
+        } else {
+          headers['Content-Type'] = 'application/json';
+        }
       }
 
       const requestOptions = {
         method: method.toUpperCase(),
         headers,
-        body: method.toUpperCase() !== 'GET' ? JSON.stringify(body) : undefined,
+        // body: method.toUpperCase() !== 'GET' ? JSON.stringify(body) : undefined,
+         body: method.toUpperCase() !== 'GET'
+          ? (isFormData ? body : JSON.stringify(body))
+          : undefined,
       };
-
+      
       try {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout')), timeout)

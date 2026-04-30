@@ -26,7 +26,22 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FinTrackApp necesita acceso a la cámara para tomar fotos.",
+          "microphonePermission": "FinTrackApp necesita acceso al micrófono para grabar video.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "FinTrackApp necesita acceso a la cámara para tomar fotos.",
+          "photosPermission": "FinTrackApp necesita acceso a tus fotos."
+        }
+      ]
     ]
   }
 }
