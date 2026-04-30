@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity,TextInput } from "react-native";
+import React, { useState, useEffect, useContext, useMemo } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 
 import Alerta from "../../Procesando/Alerta";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
-import Generarpeticion from "../../../Apis/ApiPeticiones";
 import { useApi } from "../../../Apis/useApi";
 
 export default function ListadoMovimientosGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
   const { sesiondatadate } = useContext(AuthContext);
+
   const [dataegresos, setDataegresos] = useState([]);
   const [dataegresosresult, setDataegresosresult] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
@@ -21,12 +21,11 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const { asignar_opciones_alerta } = useContext(AuthContext);
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
-  const [ready,setReady]=useState(false)
+  const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
 
-  
-
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+
   const estilos = {
     font_normal: fonts.balsamiqregular.fontFamily,
     font_negrita: fonts.balsamiqbold.fontFamily,
@@ -41,8 +40,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
   };
 
   const cargardatos = async () => {
-    
-    setReady(false)
+    setReady(false);
     actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
     actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
@@ -50,12 +48,10 @@ export default function ListadoMovimientosGastos({ navigation }) {
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
 
     const result = await apiRequest(endpoint, 'GET', {});
-    
-    
-    
+
     if (result.sessionExpired) {
-            return; // SI LA SESION NO ES VALIDA
-        }
+      return;
+    }
     if (result.resp_correcta) {
       const registros = result.data.detalle;
       if (Object.keys(registros).length > 0) {
@@ -65,18 +61,16 @@ export default function ListadoMovimientosGastos({ navigation }) {
         });
       }
       setDataegresos(registros);
-      setDataegresosresult(registros)
-      setDataresumen(result.data.resumen)
-      
-
-    } else{
-        const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-        asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false); // muestra el mensaje en la alerta personalizada
-        actualizarEstadocomponente('alerta_estado', true);
-      }
+      setDataegresosresult(registros);
+      setDataresumen(result.data.resumen);
+    } else {
+      const msj = result.data?.message || 'Error en la solicitud';
+      asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
+      actualizarEstadocomponente('alerta_estado', true);
+    }
     actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading',  false);
-    setReady(true)
+    actualizarEstadocomponente('loading', false);
+    setReady(true);
   };
 
   useEffect(() => {
@@ -84,270 +78,223 @@ export default function ListadoMovimientosGastos({ navigation }) {
   }, [estadocomponente.bandera_registro_gasto]);
 
   useEffect(() => {
-         
-          const unsubscribe = navigation.addListener('focus', () => {
-        
-          const asignar_componente=async()=>{
-            
-            actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
-  
-             
-          }
-          
-          asignar_componente()
-          
-        })
-        return unsubscribe;
-  
-  
-        }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
+    });
+    return unsubscribe;
+  }, []);
 
   const buscarEgresos = (texto) => {
-  setQuery(texto);
-  
-  if (!texto.trim()) {
-    setDataegresosresult(dataegresos);
-    return;
-  }
+    setQuery(texto);
+    if (!texto.trim()) {
+      setDataegresosresult(dataegresos);
+      return;
+    }
+    const termino = texto.toLowerCase().trim();
+    const filtrados = dataegresos.filter((item) => {
+      const matchEmpresa = item.NombreEmpresa?.toLowerCase().includes(termino);
+      const matchGasto = item.DetalleGastos?.some((g) =>
+        g.NombreGasto?.toLowerCase().includes(termino)
+      );
+      const matchMedio = item.DetalleMediosPagos?.some((m) =>
+        m.NombreMedioPago?.toLowerCase().includes(termino)
+      );
+      return matchEmpresa || matchGasto || matchMedio;
+    });
+    setDataegresosresult(filtrados);
+  };
 
-  const termino = texto.toLowerCase().trim();
+  // ── Totales dinámicos de la búsqueda activa ──
+  const totalFiltrado = useMemo(() => {
+    return dataegresosresult.reduce((sum, item) => sum + (Number(item.TotalMovimiento) || 0), 0);
+  }, [dataegresosresult]);
 
-  const filtrados = dataegresos.filter((item) => {
-    // 1) Coincidencia en empresa
-    const matchEmpresa = item.NombreEmpresa?.toLowerCase().includes(termino);
+  const hayBusqueda = query.trim().length > 0;
 
-    // 2) Coincidencia en algún gasto del detalle
-    const matchGasto = item.DetalleGastos?.some((g) =>
-      g.NombreGasto?.toLowerCase().includes(termino)
-    );
+  if (!ready) return null;
 
-    // 3) Coincidencia en algún medio de pago del detalle
-    const matchMedio = item.DetalleMediosPagos?.some((m) =>
-      m.NombreMedioPago?.toLowerCase().includes(termino)
-    );
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
+      {estadocomponente.alerta_estado && <Alerta />}
 
-    return matchEmpresa || matchGasto || matchMedio;
-  });
+      {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
-  setDataegresosresult(filtrados);
-};
-
-  if(ready){
-    return (
+      <View 
       
-  
-        <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
-  
-          {estadocomponente.alerta_estado && <Alerta />}
-  
-           {/* // --- RESUMEN CARDS ---// */}
-  
-           
-            <View style={styles.resumenContenedor}>
-            
-              <View style={[styles.resumenCard, styles.resumenCardGasto]}>
-                <View style={styles.resumenRow}>
-                  
-                  <View style={styles.resumenColumnaIcono}>
-                    <View style={[styles.resumenIcono, styles.resumenIconoGasto]}>
-                      <Text style={styles.resumenIconoTexto}>↑</Text>
-                    </View>
-                  </View>
-                  
-                  
-                  <View style={styles.resumenColumnaTextos}>
-                    <Text style={[styles.resumenLabel, styles.resumenLabelGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Total Gastos
-                    </Text>
-                    <Text style={[styles.resumenMonto, styles.resumenMontoGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
-                    </Text>
-                    <Text style={[styles.resumenCantidad, styles.resumenCantidadGasto, { fontFamily: fonts.balsamiqregular.fontFamily }]}>
-                      Cant registros: {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-  
-              <View
-                style={[
-                styles.searchBox,
+      style={{
+        marginBottom: 10,
+        
+        // iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 3,
+        // Android
+        elevation: 2,
+      }}
+      >
+
+        <View style={styles.resumenBarra}>
+          <View style={styles.resumenItem}>
+            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Gastos</Text>
+            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#C0392B' }]}>
+              Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
+            </Text>
+          </View>
+          <View style={styles.resumenSeparador} />
+          <View style={styles.resumenItem}>
+            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
+            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
+              {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ═══ BUSCADOR ═══ */}
+      <View
+        style={[
+          styles.searchBox,
+          {
+            backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+            borderColor: colors.screen_componente_estilos.color_borde_cards,
+          },
+        ]}
+      >
+        <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+        <TextInput
+          value={query}
+          onChangeText={buscarEgresos}
+          placeholder="Por empresa, concepto, medio pago..."
+          underlineColorAndroid="transparent"
+          placeholderTextColor={estilos.font_sub_color}
+          style={{
+            fontFamily: estilos.font_normal,
+            color: estilos.font_color,
+            flex: 1,
+            paddingVertical: 2,
+            height: '70%',
+            paddingLeft: 5,
+          }}
+        />
+        {hayBusqueda && (
+          <TouchableOpacity onPress={() => buscarEgresos('')} style={{ padding: 4 }}>
+            <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
+      {hayBusqueda && (
+        <View style={styles.resultadoBusqueda}>
+          <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 12 }}>
+            {dataegresosresult.length} resultado{dataegresosresult.length !== 1 ? 's' : ''} · Total filtrado:{' '}
+            <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color }}>
+              Gs. {totalFiltrado.toLocaleString('es-ES')}
+            </Text>
+          </Text>
+        </View>
+      )}
+
+      {/* ═══ LISTA ═══ */}
+      <FlatList
+        data={dataegresosresult}
+        contentContainerStyle={styles.flatlistContenido}
+        style={{ flex: 1 }}
+        renderItem={({ item }) => {
+          return (
+            <TouchableOpacity
+              style={[
+                styles.contenedordatos,
                 {
                   backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                  borderColor: colors.screen_componente_estilos.color_borde_cards,
+                  borderRightColor: colors.screen_componente_estilos.color_borde_cards,
+                  borderBottomColor: colors.screen_componente_estilos.color_borde_cards,
                 },
               ]}
-              >
-                <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-                  <TextInput
-                    value={query}
-                    onChangeText={buscarEgresos}
-                    placeholder="Por empresa, concepto, medio pago..."
-                    underlineColorAndroid="transparent" 
-                    placeholderTextColor={estilos.font_sub_color}
-                    style={{
-                      // flex: 1,
-                      fontFamily: estilos.font_normal,
-                      color: estilos.font_color,
-                      flex: 1, paddingVertical: 2, 
-                      height: '70%',
-                      paddingLeft:5,
-                      
-                    }}
-                    
-                  />
-                
+              onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
+              activeOpacity={0.85}
+            >
+              <View style={styles.columnaLogo}>
+                <LogoEmpresa imagePath={item.LogoEmpresa} />
               </View>
-         
-  
-              <FlatList
-              
-                data={dataegresosresult}
-                contentContainerStyle={styles.flatlistContenido}
-                style={{ flex: 1,}}
-                renderItem={({ item }) => {
-                  return (
-                    <TouchableOpacity
-                      style={[styles.contenedordatos,{
-                        backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                        borderRightColor:colors.screen_componente_estilos.color_borde_cards,
-                        borderBottomColor:colors.screen_componente_estilos.color_borde_cards
-                      }]}
-                      onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
-                      activeOpacity={0.85}
-                    >
-                      <View style={styles.columnaLogo}>
-                        <LogoEmpresa imagePath={item.LogoEmpresa} />
-                      </View>
-                      <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
-                          {item.NombreEmpresa}
-                        </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                          {item.FechaRegistro}
-                        </Text>
-                        <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                          ID: {item.Id}
-                        </Text>
-                      </View>
-                      <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
-                          Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={item => item.key}
-              />
-            
-          
-        </View>
-      
-    );
-  }
+              <View style={styles.columnaInfo}>
+                <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                  {item.NombreEmpresa}
+                </Text>
+                <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                  {item.FechaRegistro}
+                </Text>
+                <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                  ID: {item.Id}
+                </Text>
+              </View>
+              <View style={styles.columnaTotal}>
+                <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                  Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+        keyExtractor={item => item.key}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-
-  // --- RESUMEN ---
-  resumenContenedor: {
-    paddingHorizontal:10,
-    paddingBottom:5,
-    marginTop: 12,
-    marginBottom: 10,
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  // ═══ RESUMEN COMPACTO ═══
+  resumenBarra: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    marginHorizontal: 12,
+    marginTop: 10,
+    marginBottom: 8,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(224, 92, 92, 0.08)', // tinte muy suave del color gasto
+    borderRadius: 10,
   },
-  resumenCard: {
+  resumenItem: {
+    alignItems: 'center',
     flex: 1,
-    borderRadius: 14,
-    paddingVertical: 7,
-    paddingHorizontal: 14,
   },
-  resumenRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 1,
+  resumenSeparador: {
+    width: 1,
+    height: 24,
+    backgroundColor: 'rgba(0,0,0,0.08)',
   },
-  resumenColumnaTextos: {
-  flex: 1, // Ocupa el resto del espacio
-},
-resumenCantidad: {
-  fontSize: 11,
-  marginTop: 4,
-  opacity: 0.8,
-},
-  resumenColumnaIcono: {
-    width: 40, // Ancho fijo para la columna del icono
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resumenCardIngreso: {
-    backgroundColor: '#EEE9FD',
-  },
-  resumenCardGasto: {
-    backgroundColor: '#FDEEE9',
-  },
-  resumenFila: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
-  },
-  resumenIcono: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resumenIconoIngreso: {
-    backgroundColor: '#7B5EA7',
-  },
-  resumenIconoGasto: {
-    backgroundColor: '#E05C5C',
-  },
-  resumenIconoTexto: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  resumenLabel: {
+  resumenLabelBarra: {
     fontSize: 11,
+    color: '#888',
+    marginBottom: 2,
   },
-  resumenLabelIngreso: {
-    color: '#7B5EA7',
-  },
-  resumenLabelGasto: {
-    color: '#E05C5C',
-  },
-  resumenMonto: {
+  resumenMontoBarra: {
     fontSize: 15,
-    fontWeight: '700',
   },
-  resumenMontoIngreso: {
-    color: '#3D2A6E',
-  },
-  resumenMontoGasto: {
-    color: '#8B1A1A',
-  },
-  //--- BUSCADOR
+
+  // ═══ BUSCADOR ═══
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 10,
-    marginBottom: 8,
+    marginBottom: 6,
     paddingHorizontal: 12,
-    height: 35,
-    marginLeft:12,
-    marginRight:12
+    height: 38,
+    marginLeft: 12,
+    marginRight: 12,
   },
 
-  // --- LISTA ---
+  // ═══ RESULTADO BÚSQUEDA ═══
+  resultadoBusqueda: {
+    marginHorizontal: 16,
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+
+  // ═══ LISTA ═══
   contenedordatos: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -356,19 +303,15 @@ resumenCantidad: {
     marginHorizontal: 10,
     marginBottom: 8,
     borderRadius: 10,
-    //backgroundColor: '#1e2336',
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 3,
-    //borderRightColor: '#c9a84c',
     borderBottomWidth: 1,
-    //borderBottomColor: '#c9a84c',
   },
   flatlistContenido: {
-  paddingBottom: 16,   // espacio para el BottomTab (height 65 + margen)
-  paddingTop: 4,       // pequeño respiro del resumen cards
-  
-},
+    paddingBottom: 16,
+    paddingTop: 4,
+  },
   columnaLogo: {
     flex: 1,
     alignItems: 'flex-start',
