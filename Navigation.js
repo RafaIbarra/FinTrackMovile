@@ -33,6 +33,7 @@ import RegistroMovimientoGasto from './Componentes/Screens/MovimientosGastos/Reg
 // import MovimientosIngresos from './Componentes/Screens/MovimientosIngresos/ListadoMovimientosIngresos';
 
 import ListadoMovimientosIngresos from './Componentes/Screens/MovimientosIngresos/ListadoMovimientosIngresos';
+
 import DetalleMovimientoIngreso from './Componentes/Screens/MovimientosIngresos/DetalleMovimientoIngreso';
 import RegistroMovimientoIngreso from './Componentes/Screens/MovimientosIngresos/RegistroMovimientoIngreso';
 
@@ -324,7 +325,7 @@ function DrawerInicio({navigation}) {
 const BTN_R = 28;
 const OVERHANG = 27; // cuánto sobresale arriba del tab bar
 const TAB_H = 60;   // altura del tab bar
-const W = BTN_R * 4; // ancho del área SVG (112px)
+const W = BTN_R * 3; // ancho del área SVG (112px)
 const cx = W / 2;
 
 // El círculo tiene centro en y=OVERHANG dentro del SVG
@@ -402,17 +403,29 @@ const CentralTabButton = ({ onPress, colors   }) => {
 const Tab = createBottomTabNavigator();
 function TabsGroup({ navigation }) {
   
-  const { colors } = useTheme();
+  const { colors,fonts } = useTheme();
+  const estilos= {
+    icon_size:20,
+    label_size:11,
+    family_active:fonts.balsamiqbold.fontFamily,
+    family_inactive:fonts.balsamiqregular.fontFamily, 
+    icon_color_active:colors.screen_componente_estilos.color_fondo,
+    icon_color_inactive:colors.screen_componente_estilos.color_texto_subtitulo,
+    text_color_active:colors.screen_componente_estilos.color_fondo,
+    text_color_inactive:colors.screen_componente_estilos.color_texto_subtitulo,
+
+  }
   return (
     <Tab.Navigator
       initialRouteName="ListadoMovimientosGastos"
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
-          height: 60,        // altura fija sin espacio extra
-          paddingBottom: 0,  // el SafeAreaView del App.js ya reservó el espacio inferior
+          height: 57, 
+          paddingBottom: 0,
           borderTopLeftRadius:30,
           borderTopRightRadius:30,
+          
         },
        
       }}
@@ -420,12 +433,58 @@ function TabsGroup({ navigation }) {
       <Tab.Screen
         name="ListadoMovimientosGastos"
         component={ListadoMovimientosGastos}
-         options={{ headerShown: false }}
+         options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "caret-square-up"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Gastos"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}</Text>
+            },
+          headerShown: false 
+        }}
       />
       <Tab.Screen
         name="ListadoMovimientosIngresos"
         component={ListadoMovimientosIngresos}
-        options={{ headerShown: false }}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "caret-square-down"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Ingresos"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
       />
 
       <Tab.Screen
@@ -448,17 +507,71 @@ function TabsGroup({ navigation }) {
 
       <Tab.Screen
         name="ResumenMovimientos"
-        component={CameraScreen}
-        options={{ headerShown: false }}
+        component={ResumenMovimientos}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "table"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Resumen"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
       />
       <Tab.Screen
         name="Estats"
-        component={PickerScreen}
-        options={{ headerShown: false }}
+        component={GraficaOverview}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "chart-pie"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Stats"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
       />
       
     </Tab.Navigator>
   );
+
+ 
 }
 
 const HomeStack = createNativeStackNavigator();
@@ -508,6 +621,7 @@ function NavigationLogin(){
       </Stack.Navigator>
     
   );
+
   
   }
 
@@ -537,6 +651,21 @@ function Navigation({notificationData,setNotificationData}) {
 
       </NavigationContainer>
     );
+
+    
   }
   
+ const styles = StyleSheet.create({
+      iconContainer: {
+      
+      width:40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: 30,
+      marginTop:5,
+      marginBottom:5,
+      
+      },
+    
+    });
   export default Navigation;

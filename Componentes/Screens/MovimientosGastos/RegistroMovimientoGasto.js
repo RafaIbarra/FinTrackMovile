@@ -1464,11 +1464,11 @@ export default function RegistroMovimientoGasto({ navigation }) {
           
                 {/* Botones */}
                 <View style={camaraStyles.buttons_camara}>
-                  <TouchableOpacity style={camaraStyles.btn_camara} onPress={tomarFoto}>
-                    <Text style={camaraStyles.btnText_camara}>📷 Cámara</Text>
+                  <TouchableOpacity style={[camaraStyles.btn_camara,{backgroundColor:estilos.pantalla_color_fondo,borderWidth:0.5,borderColor:estilos.boton_color_borde}]} onPress={tomarFoto}>
+                    <Text style={[camaraStyles.btnText_camara,{color:estilos.font_color,fontFamily:estilos.font_normal}]}>📷 Cámara</Text>
                   </TouchableOpacity>
           
-                  <TouchableOpacity style={[camaraStyles.btn_camara, camaraStyles.btnSecondary_camara]} onPress={seleccionarDeGaleria}>
+                  <TouchableOpacity style={[camaraStyles.btn_camara,{backgroundColor:estilos.pantalla_color_fondo,borderWidth:0.5,borderColor:estilos.boton_color_borde}]} onPress={seleccionarDeGaleria}>
                     <Text style={camaraStyles.btnText_camara}>🖼️ Galería</Text>
                   </TouchableOpacity>
                 </View>
@@ -1823,17 +1823,20 @@ const camaraStyles=StyleSheet.create({
     gap: 12,
   },
   btn_camara: {
-    backgroundColor: '#1a73e8',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    width:110,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+
   },
   btnSecondary_camara: {
-    backgroundColor: '#555',
+    
   },
   btnText_camara: {
-    color: '#fff',
-    fontSize: 15,
+    
+    fontSize: 13,
     fontWeight: '600',
   },
   contenedor_img:{
