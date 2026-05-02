@@ -42,6 +42,7 @@ import RegistroMovimientoIngreso from './Componentes/Screens/MovimientosIngresos
 import ResumenMovimientos from './Componentes/Screens/ResumenMovimientos/ResumenMovimientos';
 
 import GraficaOverview from './Componentes/Screens/Estadisticas/Estadisticas';
+import EstadisticasMes from './Componentes/Screens/Estadisticas/EstadisticasMes';
 
 
 import CameraScreen from './Componentes/Screens/Camerascreen/Camarascreen';
@@ -538,7 +539,7 @@ function TabsGroup({ navigation }) {
       />
       <Tab.Screen
         name="Estats"
-        component={GraficaOverview}
+        component={EstadisticasMes}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono

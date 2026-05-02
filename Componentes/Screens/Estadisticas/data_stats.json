@@ -1,0 +1,178 @@
+{
+    "ResultadoDelMes": {
+        "TotalGasto": 795790,
+        "cantidadGasto": 27,
+        "TotalIngreso": 7500000,
+        "CantidadIngreso": 2,
+        "Resultado": 6704210,
+        "PorcentajeUtilizado": 10.61
+    },
+    "GastosPorCategoria": [
+        {
+            "CategoriaGasto": "Otra",
+            "TotalCategoria": 795790,
+            "Cantidad": 31,
+            "Porcentaje": 100.0
+        }
+    ],
+    "GastosPorConceptos": [
+        {
+            "ConceptGasto": "manzana",
+            "TotalConcepto": 65000,
+            "CantidadConcepto": 2,
+            "Porcentaje": 8.17
+        },
+        {
+            "ConceptGasto": "leche",
+            "TotalConcepto": 253690,
+            "CantidadConcepto": 9,
+            "Porcentaje": 31.88
+        },
+        {
+            "ConceptGasto": "pera",
+            "TotalConcepto": 51050,
+            "CantidadConcepto": 3,
+            "Porcentaje": 6.42
+        },
+        {
+            "ConceptGasto": "Cerveza Coronita",
+            "TotalConcepto": 426050,
+            "CantidadConcepto": 17,
+            "Porcentaje": 53.54
+        }
+    ],
+    "ResumenMediosDePagos": [
+        {
+            "MedioPago": "QR Ueno",
+            "TotalMedioPago": 320390,
+            "Cantidad": 9,
+            "Porcentaje": 40.26
+        },
+        {
+            "MedioPago": "QR Dimo",
+            "TotalMedioPago": 201580,
+            "Cantidad": 7,
+            "Porcentaje": 25.33
+        },
+        {
+            "MedioPago": "Efectivo",
+            "TotalMedioPago": 273820,
+            "Cantidad": 12,
+            "Porcentaje": 34.41
+        }
+    ],
+    "GastosSemana": [
+        {
+            "NumeroSemana": 1,
+            "FechaInicio": "26/04/2026",
+            "FechaFin": "02/05/2026",
+            "Leyenda": "26/04 al 02/05",
+            "TotalSemana": 0,
+            "Porcentaje": 0.0,
+            "CantidadGastos": 0,
+            "DiasGasto": []
+        },
+        {
+            "NumeroSemana": 2,
+            "FechaInicio": "03/05/2026",
+            "FechaFin": "09/05/2026",
+            "Leyenda": "03/05 al 09/05",
+            "TotalSemana": 200000,
+            "Porcentaje": 25.13,
+            "CantidadGastos": 3,
+            "DiasGasto": [
+                {
+                    "fecha": "08/05/2026",
+                    "total": 50000,
+                    "cantidad": 1
+                },
+                {
+                    "fecha": "09/05/2026",
+                    "total": 150000,
+                    "cantidad": 2
+                }
+            ]
+        },
+        {
+            "NumeroSemana": 3,
+            "FechaInicio": "10/05/2026",
+            "FechaFin": "16/05/2026",
+            "Leyenda": "10/05 al 16/05",
+            "TotalSemana": 105660,
+            "Porcentaje": 13.28,
+            "CantidadGastos": 3,
+            "DiasGasto": [
+                {
+                    "fecha": "16/05/2026",
+                    "total": 105660,
+                    "cantidad": 3
+                }
+            ]
+        },
+        {
+            "NumeroSemana": 4,
+            "FechaInicio": "17/05/2026",
+            "FechaFin": "23/05/2026",
+            "Leyenda": "17/05 al 23/05",
+            "TotalSemana": 352130,
+            "Porcentaje": 44.25,
+            "CantidadGastos": 18,
+            "DiasGasto": [
+                {
+                    "fecha": "17/05/2026",
+                    "total": 1000,
+                    "cantidad": 1
+                },
+                {
+                    "fecha": "22/05/2026",
+                    "total": 301130,
+                    "cantidad": 15
+                },
+                {
+                    "fecha": "23/05/2026",
+                    "total": 50000,
+                    "cantidad": 2
+                }
+            ]
+        },
+        {
+            "NumeroSemana": 5,
+            "FechaInicio": "24/05/2026",
+            "FechaFin": "30/05/2026",
+            "Leyenda": "24/05 al 30/05",
+            "TotalSemana": 138000,
+            "Porcentaje": 17.34,
+            "CantidadGastos": 3,
+            "DiasGasto": [
+                {
+                    "fecha": "29/05/2026",
+                    "total": 80000,
+                    "cantidad": 2
+                },
+                {
+                    "fecha": "30/05/2026",
+                    "total": 58000,
+                    "cantidad": 1
+                }
+            ]
+        },
+        {
+            "NumeroSemana": 6,
+            "FechaInicio": "31/05/2026",
+            "FechaFin": "06/06/2026",
+            "Leyenda": "31/05 al 06/06",
+            "TotalSemana": 0,
+            "Porcentaje": 0.0,
+            "CantidadGastos": 0,
+            "DiasGasto": []
+        }
+    ],
+    "ConceptoIngresos": [
+        {
+            "NombreIngreso": "Sistema Maiacc",
+            "TotalIngreso": 7500000,
+            "Cantidad": 2,
+            "Porcentaje": 100.0
+        }
+    ]
+}
