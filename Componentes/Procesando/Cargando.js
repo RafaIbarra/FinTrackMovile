@@ -15,6 +15,7 @@ function Cargando({ navigation }) {
             <View style={[styles.curvedContainer,{backgroundColor:colors.background}]}>
                 <LottieView
                     source={require('../../assets/maintenance.json')}
+                    
                     style={styles.video}
                     autoPlay={true}
                     loop={true}

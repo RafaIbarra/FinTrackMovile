@@ -1,0 +1,68 @@
+{
+    "ResultadoDelMes": {
+        "TotalGasto": 430000,
+        "cantidadGasto": 2,
+        "TotalIngreso": 7500000,
+        "CantidadIngreso": 1,
+        "Resultado": 7070000,
+        "PorcentajeUtilizado": 5.73
+    },
+    "ResumenPorTipos": {
+        "GastosPorCategoria": [
+            {
+                "CategoriaGasto": "Lacteos",
+                "TotalCategoria": 80000,
+                "Cantidad": 2,
+                "Porcentaje": 18.6
+            },
+            {
+                "CategoriaGasto": "Bebidas",
+                "TotalCategoria": 350000,
+                "Cantidad": 1,
+                "Porcentaje": 81.4
+            }
+        ],
+        "Ingresos": [
+            {
+                "NombreIngreso": "Salario Coop",
+                "TotalIngreso": 7500000,
+                "Cantidad": 1,
+                "Porcentaje": 100.0
+            }
+        ]
+    },
+    "ResumenConceptosGastos": [
+        {
+            "ConceptGasto": "Yougurt",
+            "TotalConcepto": 35000,
+            "CantidadConcepto": 1,
+            "Porcentaje": 8.14
+        },
+        {
+            "ConceptGasto": "leche",
+            "TotalConcepto": 45000,
+            "CantidadConcepto": 1,
+            "Porcentaje": 10.47
+        },
+        {
+            "ConceptGasto": "Cerveza Coronita",
+            "TotalConcepto": 350000,
+            "CantidadConcepto": 1,
+            "Porcentaje": 81.4
+        }
+    ],
+    "ResumenPorMediosDePagos": [
+        {
+            "MedioPago": "Efectivo",
+            "TotalMedioPago": 400000,
+            "Cantidad": 2,
+            "Porcentaje": 93.02
+        },
+        {
+            "MedioPago": "QR Ueno Bank",
+            "TotalMedioPago": 30000,
+            "Cantidad": 1,
+            "Porcentaje": 6.98
+        }
+    ]
+}
