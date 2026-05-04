@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
+import { Surface } from 'react-native-paper';
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
@@ -116,20 +117,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
-      <View 
-      
-      style={{
-        marginBottom: 10,
-        // iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 3,
-        // Android
-        elevation: 2,
-      }}
-      >
-
+      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
         <View style={styles.resumenBarra}>
           <View style={styles.resumenItem}>
             <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Ingreso</Text>
@@ -145,7 +133,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
             </Text>
           </View>
         </View>
-      </View>
+      </Surface>
 
       {/* ═══ BUSCADOR ═══ */}
       <View
@@ -238,6 +226,9 @@ export default function ListadoMovimientosIngresos({ navigation }) {
 
 const styles = StyleSheet.create({
   // ═══ RESUMEN COMPACTO ═══
+  card: {
+        marginBottom: 15,
+    },
   resumenBarra: {
     flexDirection: 'row',
     alignItems: 'center',

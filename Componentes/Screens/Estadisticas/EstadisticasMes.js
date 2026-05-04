@@ -7,7 +7,8 @@ import { AuthContext } from '../../../AuthContext';
 import Handelstorage from '../../../Storage/HandelStorage';
 import { useApi } from '../../../Apis/useApi';
 import Alerta from '../../Procesando/Alerta';
-
+import Switch from '../../Switch/Switch';
+import SegmentedToggle from '../../Switch/SegmentedToggle';
 // Victory Native (legacy - basado en SVG, funciona en Expo Go)
 import {
     VictoryPie,
@@ -33,6 +34,10 @@ export default function EstadisticasMes({ navigation }) {
     const { sesiondatadate } = useContext(AuthContext);
     const [ready, setReady] = useState(false);
     const [statsData, setStatsData] = useState(null);
+    const [leyendacategoria, setLeyendacategoria] = useState(false);
+    const [leyendaconceptos, setLeyendaconceptos] = useState(false);
+    const [leyendamedios, setLeyendamedios] = useState(false);
+    const [leyendasemana, setLeyendasemana] = useState(false);
 
     const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -72,18 +77,20 @@ export default function EstadisticasMes({ navigation }) {
         const endpoint = `analitic/EstadisticaMes/${anno_storage}/${mes_storage}/`;
 
         const result = await apiRequest(endpoint, 'GET', {});
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
+        
         
         if (result.sessionExpired) return;
         
         if (result.resp_correcta) {
+            
             setStatsData(result.data);
         } else {
             const msj = result.data?.message || 'Error en la solicitud';
             asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
             actualizarEstadocomponente('alerta_estado', true);
         }
+        actualizarEstadocomponente('tituloloading', '');
+        actualizarEstadocomponente('loading', false);
         setReady(true);
     };
 
@@ -150,7 +157,7 @@ export default function EstadisticasMes({ navigation }) {
     const gastosSemanaData = useMemo(() => {
         if (!statsData?.GastosSemana) return [];
         return statsData.GastosSemana
-            .filter(item => item.TotalSemana > 0)
+            // .filter(item => item.TotalSemana > 0)
             .map((item, index) => ({
                 x: item.NumeroSemana,
                 y: item.TotalSemana,
@@ -158,6 +165,7 @@ export default function EstadisticasMes({ navigation }) {
                 label: item.Leyenda,
                 fill: CHART_COLORS[index % CHART_COLORS.length]
             }));
+        
     }, [statsData]);
 
     // 6. ConceptoIngresos -> Pie Chart
@@ -170,6 +178,23 @@ export default function EstadisticasMes({ navigation }) {
             fill: CHART_COLORS[index % CHART_COLORS.length]
         }));
     }, [statsData]);
+
+    const formatAxisTick = (value) => {
+        if (value <= 0) return '0';
+        if (value >= 1_000_000) {
+            const millions = value / 1_000_000;
+            // Si es entero o muy cercano (por decimales flotantes)
+            if (Math.abs(millions - Math.round(millions)) < 0.01) {
+                return `${Math.round(millions)}M`;
+            }
+            return `${millions.toFixed(1)}M`;
+        }
+        if (value >= 100_000) {
+            return `${Math.round(value / 1_000)}k`;
+        }
+        // Menos de 100.000
+        return value.toLocaleString('es-ES');
+    };
 
     if (!ready || !statsData) {
         return (
@@ -284,7 +309,8 @@ export default function EstadisticasMes({ navigation }) {
                                 tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal },
                                 grid: { stroke: estilos.cards_color_border, strokeWidth: 0.5 }
                             }}
-                            tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            // tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            tickFormat={formatAxisTick}
                         />
                         <VictoryAxis
                             style={{
@@ -306,8 +332,15 @@ export default function EstadisticasMes({ navigation }) {
                             }
                         />
                     </VictoryChart>
+                    
+                    <SegmentedToggle 
+                        textoactivo='Ver leyenda'
+                        textoinactivo='Ocultar leyenda'
+                        value={leyendacategoria} 
+                        onValueChange={setLeyendacategoria
 
-                    {statsData.GastosPorCategoria.map((item, idx) => (
+                        }/>
+                        { leyendacategoria && statsData.GastosPorCategoria.map((item, idx) => (
                         <View key={idx} style={styles.listItem}>
                             <View style={styles.listItemLeft}>
                                 <View style={[styles.listBullet, { backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }]} />
@@ -320,12 +353,14 @@ export default function EstadisticasMes({ navigation }) {
                             </Text>
                         </View>
                     ))}
+                        
+                    
                 </Surface>
 
                 {/* ========================================== */}
                 {/* 3. GASTOS POR CONCEPTOS - BARRAS HORIZONTALES */}
                 {/* ========================================== */}
-                <Surface style={[styles.card, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]} elevation={5}>
+                <Surface style={[styles.card, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border,overflow: 'visible'  }]} elevation={5}>
                     <Text style={[styles.cardTitle, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
                         Gastos por Conceptos
                     </Text>
@@ -365,8 +400,14 @@ export default function EstadisticasMes({ navigation }) {
                             }
                         />
                     </VictoryChart>
+                    <SegmentedToggle 
+                        textoactivo='Ver leyenda'
+                        textoinactivo='Ocultar leyenda'
+                        value={leyendaconceptos} 
+                        onValueChange={setLeyendaconceptos
 
-                    {statsData.GastosPorConceptos.map((item, idx) => (
+                        }/>
+                    { leyendaconceptos && statsData.GastosPorConceptos.map((item, idx) => (
                         <View key={idx} style={styles.listItem}>
                             <View style={styles.listItemLeft}>
                                 <View style={[styles.listBullet, { backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }]} />
@@ -384,6 +425,7 @@ export default function EstadisticasMes({ navigation }) {
                             </View>
                         </View>
                     ))}
+                    
                 </Surface>
 
                 {/* ========================================== */}
@@ -393,7 +435,49 @@ export default function EstadisticasMes({ navigation }) {
                     <Text style={[styles.cardTitle, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
                         Medios de Pago
                     </Text>
-                    
+                    {/* <VictoryChart
+                        width={SCREEN_WIDTH - 64}
+                        height={250}
+                        theme={VictoryTheme.material}
+                        domainPadding={{ x: 40, y: 20 }}
+                        containerComponent={<VictoryContainer responsive={true} />}
+                    >
+                        <VictoryAxis
+                            style={{
+                                tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal, angle: -30 },
+                                grid: { stroke: estilos.cards_color_border, strokeWidth: 0.2 } // Agrega esto para líneas verticales
+                            }}
+                        />
+                        <VictoryAxis
+                            dependentAxis
+                            style={{
+                                grid: { stroke: estilos.cards_color_border, strokeWidth: 0.2 } // Agrega esto para líneas horizontales
+                            }}
+                        />
+                        <VictoryAxis
+                            dependentAxis
+                            label="Monto"
+                            style={{
+                                axisLabel: { fill: estilos.font_sub_color, fontSize: 12, fontFamily: estilos.font_normal, padding: 40 },
+                                tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal }
+                            }}
+                            // tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            tickFormat={formatAxisTick}
+                        />
+                        <VictoryBar
+                            data={mediosPagoData}
+                            style={{
+                                data: { fill: ({ datum }) => datum.fill }
+                            }}
+                            // labels={({ datum }) => `${datum.label}`}
+                            // labelComponent={
+                            //     <VictoryLabel 
+                            //         dy={-5} 
+                            //         style={[{ fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal }]} 
+                            //     />
+                            // }
+                        />
+                    </VictoryChart> */}
                     <VictoryChart
                         width={SCREEN_WIDTH - 64}
                         height={250}
@@ -401,13 +485,49 @@ export default function EstadisticasMes({ navigation }) {
                         domainPadding={{ x: 40, y: 20 }}
                         containerComponent={<VictoryContainer responsive={true} />}
                     >
-                        {/* <VictoryAxis
+                        {/* Eje X (categorías) */}
+                        <VictoryAxis
                             style={{
                                 tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal, angle: -30 },
-                                grid: { stroke: estilos.cards_color_border, strokeWidth: 0.5 }
+                                grid: { stroke: estilos.cards_color_border, strokeWidth: 0.2 }
                             }}
-                            tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
-                        /> */}
+                        />
+
+                        {/* Único eje Y (dependiente) */}
+                        <VictoryAxis
+                            dependentAxis
+                            label="Monto"
+                            style={{
+                                axisLabel: { fill: estilos.font_sub_color, fontSize: 12, fontFamily: estilos.font_normal, padding: 40 },
+                                tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal },
+                                grid: { stroke: estilos.cards_color_border, strokeWidth: 0.2 }
+                            }}
+                            tickFormat={formatAxisTick}
+                        />
+
+                        <VictoryBar
+                            data={mediosPagoData}
+                            style={{
+                                data: { fill: ({ datum }) => datum.fill }
+                            }}
+                            labels={({ datum }) => `${datum.label}`}
+                            labelComponent={
+                                <VictoryLabel 
+                                    dx={5} 
+                                    style={[{ fill: estilos.font_color, fontSize: 9, fontFamily: estilos.font_normal }]} 
+                                />
+                            }
+                        />
+                    </VictoryChart>
+                    
+                    {/* <VictoryChart
+                        width={SCREEN_WIDTH - 64}
+                        height={250}
+                        theme={VictoryTheme.material}
+                        domainPadding={{ x: 40, y: 20 }}
+                        containerComponent={<VictoryContainer responsive={true} />}
+                    >
+                        
                         <VictoryAxis
                             style={{
                                 tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal, angle: -30 }
@@ -426,26 +546,36 @@ export default function EstadisticasMes({ navigation }) {
                                 />
                             }
                         />
-                    </VictoryChart>
+                    </VictoryChart> */}
+                    <SegmentedToggle 
+                        textoactivo='Ver leyenda'
+                        textoinactivo='Ocultar leyenda'
+                        value={leyendamedios} 
+                        onValueChange={setLeyendamedios
 
-                    <View style={styles.mediosGrid}>
-                        {statsData.ResumenMediosDePagos.map((item, idx) => (
-                            <View key={idx} style={styles.medioItem}>
-                                <Text style={[styles.medioLabel, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-                                    {item.MedioPago}
-                                </Text>
-                                <Text style={[styles.medioValue, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
-                                    {formatCurrency(item.TotalMedioPago)}
-                                </Text>
-                                <Text style={[styles.medioSub, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
-                                    {item.Cantidad} transacciones • {item.Porcentaje}%
-                                </Text>
-                                <View style={styles.medioBarContainer}>
-                                    <View style={[styles.medioBar, { width: `${item.Porcentaje}%`, backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }]} />
+                        }/>
+                    {leyendamedios && 
+                        
+                        <View style={styles.mediosGrid}>
+                            {statsData.ResumenMediosDePagos.map((item, idx) => (
+                                <View key={idx} style={styles.medioItem}>
+                                    <Text style={[styles.medioLabel, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
+                                        {item.MedioPago}
+                                    </Text>
+                                    <Text style={[styles.medioValue, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
+                                        {formatCurrency(item.TotalMedioPago)}
+                                    </Text>
+                                    <Text style={[styles.medioSub, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                                        {item.Cantidad} transacciones • {item.Porcentaje}%
+                                    </Text>
+                                    <View style={styles.medioBarContainer}>
+                                        <View style={[styles.medioBar, { width: `${item.Porcentaje}%`, backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }]} />
+                                    </View>
                                 </View>
-                            </View>
-                        ))}
-                    </View>
+                            ))}
+                        </View>
+                        
+                    }
                 </Surface>
 
                 {/* ========================================== */}
@@ -461,16 +591,17 @@ export default function EstadisticasMes({ navigation }) {
                         height={250}
                         theme={VictoryTheme.material}
                         domainPadding={{ x: 30, y: 30 }}
+                        
                         containerComponent={<VictoryContainer responsive={true} />}
                     >
                         <VictoryAxis
-                            label="Semana"
+                            // label="Semana"
                             style={{
-                                axisLabel: { fill: estilos.font_sub_color, fontSize: 12, fontFamily: estilos.font_normal, padding: 30 },
-                                tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal },
+                                axisLabel: { fill: estilos.font_sub_color, fontSize: 12, fontFamily: estilos.font_normal, padding: 30,angle:-30 },
+                                tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal, angle:-90, padding: 20},
                                 grid: { stroke: estilos.cards_color_border, strokeWidth: 0.5 }
                             }}
-                            tickFormat={(t) => `Sem ${t}`}
+                            tickFormat={(t) => `Sem ${t}    `}
                         />
                         <VictoryAxis
                             dependentAxis
@@ -479,7 +610,8 @@ export default function EstadisticasMes({ navigation }) {
                                 axisLabel: { fill: estilos.font_sub_color, fontSize: 12, fontFamily: estilos.font_normal, padding: 40 },
                                 tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal }
                             }}
-                            tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            // tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            tickFormat={formatAxisTick}
                         />
                         <VictoryScatter
                             data={gastosSemanaData}
@@ -496,8 +628,16 @@ export default function EstadisticasMes({ navigation }) {
                             }
                         />
                     </VictoryChart>
+                    <SegmentedToggle 
+                        textoactivo='Ver leyenda'
+                        textoinactivo='Ocultar leyenda'
+                        value={leyendasemana} 
+                        onValueChange={setLeyendasemana
 
-                    {statsData.GastosSemana.filter(i => i.TotalSemana > 0).map((item, idx) => (
+                        }/>
+                    
+
+                    { leyendasemana && statsData.GastosSemana.filter(i => i.TotalSemana > 0).map((item, idx) => (
                         <View key={idx} style={styles.semanaItem}>
                             <View style={styles.semanaHeader}>
                                 <Text style={[styles.semanaTitle, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
@@ -515,6 +655,7 @@ export default function EstadisticasMes({ navigation }) {
                             </Text>
                         </View>
                     ))}
+                       
                 </Surface>
 
                 {/* ========================================== */}
@@ -529,7 +670,7 @@ export default function EstadisticasMes({ navigation }) {
                         data={conceptosIngresosPieData}
                         width={SCREEN_WIDTH - 64}
                         height={250}
-                        innerRadius={50}
+                        innerRadius={2}
                         padAngle={2}
                         cornerRadius={6}
                         colorScale={CHART_COLORS}
@@ -725,5 +866,5 @@ const styles = StyleSheet.create({
     legendSub: {
         fontSize: 11,
         marginTop: 2,
-    },
+    }
 });
