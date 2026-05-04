@@ -51,6 +51,9 @@ import PickerScreen from './Componentes/Screens/Pickerscreen/Pickerscreen';
 
 
 
+import ListadoCategoriasGastos from './Componentes/Screens/CategoriasGastos/ListadoCategoriasGastos';
+import DetalleCategoriaGasto from './Componentes/Screens/CategoriasGastos/DetalleCategoriaGasto';
+
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -185,8 +188,8 @@ function DrawerInicio({navigation}) {
           }}
       />
 
-      <DrawerNav.Screen name="ConceptosIngresos" 
-        component={Modelo}
+      <DrawerNav.Screen name="StackBasicoskGroup" 
+        component={StackBasicoskGroup}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -195,12 +198,12 @@ function DrawerInicio({navigation}) {
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
                       <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Conceptos Ingresos
+                        Etiquetas
                       </Text>
                     </View>)
           },
           drawerIcon: ({size, color})=>(
-            <Feather name="trending-up"  size={sizeicon} color={color_icono} />
+            <MaterialCommunityIcons name="tag-outline"  size={sizeicon} color={color_icono} />
           ),
           drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
          }}
@@ -655,6 +658,217 @@ function Navigation({notificationData,setNotificationData}) {
 
     
   }
+
+const TabBasicos = createBottomTabNavigator();
+function TabBasicosGroup({ navigation }) {
+  
+  const { colors,fonts } = useTheme();
+  const estilos= {
+    icon_size:20,
+    label_size:11,
+    family_active:fonts.balsamiqbold.fontFamily,
+    family_inactive:fonts.balsamiqregular.fontFamily, 
+    icon_color_active:colors.screen_componente_estilos.color_fondo,
+    icon_color_inactive:colors.screen_componente_estilos.color_texto_subtitulo,
+    text_color_active:colors.screen_componente_estilos.color_fondo,
+    text_color_inactive:colors.screen_componente_estilos.color_texto_subtitulo,
+
+  }
+  return (
+    <TabBasicos.Navigator
+      initialRouteName="Categorias"
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor:colors.card,
+          height: 57, 
+          paddingBottom: 0,
+          borderTopLeftRadius:30,
+          borderTopRightRadius:30,
+          
+        },
+       
+      }}
+    >
+      <TabBasicos.Screen
+        name="Categorias"
+        component={ListadoCategoriasGastos}
+         options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "category"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <MaterialIcons name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Categorias"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}</Text>
+            },
+          headerShown: false 
+        }}
+      />
+      <TabBasicos.Screen
+        name="ConceptosGastos"
+        component={ListadoMovimientosIngresos}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "caret-square-down"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Ingresos"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
+      />
+
+      <TabBasicos.Screen
+              name="Agregar"
+              component={RegistroMovimientoGasto}
+              options={{
+                headerShown: false,
+                tabBarLabel: '',
+                tabBarButton: (props) => (
+                  <CentralTabButton
+                  onPress={props.onPress}
+                  colors={colors}
+                  
+                  
+                  />
+                ),
+              }}
+      />
+
+
+      <TabBasicos.Screen
+        name="MediosPagos"
+        component={ResumenMovimientos}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "table"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Resumen"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
+      />
+      <TabBasicos.Screen
+        name="ConceptosIngresos"
+        component={EstadisticasMes}
+        options={{ 
+           tabBarIcon: ({focused, color, size }) => {
+              let nombrreico,color_icono
+              nombrreico = "chart-pie"
+              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+              return  ( 
+                    <View style={[styles.iconContainer]}>
+                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                      </View>
+                      )
+            },
+          tabBarLabel: ({focused})=>{
+              let titulolabel,tipo_fuente,text_color
+
+              titulolabel =  "Stats"
+              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
+              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
+              return (
+                
+
+                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
+                  </Text>
+                
+                )
+            },
+          headerShown: false 
+        }}
+      />
+      
+    </TabBasicos.Navigator>
+  );
+
+ 
+}
+
+const StackBasicos = createNativeStackNavigator();
+function StackBasicoskGroup(){
+  const { colors,fonts } = useTheme();
+  
+  return(
+    <StackBasicos.Navigator 
+    options
+    >
+      <StackBasicos.Screen name="TabBasicosGroup" component={TabBasicosGroup} 
+      options={{ headerShown: false }}
+      />
+
+      <StackBasicos.Screen name="DetalleCategoriaGasto" 
+        component={DetalleCategoriaGasto} 
+        options={{ headerShown: false }}
+      /> 
+
+      {/* <StackBasicos.Screen name="RegistroMovimientoGasto" 
+        component={RegistroMovimientoGasto} 
+        options={{ headerShown: false }}
+      /> 
+
+      <StackBasicos.Screen name="DetalleMovimientoIngreso" 
+        component={DetalleMovimientoIngreso} 
+        options={{ headerShown: false }}
+      />
+
+      <StackBasicos.Screen name="RegistroMovimientoIngreso" 
+        component={RegistroMovimientoIngreso} 
+        options={{ headerShown: false }}
+      />  */}
+      
+    </StackBasicos.Navigator>
+  )
+
+}
   
  const styles = StyleSheet.create({
       iconContainer: {
