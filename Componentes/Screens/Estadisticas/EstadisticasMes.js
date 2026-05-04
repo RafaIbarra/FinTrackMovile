@@ -378,7 +378,7 @@ export default function EstadisticasMes({ navigation }) {
                                 tickLabels: { fill: estilos.font_color, fontSize: 10, fontFamily: estilos.font_normal },
                                 grid: { stroke: estilos.cards_color_border, strokeWidth: 0.5 }
                             }}
-                            tickFormat={(t) => `${(t / 1000).toFixed(0)}k`}
+                            tickFormat={formatAxisTick}
                         />
                         <VictoryAxis
                             style={{
