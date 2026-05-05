@@ -19,6 +19,8 @@ export const AuthProvider = ({ children }) => {
         isHeaderVisible:true,
         bandera_registro_gasto:false, 
         bandera_registro_ingreso:false, 
+
+        bandera_registro_categoria:false,
         
         loading:false,
         tituloloading:'CARGANDO..',

@@ -41,7 +41,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
 
   const cargardatos = async () => {
     setReady(false)
-    actualizarEstadocomponente('tituloloading', 'CARGANDO INGRESOS');
+    actualizarEstadocomponente('tituloloading', 'CARGANDO CATEGORIAS');
     actualizarEstadocomponente('loading', true);
     
     const endpoint = `ref/ListadoCategoriasUser/`;
@@ -76,7 +76,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
 
   useEffect(() => {
     cargardatos();
-  }, [estadocomponente.bandera_registro_gasto]);
+  }, [estadocomponente.bandera_registro_categoria]);
 
   
 

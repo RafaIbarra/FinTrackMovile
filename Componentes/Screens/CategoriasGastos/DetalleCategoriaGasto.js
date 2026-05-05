@@ -1,6 +1,12 @@
-import React, { useState, useEffect,useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image,StatusBar 
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Image,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useTheme } from "@react-navigation/native";
@@ -8,205 +14,603 @@ import { useTheme } from "@react-navigation/native";
 import { useApi } from "../../../Apis/useApi";
 import { AuthContext } from "../../../AuthContext";
 
-
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
 import Confirmacion from "../../Procesando/Confirmacion";
 import Alerta from "../../Procesando/Alerta";
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AntDesign } from '@expo/vector-icons';
-
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function DetalleCategoriaGasto({ navigation }) {
   const { colors, fonts } = useTheme();
-  const [datositem, setDatositem] = useState({});
-  const [detallegastos, setDetallegastos] = useState([]);
-  const [detallemedios, setDetallemedios] = useState([]);
+
+  // ── Estados genéricos ─────────────────────────────
+  const [registroPrincipal, setRegistroPrincipal] = useState({});
+  const [listaDetalles, setListaDetalles] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [CompsCabecera,setCompsCabecera]=useState([])
 
-  const [showconfirmacion,setShowconfirmacion]=useState(false)
-  const [mensajeconfirmacion,setMensajeconfirmacion]=useState(false)
-  const [confirmaciondelete,setConfirmaciondelete]=useState(false)
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
+  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
-  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
-  const { activarsesion, setActivarsesion } = useContext(AuthContext);
-  const { reiniciarvalores } = useContext(AuthContext);
+  const {
+    estadocomponente,
+    actualizarEstadocomponente,
+    asignar_opciones_alerta,
+    activarsesion,
+    setActivarsesion,
+    reiniciarvalores,
+  } = useContext(AuthContext);
 
-  const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
+  const apiRequest = useApi({
+    setActivarsesion,
+    reiniciarvalores,
+    actualizarEstadocomponente,
+  });
 
-  const { params: { item } } = useRoute();
+  const {
+    params: { item },
+  } = useRoute();
 
   const handleEdit = () => {
-    
-    const IdMovGasto=item.Id
-    
-    navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
-    
+    const IdMovGasto = item.Id;
+    navigation.navigate("RegistroMovimientoGasto", { IdMovGasto });
   };
-  
-  const handleyes=()=>{
-    setShowconfirmacion(false)
-    setConfirmaciondelete(true)
-  }
-  const handleno=()=>{
-    setShowconfirmacion(false)
-    setConfirmaciondelete(false)
-  }
+
+  const handleYes = () => {
+    setMostrarConfirmacion(false);
+    setConfirmarEliminacion(true);
+  };
+
+  const handleNo = () => {
+    setMostrarConfirmacion(false);
+    setConfirmarEliminacion(false);
+  };
+
   const handleDelete = () => {
-    const id_del= datositem.Id
-    setMensajeconfirmacion(`Desea eliminar el movimiento con ID ${id_del}?`)
-    setShowconfirmacion(true)
-    
+    const id_del = registroPrincipal.Id;
+    setMensajeConfirmacion(`Desea eliminar la categoria con ID ${id_del}?`);
+    setMostrarConfirmacion(true);
   };
 
-  const eliminar_registro =async()=>{
-    const id_del= datositem.Id
-    actualizarEstadocomponente('tituloloading', 'Eliminando Gasto..');
-    actualizarEstadocomponente('loading', true);
-    
-    const endpoint = `operaciones/EliminarMovimientoGastoUser/${id_del}/` 
-    const metodo = 'DELETE'
-    const result = await apiRequest(endpoint, metodo, {});
-    if (result.sessionExpired) {
-        return; // Salimos de la función
-      }
-    if (result.resp_correcta) {
-        
-        const nuevo = !estadocomponente.bandera_registro_gasto;
-        const mensajeExito =  'Movimiento Gasto Eliminado';
-        asignar_opciones_alerta(false, 'REGISTRO GASTOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosGastos', 'bandera_registro_gasto', nuevo);
-        actualizarEstadocomponente('alerta_estado', true); 
-        
-      } else {
-        const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
-        actualizarEstadocomponente('alerta_estado', true);
-      }
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
+  const eliminarRegistro = async () => {
+    const id_del = registroPrincipal.Id;
+    actualizarEstadocomponente("tituloloading", "Eliminando Categoria..");
+    actualizarEstadocomponente("loading", true);
 
-  }
+    const endpoint = `ref/OperacionesCategoriasGastosUser/${id_del}/`;
+    const metodo = "DELETE";
+    const result = await apiRequest(endpoint, metodo, {});
+
+    if (result.sessionExpired) {
+      actualizarEstadocomponente("tituloloading", "");
+      actualizarEstadocomponente("loading", false);
+      return;
+    }
+
+    if (result.resp_correcta) {
+      const nuevo = !estadocomponente.bandera_registro_categoria;
+      const mensajeExito = "Categoria Eliminada";
+      asignar_opciones_alerta(
+        false,
+        "REGISTRO CATEGORIAS",
+        mensajeExito,
+        "TabBasicosGroup",
+        "Categorias",
+        "bandera_registro_categoria",
+        nuevo
+      );
+      actualizarEstadocomponente("alerta_estado", true);
+    } else {
+      const msj = result.data?.message || "Error en la solicitud";
+      asignar_opciones_alerta(
+        true,
+        "ERROR",
+        msj,
+        "Gastos",
+        "bandera_registro_gasto",
+        false
+      );
+      actualizarEstadocomponente("alerta_estado", true);
+    }
+
+    actualizarEstadocomponente("tituloloading", "");
+    actualizarEstadocomponente("loading", false);
+  };
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      
-      setDatositem(item);
-      setDetallegastos(item["DetalleGastos"] || []);
-      setDetallemedios(item["DetalleMediosPagos"] || []);
-      
+      setRegistroPrincipal(item);
+      setListaDetalles(item?.DetalleGastos || []);
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, item]);
+
   useEffect(() => {
-        if(confirmaciondelete){
-          eliminar_registro();
-        }
-          
-  }, [confirmaciondelete]);
-  const tieneComprobante = !!datositem.UrlImg;
+    if (confirmarEliminacion) {
+      eliminarRegistro();
+    }
+  }, [confirmarEliminacion]);
+
+  const tieneComprobante = !!registroPrincipal.UrlImg;
+
+  // ── Anchos de columna para la tabla ───────────────
+  const COL_ID = 45;
+  const COL_NOMBRE = 130;
+  const COL_TOTAL = 110;
+  const COL_CANT = 90;
+  const COL_PORC = 80;
+
+  const renderTablaHeader = () => (
+    <View
+      style={[
+        styles.tablaRow,
+        styles.tablaHeader,
+        {
+          borderBottomColor:
+            colors.screen_componente_estilos.color_texto_subtitulo,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.tablaHeaderText,
+          { width: COL_ID, fontFamily: fonts.balsamiqbold.fontFamily },
+        ]}
+      >
+        ID
+      </Text>
+      <Text
+        style={[
+          styles.tablaHeaderText,
+          {
+            width: COL_NOMBRE,
+            textAlign: "left",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+          },
+        ]}
+      >
+        CONCEPTO
+      </Text>
+      <Text
+        style={[
+          styles.tablaHeaderText,
+          {
+            width: COL_TOTAL,
+            textAlign: "right",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+          },
+        ]}
+      >
+        TOTAL
+      </Text>
+      <Text
+        style={[
+          styles.tablaHeaderText,
+          {
+            width: COL_CANT,
+            textAlign: "center",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+          },
+        ]}
+      >
+        CANT.
+      </Text>
+      <Text
+        style={[
+          styles.tablaHeaderText,
+          {
+            width: COL_PORC,
+            textAlign: "right",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+          },
+        ]}
+      >
+        %
+      </Text>
+    </View>
+  );
+
+  const renderTablaFila = (fila, idx) => (
+    <View
+      key={fila.Id ?? idx}
+      style={[
+        styles.tablaRow,
+        {
+          borderBottomColor: colors.screen_componente_estilos.color_fondo,
+        },
+        idx === listaDetalles.length - 1 && { borderBottomWidth: 0 },
+      ]}
+    >
+      <Text
+        style={[
+          styles.tablaCell,
+          {
+            width: COL_ID,
+            fontFamily: fonts.balsamiqregular.fontFamily,
+            color: colors.screen_componente_estilos.color_texto_subtitulo,
+          },
+        ]}
+      >
+        {fila.Id}
+      </Text>
+      <Text
+        style={[
+          styles.tablaCell,
+          {
+            width: COL_NOMBRE,
+            textAlign: "left",
+            fontFamily: fonts.balsamiqregular.fontFamily,
+            color: colors.screen_componente_estilos.color_texto,
+          },
+        ]}
+      >
+        {fila.NombreGasto}
+      </Text>
+      <Text
+        style={[
+          styles.tablaCell,
+          {
+            width: COL_TOTAL,
+            textAlign: "right",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+            color: colors.screen_componente_estilos.color_texto,
+          },
+        ]}
+      >
+        Gs. {Number(fila.TotalConcepto).toLocaleString("es-ES")}
+      </Text>
+      <Text
+        style={[
+          styles.tablaCell,
+          {
+            width: COL_CANT,
+            textAlign: "center",
+            fontFamily: fonts.balsamiqregular.fontFamily,
+            color: colors.screen_componente_estilos.color_texto_subtitulo,
+          },
+        ]}
+      >
+        {fila.CantidadRegistrosConcepto}
+      </Text>
+      <Text
+        style={[
+          styles.tablaCell,
+          {
+            width: COL_PORC,
+            textAlign: "right",
+            fontFamily: fonts.balsamiqbold.fontFamily,
+            color: colors.screen_componente_estilos.color_texto_importante,
+          },
+        ]}
+      >
+        {fila.PorcentajeConcepto}%
+      </Text>
+    </View>
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.screen_componente_estilos.color_fondo,
+      }}
+    >
       {estadocomponente.alerta_estado && <Alerta />}
 
-      {showconfirmacion &&
-          <Confirmacion
-            title="Detalle Categoria"
-            question={mensajeconfirmacion}
-            navigation={navigation}
-            onYes={handleyes}
-            onNo={handleno}
-            
-            
-          />
-      }
+      {mostrarConfirmacion && (
+        <Confirmacion
+          title="Detalle Categoria"
+          question={mensajeConfirmacion}
+          navigation={navigation}
+          onYes={handleYes}
+          onNo={handleNo}
+        />
+      )}
+
       <CabaceraRegistros
         title={`Detalle de la categoria`}
         navigation={navigation}
         onDelete={handleDelete}
         onEdit={handleEdit}
         showbottons={true}
-        
       />
-      
-      
-      <ScrollView style={styles.scroll} bounces={false}>
 
-        
-        <View style={[styles.hero,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards,borderBottomWidth: 0.5}]}>
-          
-          <View style={[styles.heroTop]}>
-            {/* <View style={styles.logoWrap}>
-              <LogoEmpresa imagePath={item.LogoEmpresa} />
-            </View> */}
-            <View style={{ flex: 1, paddingLeft: 12 }}>
-              <Text style={[styles.NombreCategoria, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
-                {datositem.NombreCategoria}
+      <ScrollView style={styles.scroll} bounces={false}>
+        {/* ═══════════════════════════════════════════════
+            HERO — Enfoque en Nombre + ID
+        ═══════════════════════════════════════════════ */}
+        <View
+          style={[
+            styles.hero,
+            {
+              backgroundColor:
+                colors.screen_componente_estilos.color_fondo_cards,
+            },
+          ]}
+        >
+          {/* Fila superior: Nombre grande + ID */}
+          <View style={styles.heroTop}>
+            <Text
+              style={[
+                styles.nombreCategoria,
+                {
+                  fontFamily: fonts.balsamiqbold.fontFamily,
+                  color: colors.screen_componente_estilos.color_texto,
+                },
+              ]}
+            >
+              {registroPrincipal.NombreCategoria}
+            </Text>
+
+            <View style={styles.idBadge}>
+              <Text
+                style={[
+                  styles.idText,
+                  {
+                    fontFamily: fonts.balsamiqregular.fontFamily,
+                    color:
+                      colors.screen_componente_estilos.color_texto_subtitulo,
+                  },
+                ]}
+              >
+                ID {registroPrincipal.Id}
               </Text>
-              <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                Reg. {datositem.FechaRegistro}
+            </View>
+
+            <Text
+              style={[
+                styles.fechaRegistro,
+                {
+                  fontFamily: fonts.balsamiqregular.fontFamily,
+                  color:
+                    colors.screen_componente_estilos.color_texto_subtitulo,
+                },
+              ]}
+            >
+              Registrado el {registroPrincipal.FechaRegistro}
+            </Text>
+          </View>
+
+          {/* Fila inferior: Totales y métricas */}
+          <View
+            style={[
+              styles.heroMeta,
+              {
+                borderTopColor:
+                  colors.screen_componente_estilos.color_fondo,
+              },
+            ]}
+          >
+            <View>
+              <Text
+                style={[
+                  styles.metaLabel,
+                  {
+                    fontFamily: fonts.balsamiqregular.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_subtitulo,
+                  },
+                ]}
+              >
+                CONCEPTOS
+              </Text>
+              <Text
+                style={[
+                  styles.metaValue,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color:
+                      colors.screen_componente_estilos.color_texto,
+                  },
+                ]}
+              >
+                {registroPrincipal.CantidadConceptoGastos ?? 0}
+              </Text>
+            </View>
+
+            <View style={{ alignItems: "center" }}>
+              <Text
+                style={[
+                  styles.metaLabel,
+                  {
+                    fontFamily: fonts.balsamiqregular.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_subtitulo,
+                  },
+                ]}
+              >
+                REGISTROS
+              </Text>
+              <Text
+                style={[
+                  styles.metaValue,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color:
+                      colors.screen_componente_estilos.color_texto,
+                  },
+                ]}
+              >
+                {registroPrincipal.CantidadGastosCategoria ?? 0}
+              </Text>
+            </View>
+
+            <View style={{ alignItems: "flex-end" }}>
+              <Text
+                style={[
+                  styles.metaLabel,
+                  {
+                    fontFamily: fonts.balsamiqregular.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_subtitulo,
+                  },
+                ]}
+              >
+                TOTAL
+              </Text>
+              <Text
+                style={[
+                  styles.totalAmount,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_importante,
+                  },
+                ]}
+              >
+                Gs.{" "}
+                {Number(
+                  registroPrincipal.TotalGastoCategoria
+                ).toLocaleString("es-ES")}
               </Text>
             </View>
           </View>
-
-          
-          <View style={[styles.heroTotal,
-                {borderBottomWidth: 2,borderBottomColor:colors.screen_componente_estilos.color_fondo,
-                  borderTopWidth:2,borderTopColor:colors.screen_componente_estilos.color_fondo
-
-                }
-                ]}>
-            <Text style={[styles.heroTotalLabel, 
-              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginTop:5 }]}>
-              TOTAL CATEGORIA
-            </Text>
-            <Text style={[styles.heroTotalAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_importante }]}>
-              Gs. {Number(datositem.TotalGastoCategoria).toLocaleString("es-ES")}
-            </Text>
-            <Text style={[styles.heroFechaGasto, 
-              { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo,marginBottom:5 }]}>
-              Registrado el {datositem.FechaRegistro}
-            </Text>
-          </View>
         </View>
 
-        
-        <View style={[styles.cardsContainer]}>
+        {/* ═══════════════════════════════════════════════
+            TABLA DE DETALLES — Scroll horizontal
+        ═══════════════════════════════════════════════ */}
 
-          
-          <View style={[styles.card,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
-            <Text style={[styles.cardTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-              Conceptos Gastos
+        {listaDetalles.length > 0 ? (
+        <View style={styles.cardsContainer}>
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor:
+                  colors.screen_componente_estilos.color_fondo_cards,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  fontFamily: fonts.balsamiqbold.fontFamily,
+                  color:
+                    colors.screen_componente_estilos
+                      .color_texto_subtitulo,
+                },
+              ]}
+            >
+              DETALLE DE CONCEPTOS
             </Text>
-            {Object.keys(detallegastos).map((key, idx) => (
-              <View key={key} style={[styles.cardRow, idx > 0 && styles.cardRowBorder]}>
-                <Text style={[styles.cardRowLabel, { fontFamily: fonts.balsamiqregular.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
-                  {detallegastos[key].NombreGasto}
-                </Text>
-                <Text style={[styles.cardRowAmount, { fontFamily: fonts.balsamiqbold.fontFamily,color: colors.screen_componente_estilos.color_texto }]}>
-                  Gs. {Number(detallegastos[key].TotalConcepto).toLocaleString("es-ES")}
-                </Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator
+              contentContainerStyle={styles.tablaScrollContent}
+            >
+              <View style={styles.tablaWrapper}>
+                {renderTablaHeader()}
+                {listaDetalles.map((fila, idx) => renderTablaFila(fila, idx))}
               </View>
-            ))}
+            </ScrollView>
           </View>
-
-
         </View>
-
-        
-        
+        ):(
+        <View style={styles.sinDatosContainer}>
+        <MaterialCommunityIcons
+          name="inbox-remove-outline"
+          size={40}
+          color={colors.screen_componente_estilos.color_texto_subtitulo}
+        />
+        <Text
+          style={[
+            styles.sinDatosTexto,
+            {
+              fontFamily: fonts.balsamiqregular.fontFamily,
+              color: colors.screen_componente_estilos.color_texto_subtitulo,
+            },
+          ]}
+        >
+          Sin Gastos asociados
+        </Text>
+      </View>)
+      }
+        {/* Espacio inferior para scroll cómodo */}
+        <View style={{ height: 24 }} />
       </ScrollView>
-    
 
-
-
-
-      
-      
+      {/* ═══════════════════════════════════════════════
+          MODAL COMPROBANTE (se mantiene la funcionalidad)
+      ═══════════════════════════════════════════════ */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalSheet,
+              {
+                backgroundColor:
+                  colors.screen_componente_estilos.color_fondo_cards,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.modalHandle,
+                {
+                  backgroundColor:
+                    colors.screen_componente_estilos.color_fondo,
+                },
+              ]}
+            />
+            <Text
+              style={[
+                styles.modalTitle,
+                {
+                  fontFamily: fonts.balsamiqbold.fontFamily,
+                  color: colors.screen_componente_estilos.color_texto,
+                },
+              ]}
+            >
+              Comprobante
+            </Text>
+            {tieneComprobante && (
+              <Image
+                source={{ uri: registroPrincipal.UrlImg }}
+                style={styles.comprobanteImg}
+              />
+            )}
+            <TouchableOpacity
+              style={[
+                styles.cerrarBtn,
+                {
+                  borderColor:
+                    colors.screen_componente_estilos.color_texto_importante,
+                },
+              ]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text
+                style={[
+                  styles.cerrarBtnText,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_importante,
+                  },
+                ]}
+              >
+                Cerrar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -214,156 +618,153 @@ export default function DetalleCategoriaGasto({ navigation }) {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    //backgroundColor: '#13161f',       // fondo negro azulado general
-  },
-   customHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
   },
 
   // ── HERO ──────────────────────────────────────────
   hero: {
-    //backgroundColor: '#1a1f2e',       // negro azulado más claro para el hero
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 32,
+    paddingTop: 24,
+    paddingBottom: 20,
   },
   heroTop: {
-    flexDirection: 'row',
+    marginBottom: 4,
     alignItems: 'center',
-    marginBottom: 24,
+    
   },
-  logoWrap: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    flexShrink: 0,
+  nombreCategoria: {
+    fontSize: 26,
+    lineHeight: 32,
+    textAlign: 'center',
   },
-  nombreEmpresa: {
-    fontSize: 15,
-    //color: '#ffffff',
+  idBadge: {
+    marginTop: 6,
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: "rgba(128,128,128,0.15)",
+  },
+  idText: {
+    fontSize: 12,
+    letterSpacing: 0.5,
+
   },
   fechaRegistro: {
-    fontSize: 11,
-    //color: '#8a8fa8',                 // gris azulado apagado
-    marginTop: 3,
-  },
-  heroTotal: {
-    alignItems: 'center',
-  
-    
-  },
-  heroTotalLabel: {
-    fontSize: 15,
-    letterSpacing: 1.2,
-    
-    //color: '#8a8fa8',                 // gris apagado
-  },
-  heroTotalAmount: {
-    fontSize: 34,
-   // color: '#3AB884',                 // verde brillante
-    marginTop: 6,
-  },
-  heroFechaGasto: {
     fontSize: 12,
-    //color: '#8a8fa8',
     marginTop: 8,
+    alignSelf: "flex-start",
   },
+  heroMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginTop: 18,
+    paddingTop: 14,
+    borderTopWidth: 1,
+  },
+  metaLabel: {
+    fontSize: 10,
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  metaValue: {
+    fontSize: 16,
+  },
+  totalAmount: {
+    fontSize: 20,
+  },
+  sinDatosContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 32,
+  gap: 8,
+},
+sinDatosTexto: {
+  fontSize: 14,
+  textAlign: 'center',
+},
 
-  // ── TARJETAS ──────────────────────────────────────
+  // ── CARDS / TABLA ─────────────────────────────────
   cardsContainer: {
     padding: 14,
     gap: 12,
   },
   card: {
-    //backgroundColor: '#1e2336',       // gris oscuro azulado para las tarjetas
     borderRadius: 14,
     borderWidth: 0.5,
-    //borderColor: '#2a2f45',           // borde apenas visible
     padding: 14,
   },
   cardTitle: {
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.1,
-    //color: '#8a8fa8',                 // gris apagado
-    marginBottom: 10,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 9,
-  },
-  cardRowBorder: {
-    borderTopWidth: 0.5,
-    //borderTopColor: '#2a2f45',
-  },
-  cardRowLabel: {
-    fontSize: 13,
-    //color: '#ffffff',
-  },
-  cardRowAmount: {
-    fontSize: 13,
-    //color: '#ffffff',
+    marginBottom: 12,
   },
 
-  // ── BOTÓN COMPROBANTE ─────────────────────────────
-  comprobanteBtn: {
-    borderWidth: 0.5,
-    //borderColor: '#3AB884',
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    marginTop: 4,
+  // Tabla
+  tablaScrollContent: {
+    paddingBottom: 4,
   },
-  comprobanteBtnText: {
-    fontSize: 13,
-    //color: '#3AB884',
+  tablaWrapper: {
+    minWidth: "100%",
+  },
+  tablaHeader: {
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginBottom: 2,
+  },
+  tablaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+  },
+  tablaHeaderText: {
+    fontSize: 10,
+    letterSpacing: 0.6,
+    textAlign: "center",
+  },
+  tablaCell: {
+    fontSize: 12,
+    textAlign: "center",
   },
 
   // ── MODAL ─────────────────────────────────────────
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "flex-end",
   },
   modalSheet: {
-    //backgroundColor: '#1e2336',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
-    height: '88%',
+    height: "88%",
   },
   modalHandle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    //backgroundColor: '#2a2f45',
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 16,
   },
   modalTitle: {
     fontSize: 16,
-    //color: '#ffffff',
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
   },
   comprobanteImg: {
-    width: '100%',
-  height: 460,                 // se respetará si el ScrollView tiene altura suficiente
-  resizeMode: 'contain',
+    width: "100%",
+    height: 460,
+    resizeMode: "contain",
   },
   cerrarBtn: {
     marginTop: 16,
     borderRadius: 12,
-     borderWidth: 0.5,
+    borderWidth: 0.5,
     padding: 14,
-    alignItems: 'center',
-    //backgroundColor: '#3AB884',
+    alignItems: "center",
   },
   cerrarBtnText: {
-    //color: '#fff',
     fontSize: 14,
   },
 });
