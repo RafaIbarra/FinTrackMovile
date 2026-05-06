@@ -55,8 +55,9 @@ export default function DetalleCategoriaGasto({ navigation }) {
   } = useRoute();
 
   const handleEdit = () => {
-    const IdMovGasto = item.Id;
-    navigation.navigate("RegistroMovimientoGasto", { IdMovGasto });
+    const IdCategoria = item.Id;
+    //const IdCategoria = 0;
+    navigation.navigate("RegistroCategoria", { IdCategoria });
   };
 
   const handleYes = () => {

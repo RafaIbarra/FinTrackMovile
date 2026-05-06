@@ -44,7 +44,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
     actualizarEstadocomponente('tituloloading', 'CARGANDO CATEGORIAS');
     actualizarEstadocomponente('loading', true);
     
-    const endpoint = `ref/ListadoCategoriasUser/`;
+    const endpoint = `ref/ListadoCategoriasUser/0/`;
 
     const result = await apiRequest(endpoint, 'GET', {});
     

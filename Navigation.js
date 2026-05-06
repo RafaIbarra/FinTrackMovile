@@ -53,7 +53,9 @@ import PickerScreen from './Componentes/Screens/Pickerscreen/Pickerscreen';
 
 import ListadoCategoriasGastos from './Componentes/Screens/CategoriasGastos/ListadoCategoriasGastos';
 import DetalleCategoriaGasto from './Componentes/Screens/CategoriasGastos/DetalleCategoriaGasto';
+import RegistroCategoria from './Componentes/Screens/CategoriasGastos/RegistroCategoria';
 
+import AddBasic from './Componentes/AddBasic/AddBasic2';
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -642,6 +644,7 @@ function Navigation({notificationData,setNotificationData}) {
         {activarsesion ? (
               <>
                 {estadocomponente.loading && <Cargando />}
+                {estadocomponente.componente_plus_basic && <AddBasic />}
                 <DrawerInicio />
               </>
           ) : (
@@ -659,6 +662,70 @@ function Navigation({notificationData,setNotificationData}) {
     
   }
 
+
+const CentralTabButtonBasic = ({ onPress, colors   }) => {
+  
+  const tabColor = colors.navigation_estilos.color_fondo;
+  const iconColor = colors.navigation_estilos.color_texto;
+  const borderColor = colors.screen_componente_estilos.color_fondo;
+  const navigation = useNavigation(); 
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  
+  
+  const handlePress = () => {
+    // Determinar a qué pantalla navegar según el componente activo
+    actualizarEstadocomponente('componente_plus_basic', true);
+    
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.85}
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginTop: -10,
+        
+      }}
+    >
+      <Svg width={W} height={TAB_H + OVERHANG}>
+        {/* Fondo del tab bar dentro del SVG */}
+        <Rect
+          x={0}
+          y={OVERHANG}
+          width={W}
+          height={TAB_H}
+          fill={tabColor}
+        />
+
+        {/* Círculo con centro en y=OVERHANG → sobresale OVERHANG px arriba */}
+        <Circle
+          cx={cx}
+          cy={OVERHANG}
+          r={BTN_R}
+          fill={tabColor}
+          stroke={borderColor}
+          strokeWidth={3}
+        />
+
+        {/* Ícono + centrado en el círculo */}
+        <SvgText
+          x={cx}
+          y={OVERHANG}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fontSize={28}
+          fontWeight="bold"
+          fill={iconColor}
+        >
+          +
+        </SvgText>
+      </Svg>
+    </TouchableOpacity>
+  );
+};
 const TabBasicos = createBottomTabNavigator();
 function TabBasicosGroup({ navigation }) {
   
@@ -720,18 +787,18 @@ function TabBasicosGroup({ navigation }) {
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
-              nombrreico = "caret-square-down"
+              nombrreico = "cash-minus"
               color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
               return  ( 
                     <View style={[styles.iconContainer]}>
-                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                          <MaterialCommunityIcons name={nombrreico} size={30} color={color_icono}  />
                       </View>
                       )
             },
           tabBarLabel: ({focused})=>{
               let titulolabel,tipo_fuente,text_color
 
-              titulolabel =  "Ingresos"
+              titulolabel =  "Gastos"
               tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
               text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
               return (
@@ -753,7 +820,7 @@ function TabBasicosGroup({ navigation }) {
                 headerShown: false,
                 tabBarLabel: '',
                 tabBarButton: (props) => (
-                  <CentralTabButton
+                  <CentralTabButtonBasic
                   onPress={props.onPress}
                   colors={colors}
                   
@@ -770,18 +837,18 @@ function TabBasicosGroup({ navigation }) {
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
-              nombrreico = "table"
+              nombrreico = "wallet-outline"
               color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
               return  ( 
                     <View style={[styles.iconContainer]}>
-                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                          <MaterialCommunityIcons name={nombrreico} size={25} color={color_icono}  />
                       </View>
                       )
             },
           tabBarLabel: ({focused})=>{
               let titulolabel,tipo_fuente,text_color
 
-              titulolabel =  "Resumen"
+              titulolabel =  "Medios P."
               tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
               text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
               return (
@@ -801,18 +868,18 @@ function TabBasicosGroup({ navigation }) {
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
-              nombrreico = "chart-pie"
+              nombrreico = "cash-plus"
               color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
               return  ( 
                     <View style={[styles.iconContainer]}>
-                          <FontAwesome6 name={nombrreico} size={estilos.icon_size} color={color_icono}  />
+                          <MaterialCommunityIcons name={nombrreico} size={30} color={color_icono}  />
                       </View>
                       )
             },
           tabBarLabel: ({focused})=>{
               let titulolabel,tipo_fuente,text_color
 
-              titulolabel =  "Stats"
+              titulolabel =  "Ingresos"
               tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
               text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
               return (
@@ -850,12 +917,12 @@ function StackBasicoskGroup(){
         options={{ headerShown: false }}
       /> 
 
-      {/* <StackBasicos.Screen name="RegistroMovimientoGasto" 
-        component={RegistroMovimientoGasto} 
+      <StackBasicos.Screen name="RegistroCategoria" 
+        component={RegistroCategoria} 
         options={{ headerShown: false }}
       /> 
 
-      <StackBasicos.Screen name="DetalleMovimientoIngreso" 
+      {/* <StackBasicos.Screen name="DetalleMovimientoIngreso" 
         component={DetalleMovimientoIngreso} 
         options={{ headerShown: false }}
       />

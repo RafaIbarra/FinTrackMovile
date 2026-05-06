@@ -36,7 +36,9 @@ export const AuthProvider = ({ children }) => {
         alerta_componente:[],
         alerto_tipo:'',
         alerta_mensaje:'',
-        ComponenteActivoBottonTab:''
+        ComponenteActivoBottonTab:'',
+
+        componente_plus_basic:false
         
     
       })
