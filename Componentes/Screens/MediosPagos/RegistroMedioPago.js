@@ -23,7 +23,7 @@ import { useRoute } from "@react-navigation/native";
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
-export default function RegistroCategoria({ navigation }) {
+export default function RegistroMedioPago({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
 
@@ -46,22 +46,22 @@ export default function RegistroCategoria({ navigation }) {
   const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
-  const { params: { IdCategoria } } = useRoute();
+  const { params: { IdMedio } } = useRoute();
   const [titulo, setTitulo] = useState('');
   const [mostraralerta, setMostraralerta] = useState(false);
   const [cargando, setCargando] = useState(true);
 
   // ── Data registrada (para edición) ────────────────────────────────────────
-  const [datacategoriaregistrado, setDatacategoriaregistrado] = useState(null);
+  const [datamedioregistrado, setDatamedioregistrado] = useState(null);
 
   // ── Selecciones del usuario ───────────────────────────────────────────────
-  const [nombrecategoria, setNombrecategoria] = useState('');
+  const [nombremedio, setNombremedio] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [fecharegistro, setFecharegistro] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  const actualizarcategoria = (valor) => {
-    setNombrecategoria(valor)
+  const actualizarmedio = (valor) => {
+    setNombremedio(valor)
   };
 
   const actualizardescripcion = (valor) => {
@@ -70,7 +70,7 @@ export default function RegistroCategoria({ navigation }) {
 
   // ── Carga datos ───────────────────────────────────────────────────────────
   const carga_registrado = async () => {
-    const endpoint = `ref/ListadoCategoriasUser/${IdCategoria}/`;
+    const endpoint = `ref/ListadoMedioPagosUser/${IdMedio}/`;
     const result = await apiRequest(endpoint, 'GET', {});
     
     try {
@@ -79,7 +79,7 @@ export default function RegistroCategoria({ navigation }) {
       }
       if (result.resp_correcta) {
         const mov = result.data['detalle'][0];
-        setNombrecategoria(mov.NombreCategoria);
+        setNombremedio(mov.NombreMedioPago);
         setDescripcion(mov.Observacion);
         setFecharegistro(mov.FechaRegistro);
       } else {
@@ -97,17 +97,17 @@ export default function RegistroCategoria({ navigation }) {
   };
 
   useEffect(() => {
-    if (IdCategoria === 0) {
-      setTitulo('Nueva Categoria');
+    if (IdMedio === 0) {
+      setTitulo('Nuevo Medio Pago');
       setCargando(false);
     } else {
-      setTitulo(`Editar Categoria`);
+      setTitulo(`Editar Medio Pago`);
       carga_registrado();
     }
   }, []);
 
   const resetForm = () => {
-    setNombrecategoria('');
+    setNombremedio('');
     setDescripcion('');
   };
 
@@ -116,21 +116,21 @@ export default function RegistroCategoria({ navigation }) {
   };
 
   const guardar = async () => {
-    const esEdicion = IdCategoria > 0;
+    const esEdicion = IdMedio > 0;
     const formData = new FormData();
-    formData.append('nombre', nombrecategoria);
+    formData.append('nombre', nombremedio);
     formData.append('descripcion', descripcion);
     
-    if (esEdicion) formData.append('IdCategoria', IdCategoria);
+    if (esEdicion) formData.append('IdMedio', IdMedio);
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Categoria..' : 'Registrando Categoria..');
+      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Medio Pago..' : 'Registrando Medio Pago..');
       actualizarEstadocomponente('loading', true);
 
       const endpoint = esEdicion 
-        ? `ref/OperacionesCategoriasGastosUser/${IdCategoria}/` 
-        : `ref/OperacionesCategoriasGastosUser/`;
+        ? `ref/OperacionesMediosPagosUser/${IdMedio}/` 
+        : `ref/OperacionesMediosPagosUser/`;
       const metodo = esEdicion ? 'PUT' : 'POST';
       const result = await apiRequest(endpoint, metodo, formData);
 
@@ -144,17 +144,17 @@ export default function RegistroCategoria({ navigation }) {
 
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
-        const nuevo = !estadocomponente.bandera_registro_categoria;
-        const mensajeExito = esEdicion ? 'Categoria actualizada correctamente' : 'Registro de la categoria';
-        asignar_opciones_alerta(false, 'REGISTRO CATEGORIAS', mensajeExito, 'TabBasicosGroup', 'Categorias', 'bandera_registro_categoria', nuevo);
+        const nuevo = !estadocomponente.bandera_registro_medio_pago;
+        const mensajeExito = esEdicion ? 'Medio actualizada correctamente' : 'Registro del Medio de Pago';
+        asignar_opciones_alerta(false, 'REGISTRO MEDIOS PAGOS', mensajeExito, 'TabBasicosGroup', 'MediosPagos', 'bandera_registro_medio_pago', nuevo);
         actualizarEstadocomponente('alerta_estado', true);
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_ingreso', false);
+        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_medio_pago', false);
         actualizarEstadocomponente('alerta_estado', true);
       }
     } catch (e) {
-      asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'Categorias', 'bandera_registro_categoria', false);
+      asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'MediosPagos', 'bandera_registro_medio_pago', false);
       actualizarEstadocomponente('alerta_estado', true);
       Alert.alert('Error', 'Ocurrió un error al guardar.');
     } finally {
@@ -204,7 +204,7 @@ export default function RegistroCategoria({ navigation }) {
         ]}>
           
           {/* ID Badge (solo en edición) */}
-          {IdCategoria > 0 && (
+          {IdMedio > 0 && (
             <View style={styles.idBadgeContainer}>
               <View style={[
                 styles.idBadge,
@@ -217,7 +217,7 @@ export default function RegistroCategoria({ navigation }) {
                     color: estilos.font_sub_color,
                   }
                 ]}>
-                  ID {IdCategoria}
+                  ID {IdMedio}
                 </Text>
               </View>
             </View>
@@ -232,7 +232,7 @@ export default function RegistroCategoria({ navigation }) {
                 color: estilos.font_sub_color,
               }
             ]}>
-              NOMBRE CATEGORÍA
+              NOMBRE MEDIO PAGO
             </Text>
             <TextInput
               style={[
@@ -244,10 +244,10 @@ export default function RegistroCategoria({ navigation }) {
                   borderColor: estilos.cards_color_border,
                 }
               ]}
-              placeholder="Ej: Alimentación, Transporte..."
+              placeholder="Ej: Efectivo, QR"
               placeholderTextColor={estilos.font_sub_color}
-              value={nombrecategoria}
-              onChangeText={setNombrecategoria}
+              value={nombremedio}
+              onChangeText={setNombremedio}
               autoCapitalize="words"
               maxLength={50}
             />
@@ -287,7 +287,7 @@ export default function RegistroCategoria({ navigation }) {
           </View>
 
           {/* Fecha de registro (solo visible en edición) */}
-          {IdCategoria > 0 && fecharegistro && (
+          {IdMedio > 0 && fecharegistro && (
             <View style={styles.fechaContainer}>
               <Text style={[
                 styles.label,
@@ -337,7 +337,7 @@ export default function RegistroCategoria({ navigation }) {
               color: estilos.font_importe_color, 
               fontSize: 15 
             }}>
-              {IdCategoria > 0 ? 'Actualizar categoría' : 'Registrar categoría'}
+              {IdMedio > 0 ? 'Actualizar Medio' : 'Registrar Medio'}
             </Text>
           )}
         </TouchableOpacity>

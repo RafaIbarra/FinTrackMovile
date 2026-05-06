@@ -55,6 +55,10 @@ import ListadoCategoriasGastos from './Componentes/Screens/CategoriasGastos/List
 import DetalleCategoriaGasto from './Componentes/Screens/CategoriasGastos/DetalleCategoriaGasto';
 import RegistroCategoria from './Componentes/Screens/CategoriasGastos/RegistroCategoria';
 
+import ListadoMediosPagos from './Componentes/Screens/MediosPagos/ListadoMediosPagos';
+import DetalleMedioPago from './Componentes/Screens/MediosPagos/DetalleMedioPago';
+import RegistroMedioPago from './Componentes/Screens/MediosPagos/RegistroMedioPago';
+
 import AddBasic from './Componentes/AddBasic/AddBasic2';
 
 import { tema_colores_activo } from './Utils/Temas';
@@ -833,7 +837,7 @@ function TabBasicosGroup({ navigation }) {
 
       <TabBasicos.Screen
         name="MediosPagos"
-        component={ResumenMovimientos}
+        component={ListadoMediosPagos}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -922,15 +926,15 @@ function StackBasicoskGroup(){
         options={{ headerShown: false }}
       /> 
 
-      {/* <StackBasicos.Screen name="DetalleMovimientoIngreso" 
-        component={DetalleMovimientoIngreso} 
+      <StackBasicos.Screen name="DetalleMedioPago" 
+        component={DetalleMedioPago} 
         options={{ headerShown: false }}
       />
 
-      <StackBasicos.Screen name="RegistroMovimientoIngreso" 
-        component={RegistroMovimientoIngreso} 
+      <StackBasicos.Screen name="RegistroMedioPago" 
+        component={RegistroMedioPago} 
         options={{ headerShown: false }}
-      />  */}
+      /> 
       
     </StackBasicos.Navigator>
   )

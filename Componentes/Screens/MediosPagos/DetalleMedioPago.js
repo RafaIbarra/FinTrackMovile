@@ -23,12 +23,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 
-export default function DetalleCategoriaGasto({ navigation }) {
+export default function DetalleMedioPago({ navigation }) {
   const { colors, fonts } = useTheme();
 
   // ── Estados genéricos ─────────────────────────────
   const [registroPrincipal, setRegistroPrincipal] = useState({});
-  const [listaDetalles, setListaDetalles] = useState([]);
+  
   const [modalVisible, setModalVisible] = useState(false);
 
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
@@ -55,9 +55,9 @@ export default function DetalleCategoriaGasto({ navigation }) {
   } = useRoute();
 
   const handleEdit = () => {
-    const IdCategoria = item.Id;
+    const IdMedio = item.Id;
     //const IdCategoria = 0;
-    navigation.navigate("RegistroCategoria", { IdCategoria });
+    navigation.navigate("RegistroMedioPago", { IdMedio });
   };
 
   const handleYes = () => {
@@ -72,16 +72,16 @@ export default function DetalleCategoriaGasto({ navigation }) {
 
   const handleDelete = () => {
     const id_del = registroPrincipal.Id;
-    setMensajeConfirmacion(`Desea eliminar la categoria con ID ${id_del}?`);
+    setMensajeConfirmacion(`Desea eliminar el medio de pago con ID ${id_del}?`);
     setMostrarConfirmacion(true);
   };
 
   const eliminarRegistro = async () => {
     const id_del = registroPrincipal.Id;
-    actualizarEstadocomponente("tituloloading", "Eliminando Categoria..");
+    actualizarEstadocomponente("tituloloading", "Eliminando MedioPago..");
     actualizarEstadocomponente("loading", true);
 
-    const endpoint = `ref/OperacionesCategoriasGastosUser/${id_del}/`;
+    const endpoint = `ref/OperacionesMediosPagosUser/${id_del}/`;
     const metodo = "DELETE";
     const result = await apiRequest(endpoint, metodo, {});
 
@@ -92,15 +92,15 @@ export default function DetalleCategoriaGasto({ navigation }) {
     }
 
     if (result.resp_correcta) {
-      const nuevo = !estadocomponente.bandera_registro_categoria;
+      const nuevo = !estadocomponente.bandera_registro_medio_pago;
       const mensajeExito = "Categoria Eliminada";
       asignar_opciones_alerta(
         false,
-        "REGISTRO CATEGORIAS",
+        "REGISTRO MEDIOS PAGOS",
         mensajeExito,
         "TabBasicosGroup",
-        "Categorias",
-        "bandera_registro_categoria",
+        "MediosPagos",
+        "bandera_registro_medio_pago",
         nuevo
       );
       actualizarEstadocomponente("alerta_estado", true);
@@ -110,8 +110,8 @@ export default function DetalleCategoriaGasto({ navigation }) {
         true,
         "ERROR",
         msj,
-        "Gastos",
-        "bandera_registro_gasto",
+        "Medios",
+        "bandera_registro_medio_pago",
         false
       );
       actualizarEstadocomponente("alerta_estado", true);
@@ -124,7 +124,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       setRegistroPrincipal(item);
-      setListaDetalles(item?.DetalleGastos || []);
+      
     });
     return unsubscribe;
   }, [navigation, item]);
@@ -135,162 +135,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
     }
   }, [confirmarEliminacion]);
 
-  const tieneComprobante = !!registroPrincipal.UrlImg;
-
-  // ── Anchos de columna para la tabla ───────────────
-  const COL_ID = 45;
-  const COL_NOMBRE = 130;
-  const COL_TOTAL = 110;
-  const COL_CANT = 90;
-  const COL_PORC = 80;
-
-  const renderTablaHeader = () => (
-    <View
-      style={[
-        styles.tablaRow,
-        styles.tablaHeader,
-        {
-          borderBottomColor:
-            colors.screen_componente_estilos.color_texto_subtitulo,
-        },
-      ]}
-    >
-      <Text
-        style={[
-          styles.tablaHeaderText,
-          { width: COL_ID, fontFamily: fonts.balsamiqbold.fontFamily },
-        ]}
-      >
-        ID
-      </Text>
-      <Text
-        style={[
-          styles.tablaHeaderText,
-          {
-            width: COL_NOMBRE,
-            textAlign: "left",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-          },
-        ]}
-      >
-        CONCEPTO
-      </Text>
-      <Text
-        style={[
-          styles.tablaHeaderText,
-          {
-            width: COL_TOTAL,
-            textAlign: "right",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-          },
-        ]}
-      >
-        TOTAL
-      </Text>
-      <Text
-        style={[
-          styles.tablaHeaderText,
-          {
-            width: COL_CANT,
-            textAlign: "center",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-          },
-        ]}
-      >
-        CANT.
-      </Text>
-      <Text
-        style={[
-          styles.tablaHeaderText,
-          {
-            width: COL_PORC,
-            textAlign: "right",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-          },
-        ]}
-      >
-        %
-      </Text>
-    </View>
-  );
-
-  const renderTablaFila = (fila, idx) => (
-    <View
-      key={fila.Id ?? idx}
-      style={[
-        styles.tablaRow,
-        {
-          borderBottomColor: colors.screen_componente_estilos.color_fondo,
-        },
-        idx === listaDetalles.length - 1 && { borderBottomWidth: 0 },
-      ]}
-    >
-      <Text
-        style={[
-          styles.tablaCell,
-          {
-            width: COL_ID,
-            fontFamily: fonts.balsamiqregular.fontFamily,
-            color: colors.screen_componente_estilos.color_texto_subtitulo,
-          },
-        ]}
-      >
-        {fila.Id}
-      </Text>
-      <Text
-        style={[
-          styles.tablaCell,
-          {
-            width: COL_NOMBRE,
-            textAlign: "left",
-            fontFamily: fonts.balsamiqregular.fontFamily,
-            color: colors.screen_componente_estilos.color_texto,
-          },
-        ]}
-      >
-        {fila.NombreGasto}
-      </Text>
-      <Text
-        style={[
-          styles.tablaCell,
-          {
-            width: COL_TOTAL,
-            textAlign: "right",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-            color: colors.screen_componente_estilos.color_texto,
-          },
-        ]}
-      >
-        Gs. {Number(fila.TotalConcepto).toLocaleString("es-ES")}
-      </Text>
-      <Text
-        style={[
-          styles.tablaCell,
-          {
-            width: COL_CANT,
-            textAlign: "center",
-            fontFamily: fonts.balsamiqregular.fontFamily,
-            color: colors.screen_componente_estilos.color_texto_subtitulo,
-          },
-        ]}
-      >
-        {fila.CantidadRegistrosConcepto}
-      </Text>
-      <Text
-        style={[
-          styles.tablaCell,
-          {
-            width: COL_PORC,
-            textAlign: "right",
-            fontFamily: fonts.balsamiqbold.fontFamily,
-            color: colors.screen_componente_estilos.color_texto_importante,
-          },
-        ]}
-      >
-        {fila.PorcentajeConcepto}%
-      </Text>
-    </View>
-  );
+  
 
   return (
     <View
@@ -303,7 +148,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
 
       {mostrarConfirmacion && (
         <Confirmacion
-          title="Detalle Categoria"
+          title="Detalle Medio Pago"
           question={mensajeConfirmacion}
           navigation={navigation}
           onYes={handleYes}
@@ -312,7 +157,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
       )}
 
       <CabaceraRegistros
-        title={`Detalle de la categoria`}
+        title={`Detalle Medio Pago`}
         navigation={navigation}
         onDelete={handleDelete}
         onEdit={handleEdit}
@@ -336,14 +181,14 @@ export default function DetalleCategoriaGasto({ navigation }) {
           <View style={styles.heroTop}>
             <Text
               style={[
-                styles.nombreCategoria,
+                styles.nombreRegistro,
                 {
                   fontFamily: fonts.balsamiqbold.fontFamily,
                   color: colors.screen_componente_estilos.color_texto,
                 },
               ]}
             >
-              {registroPrincipal.NombreCategoria}
+              {registroPrincipal.NombreMedioPago}
             </Text>
 
             <View style={styles.idBadge}>
@@ -374,7 +219,6 @@ export default function DetalleCategoriaGasto({ navigation }) {
               Registrado el {registroPrincipal.FechaRegistro}
             </Text>
           </View>
-          
 
           {/* Fila inferior: Totales y métricas */}
           <View
@@ -386,34 +230,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
               },
             ]}
           >
-            <View>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                CONCEPTOS
-              </Text>
-              <Text
-                style={[
-                  styles.metaValue,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos.color_texto,
-                  },
-                ]}
-              >
-                {registroPrincipal.CantidadConceptoGastos ?? 0}
-              </Text>
-            </View>
-
+            
             <View style={{ alignItems: "center" }}>
               <Text
                 style={[
@@ -438,7 +255,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
                   },
                 ]}
               >
-                {registroPrincipal.CantidadGastosCategoria ?? 0}
+                {registroPrincipal.CantidadPagoMedio ?? 0}
               </Text>
             </View>
 
@@ -469,119 +286,73 @@ export default function DetalleCategoriaGasto({ navigation }) {
               >
                 Gs.{" "}
                 {Number(
-                  registroPrincipal.TotalGastoCategoria
+                  registroPrincipal.TotalPagoMedio
                 ).toLocaleString("es-ES")}
               </Text>
             </View>
+
+
           </View>
 
+          {/* <View style={[
+              styles.heroMeta,
+              {
+                borderTopColor:
+                  colors.screen_componente_estilos.color_fondo,
+              },
+            ]}>
+              <Text>
+                 {registroPrincipal.Observacion}
+              </Text>
+
+          </View> */}
+
           <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
-            <Text
-              style={[
-                styles.observacionLabel,
-                {
-                  fontFamily: fonts.balsamiqregular.fontFamily,
-                  color: colors.screen_componente_estilos.color_texto_subtitulo,
-                },
-              ]}
-            >
-              OBSERVACIÓN
-            </Text>
-            <View
-              style={[
-                styles.observacionBubble,
-                {
-                  backgroundColor: colors.screen_componente_estilos.color_fondo,
-                  borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
-                },
-              ]}
-            >
               <Text
                 style={[
-                  styles.observacionText,
+                  styles.observacionLabel,
                   {
                     fontFamily: fonts.balsamiqregular.fontFamily,
-                    color: colors.screen_componente_estilos.color_texto,
+                    color: colors.screen_componente_estilos.color_texto_subtitulo,
                   },
                 ]}
               >
-                {registroPrincipal.Observacion || "Sin observación"}
+                OBSERVACIÓN
               </Text>
-            </View>
-        </View>
-        </View>
-
-        {/* ═══════════════════════════════════════════════
-            TABLA DE DETALLES — Scroll horizontal
-        ═══════════════════════════════════════════════ */}
-
-        {listaDetalles.length > 0 ? (
-        <View style={styles.cardsContainer}>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor:
-                  colors.screen_componente_estilos.color_fondo_cards,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.cardTitle,
-                {
-                  fontFamily: fonts.balsamiqbold.fontFamily,
-                  color:
-                    colors.screen_componente_estilos
-                      .color_texto_subtitulo,
-                },
-              ]}
-            >
-              DETALLE DE CONCEPTOS
-            </Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator
-              contentContainerStyle={styles.tablaScrollContent}
-            >
-              <View style={styles.tablaWrapper}>
-                {renderTablaHeader()}
-                {listaDetalles.map((fila, idx) => renderTablaFila(fila, idx))}
+              <View
+                style={[
+                  styles.observacionBubble,
+                  {
+                    backgroundColor: colors.screen_componente_estilos.color_fondo,
+                    borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.observacionText,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color: colors.screen_componente_estilos.color_texto,
+                    },
+                  ]}
+                >
+                  {registroPrincipal.Observacion || "Sin observación"}
+                </Text>
               </View>
-            </ScrollView>
           </View>
+
+
         </View>
-        ):(
-        <View style={styles.sinDatosContainer}>
-        <MaterialCommunityIcons
-          name="inbox-remove-outline"
-          size={40}
-          color={colors.screen_componente_estilos.color_texto_subtitulo}
-        />
-        <Text
-          style={[
-            styles.sinDatosTexto,
-            {
-              fontFamily: fonts.balsamiqregular.fontFamily,
-              color: colors.screen_componente_estilos.color_texto_subtitulo,
-            },
-          ]}
-        >
-          Sin Gastos asociados
-        </Text>
-      </View>)
-      }
-        
-        
 
+      
 
+        
+        {/* Espacio inferior para scroll cómodo */}
         <View style={{ height: 24 }} />
       </ScrollView>
 
-      {/* ═══════════════════════════════════════════════
-          MODAL COMPROBANTE (se mantiene la funcionalidad)
-      ═══════════════════════════════════════════════ */}
+     
       
     </View>
   );
@@ -603,7 +374,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     
   },
-  nombreCategoria: {
+  nombreRegistro: {
     fontSize: 26,
     lineHeight: 32,
     textAlign: 'center',
@@ -671,36 +442,7 @@ sinDatosTexto: {
     letterSpacing: 1.1,
     marginBottom: 12,
   },
-
-  // Tabla
-  tablaScrollContent: {
-    paddingBottom: 4,
-  },
-  tablaWrapper: {
-    minWidth: "100%",
-  },
-  tablaHeader: {
-    borderBottomWidth: 1,
-    paddingBottom: 8,
-    marginBottom: 2,
-  },
-  tablaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 0.5,
-  },
-  tablaHeaderText: {
-    fontSize: 10,
-    letterSpacing: 0.6,
-    textAlign: "center",
-  },
-  tablaCell: {
-    fontSize: 12,
-    textAlign: "center",
-  },
-  //observacion
-   observacionContainer: {
+  observacionContainer: {
   marginTop: 18,
   paddingTop: 14,
   borderTopWidth: 1,
@@ -724,5 +466,6 @@ observacionText: {
   lineHeight: 15,
   textAlign: 'left',
 },
- 
+
+
 });

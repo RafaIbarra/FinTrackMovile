@@ -18,25 +18,6 @@ const { width, height } = Dimensions.get('window');
 // Radio del círculo donde se posicionarán los botones
 const RADIO = Math.min(width, height) * 0.28;
 
-// Posiciones de reloj: 9h=180°, 11h=-60°, 13h(1h)=30°, 15h(3h)=0°
-// En sistema de ángulos estándar (0°=derecha, sentido horario):
-// 9h  → 180° (izquierda)
-// 11h → -60° equivale a 300° → ángulo desde eje X: cos/sin
-// 1h  → -30° equivale a 330° ... 
-// Reloj estándar: hora en grados = (hora * 30) - 90 para que 12h=arriba
-// 9h  = 9*30 - 90 = 270 - 90 = 180°
-// 11h = 11*30 - 90 = 330 - 90 = 240° ... esto lo pone abajo izq
-// Mejor pensarlo como ángulo desde arriba en sentido horario:
-// 9h está en el lado izquierdo a media altura
-// 11h está arriba-izquierda
-// 1h  está arriba-derecha
-// 3h  está en el lado derecho a media altura
-// Usando eje Y invertido (React Native):
-// ángulo 0° = derecha, -90° = arriba, 90° = abajo
-// 9h  → 180°
-// 11h → -150° (30° antes de las 12h, lado izquierdo arriba)
-// 1h  → -30°  (30° después de las 12h, lado derecho arriba)
-// 3h  → 0°
 const BOTONES = [
   {
     id: 'categorias',
@@ -47,6 +28,8 @@ const BOTONES = [
     navigateTo: 'RegistroCategoria',
     paramKey: 'IdCategoria',
     paramValue: 0,
+    screen: 'RegistroCategoria',
+    param: 'IdCategoria',
   },
   {
     id: 'gastos',
@@ -54,6 +37,8 @@ const BOTONES = [
     icon: 'cash-minus',
     iconSet: 'MaterialCommunityIcons',
     angle: -50, // 1 hora (arriba-derecha)
+    screen: 'RegistroCategoria',
+    param: 'IdCategoria',
   },
   {
     id: 'ingresos',
@@ -61,6 +46,8 @@ const BOTONES = [
     icon: 'cash-plus',
     iconSet: 'MaterialCommunityIcons',
     angle: 0, // 3 horas (derecha)
+    screen: 'RegistroCategoria',
+    param: 'IdCategoria',
   },
   {
     id: 'medios',
@@ -68,8 +55,11 @@ const BOTONES = [
     icon: 'wallet-outline',
     iconSet: 'MaterialCommunityIcons',
     angle: 180, // 9 horas (izquierda)
+    screen: 'RegistroMedioPago',
+    param: 'IdMedio',
   },
 ];
+
 
 function AddBasic({ navigation }) {
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
@@ -141,7 +131,18 @@ function AddBasic({ navigation }) {
       });
     }, 200);
   };
+   const ir_medio = () => {
+    cerrar();
+    setTimeout(() => {
+      const IdMedio = 0;
+      navigate('StackBasicoskGroup', {
+        screen: 'RegistroMedioPago',
+        params: { IdMedio },
+      });
+    }, 200);
+  };
 
+  
   const renderIcono = (boton, color) => {
     const props = { name: boton.icon, size: 22, color };
     return boton.iconSet === 'MaterialIcons' ? (
@@ -159,6 +160,16 @@ function AddBasic({ navigation }) {
       y: Math.sin(rad) * RADIO,
     };
   };
+
+  const navegarA = (screen, param) => {
+  cerrar();
+  setTimeout(() => {
+    navigate('StackBasicoskGroup', {
+      screen: screen,
+      params: { [param]: 0 },
+    });
+  }, 200);
+};
 
   return (
     <Animated.View
@@ -206,7 +217,13 @@ function AddBasic({ navigation }) {
                 ]}
               >
                 <TouchableOpacity
-                  onPress={boton.id === 'categorias' ? ir_categoria : cerrar}
+                  onPress={() => {
+                    if (boton.screen && boton.param) {
+                      navegarA(boton.screen, boton.param);
+                    } else {
+                      cerrar();
+                    }
+                  }}
                   style={[
                     styles.botonCircular,
                     {

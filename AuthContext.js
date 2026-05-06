@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
         bandera_registro_ingreso:false, 
 
         bandera_registro_categoria:false,
+        bandera_registro_medio_pago:false,
         
         loading:false,
         tituloloading:'CARGANDO..',
