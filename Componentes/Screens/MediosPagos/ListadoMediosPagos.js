@@ -105,7 +105,7 @@ export default function ListadoMediosPagos({ navigation }) {
   if (!ready) return null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
+    <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>
       {estadocomponente.alerta_estado && <Alerta />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
@@ -133,8 +133,8 @@ export default function ListadoMediosPagos({ navigation }) {
         style={[
           styles.searchBox,
           {
-            backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-            borderColor: colors.screen_componente_estilos.color_borde_cards,
+            backgroundColor: estilos.cards_color_fondo,
+            borderColor: estilos.cards_color_border,
           },
         ]}
       >
@@ -182,34 +182,34 @@ export default function ListadoMediosPagos({ navigation }) {
             return (
                 <TouchableOpacity
                     style={[styles.contenedordatos,{
-                    backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                    borderRightColor:colors.screen_componente_estilos.color_borde_cards,
-                    borderBottomColor:colors.screen_componente_estilos.color_borde_cards
+                    backgroundColor: estilos.cards_color_fondo,
+                    borderRightColor: estilos.cards_color_border,
+                    borderBottomColor:estilos.cards_color_border
                     }]}
                     onPress={() => { navigate('DetalleMedioPago', { item }); }}
                     activeOpacity={0.85}
                 >
                     
                     <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreMedio, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
+                        <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
                             {item.NombreMedioPago}
                         </Text>
 
-                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
                             {item.FechaRegistro}
                         </Text>
 
-                        <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
                             ID: {item.Id}
                         </Text>
 
                     </View>
 
                     <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                        <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
                             Gs. {Number(item.TotalPagoMedio).toLocaleString('es-ES')}
                         </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
                             Cant: {item.CantidadPagoMedio}
                         </Text>
                      </View>
@@ -303,11 +303,13 @@ const styles = StyleSheet.create({
     flex: 2,
     justifyContent: 'center',
     paddingHorizontal: 10,
+    gap:3
   },
   columnaTotal: {
     flex: 1.5,
     alignItems: 'flex-end',
     justifyContent: 'center',
+    gap:3
   },
   nombreMedio: {
     fontSize: 12,

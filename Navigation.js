@@ -59,6 +59,12 @@ import ListadoMediosPagos from './Componentes/Screens/MediosPagos/ListadoMediosP
 import DetalleMedioPago from './Componentes/Screens/MediosPagos/DetalleMedioPago';
 import RegistroMedioPago from './Componentes/Screens/MediosPagos/RegistroMedioPago';
 
+import ListadoIngresos from './Componentes/Screens/Ingresos/ListadoIngresos';
+import DetalleIngreso from './Componentes/Screens/Ingresos/DetalleIngreso';
+import RegistroIngreso from './Componentes/Screens/Ingresos/RegistroIngreso';
+
+import ListadosGastos from './Componentes/Screens/Gastos/ListadosGastos';
+
 import AddBasic from './Componentes/AddBasic/AddBasic2';
 
 import { tema_colores_activo } from './Utils/Temas';
@@ -787,7 +793,7 @@ function TabBasicosGroup({ navigation }) {
       />
       <TabBasicos.Screen
         name="ConceptosGastos"
-        component={ListadoMovimientosIngresos}
+        component={ListadosGastos}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -819,7 +825,7 @@ function TabBasicosGroup({ navigation }) {
 
       <TabBasicos.Screen
               name="Agregar"
-              component={RegistroMovimientoGasto}
+              component={CentralTabButtonBasic}
               options={{
                 headerShown: false,
                 tabBarLabel: '',
@@ -868,7 +874,7 @@ function TabBasicosGroup({ navigation }) {
       />
       <TabBasicos.Screen
         name="ConceptosIngresos"
-        component={EstadisticasMes}
+        component={ListadoIngresos}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -935,6 +941,17 @@ function StackBasicoskGroup(){
         component={RegistroMedioPago} 
         options={{ headerShown: false }}
       /> 
+
+      <StackBasicos.Screen name="DetalleIngreso" 
+        component={DetalleIngreso} 
+        options={{ headerShown: false }}
+      />
+      <StackBasicos.Screen name="RegistroIngreso" 
+        component={RegistroIngreso} 
+        options={{ headerShown: false }}
+      />
+      
+
       
     </StackBasicos.Navigator>
   )

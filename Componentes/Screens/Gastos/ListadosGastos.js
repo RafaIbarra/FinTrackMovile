@@ -8,14 +8,14 @@ import { useTheme } from '@react-navigation/native';
 import Alerta from "../../Procesando/Alerta";
 import { useApi } from "../../../Apis/useApi";
 
-export default function ListadoCategoriasGastos({ navigation }) {
+export default function ListadosGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
   
 
-  const [datacategorias, setDatacategorias] = useState([]);
+  const [dataconceptosgastos, setDataconceptosgastos] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
-  const [datacategoriasresult, setDatacategoriasresult] = useState([]);
+  const [dataconceptosgastosresult, setDataconceptosgastosresult] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   const { asignar_opciones_alerta } = useContext(AuthContext);
@@ -41,11 +41,10 @@ export default function ListadoCategoriasGastos({ navigation }) {
 
   const cargardatos = async () => {
     setReady(false)
-    console.log(estadocomponente.bandera_registro_categoria)
-    actualizarEstadocomponente('tituloloading', 'CARGANDO CATEGORIAS');
+    actualizarEstadocomponente('tituloloading', 'CARGANDO CONCEPTOS GASTOS');
     actualizarEstadocomponente('loading', true);
     
-    const endpoint = `ref/ListadoCategoriasUser/0/`;
+    const endpoint = `ref/ListarGastosUser/0/`;
 
     const result = await apiRequest(endpoint, 'GET', {});
     
@@ -62,51 +61,45 @@ export default function ListadoCategoriasGastos({ navigation }) {
         });
       }
       
-      setDatacategorias(registros);
+      setDataconceptosgastos(registros);
       setDataresumen(result.data.resumen)
-      setDatacategoriasresult(registros)
+      setDataconceptosgastosresult(registros)
     } else {
       const msj = result.data?.message || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'INGRESOS', '', false);
+      asignar_opciones_alerta(true, 'ERROR', msj, 'MEDIOS', '', false);
       actualizarEstadocomponente('alerta_estado', true);
     }
     actualizarEstadocomponente('tituloloading', '');
     actualizarEstadocomponente('loading', false);
     setReady(true);
   };
-  
 
   useEffect(() => {
-    console.log('>>> MONTO / EJECUTO cargardatos');
     cargardatos();
-    return () => {
-    console.log('>>> DESMONTO');
-  };
-  }, [estadocomponente.bandera_registro_categoria]);
+  }, [estadocomponente.bandera_registro_concepto_gasto]);
 
   
 
-  const buscarCategoria = (texto) => {
+  const buscarConcepto = (texto) => {
     setQuery(texto);
     if (!texto.trim()) {
-      setDatacategoriasresult(datacategorias);
+      setDataconceptosgastosresult(dataconceptosgastos);
       return;
     }
     const termino = texto.toLowerCase().trim();
-    const filtrados = datacategorias.filter((item) => {
+    const filtrados = dataconceptosgastos.filter((item) => {
       const matchCategoria = item.NombreCategoria?.toLowerCase().includes(termino);
-      const matchGasto = item.DetalleGastos?.some((g) =>
-        g.NombreGasto?.toLowerCase().includes(termino)
-      );
+      const matchGasto = item.NombreGasto?.toLowerCase().includes(termino);
+      
       
       return matchCategoria || matchGasto 
     });
-    setDatacategoriasresult(filtrados);
+    setDataconceptosgastosresult(filtrados);
   };
   // ── Totales dinámicos de la búsqueda activa ──
   const totalFiltrado = useMemo(() => {
-    return datacategoriasresult.reduce((sum, item) => sum + (Number(item.TotalGastoCategoria) || 0), 0);
-  }, [datacategoriasresult]);
+    return dataconceptosgastosresult.reduce((sum, item) => sum + (Number(item.TotalConceptoGasto) || 0), 0);
+  }, [dataconceptosgastosresult]);
 
   const hayBusqueda = query.trim().length > 0;
 
@@ -121,7 +114,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
       <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
         <View style={styles.resumenBarra}>
           <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Categoria</Text>
+            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Medio Pago</Text>
             <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#7B5EA7' }]}>
               Gs. {Number(dataresumen?.TotalGeneral).toLocaleString('es-ES')}
             </Text>
@@ -130,7 +123,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
           <View style={styles.resumenItem}>
             <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
             <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-              {Number(dataresumen?.CantidadCategorias).toLocaleString('es-ES')}
+              {Number(dataresumen?.CantidadGastos).toLocaleString('es-ES')}
             </Text>
           </View>
         </View>
@@ -149,8 +142,8 @@ export default function ListadoCategoriasGastos({ navigation }) {
         <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
         <TextInput
           value={query}
-          onChangeText={buscarCategoria}
-          placeholder="Por categoria, concepto gasto..."
+          onChangeText={buscarConcepto}
+          placeholder="Por concepto o categoria..."
           underlineColorAndroid="transparent"
           placeholderTextColor={estilos.font_sub_color}
           style={{
@@ -163,7 +156,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
           }}
         />
         {hayBusqueda && (
-          <TouchableOpacity onPress={() => buscarCategoria('')} style={{ padding: 4 }}>
+          <TouchableOpacity onPress={() => buscarConcepto('')} style={{ padding: 4 }}>
             <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
           </TouchableOpacity>
         )}
@@ -173,7 +166,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
       {hayBusqueda && (
         <View style={styles.resultadoBusqueda}>
           <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 12 }}>
-            {datacategoriasresult.length} resultado{datacategoriasresult.length !== 1 ? 's' : ''} · Total filtrado:{' '}
+            {dataconceptosgastosresult.length} resultado{dataconceptosgastosresult.length !== 1 ? 's' : ''} · Total filtrado:{' '}
             <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color }}>
               Gs. {totalFiltrado.toLocaleString('es-ES')}
             </Text>
@@ -183,7 +176,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
 
       {/* ═══ LISTA ═══ */}
       <FlatList
-        data={datacategoriasresult}
+        data={dataconceptosgastosresult}
         contentContainerStyle={styles.flatlistContenido}
         style={{ flex: 1 }}
         renderItem={({ item }) => {
@@ -194,31 +187,35 @@ export default function ListadoCategoriasGastos({ navigation }) {
                     borderRightColor: estilos.cards_color_border,
                     borderBottomColor:estilos.cards_color_border
                     }]}
-                    onPress={() => { navigate('DetalleCategoriaGasto', { item }); }}
+                    onPress={() => { navigate('DetalleMedioPago', { item }); }}
                     activeOpacity={0.85}
                 >
                     
                     <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreEmpresa, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            {item.NombreCategoria}
+                        <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                            {item.NombreGasto}
                         </Text>
 
                         <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
                             {item.FechaRegistro}
                         </Text>
 
-                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            ID: {item.Id}
+                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                            
+                            {item.NombreCategoria}
                         </Text>
 
                     </View>
 
                     <View style={styles.columnaTotal}>
                         <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            Gs. {Number(item.TotalGastoCategoria).toLocaleString('es-ES')}
+                            Gs. {Number(item.TotalConceptoGasto).toLocaleString('es-ES')}
                         </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            Cant: {item.CantidadGastosCategoria}
+                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                            Cant: {item.CantidadConceptoGasto}
+                        </Text>
+                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                            ID: {item.Id}
                         </Text>
                      </View>
                 </TouchableOpacity>
@@ -319,7 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap:3
   },
-  nombreEmpresa: {
+  nombreMedio: {
     fontSize: 12,
     marginBottom: 4,
   },

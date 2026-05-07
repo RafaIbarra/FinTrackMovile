@@ -46,8 +46,8 @@ const BOTONES = [
     icon: 'cash-plus',
     iconSet: 'MaterialCommunityIcons',
     angle: 0, // 3 horas (derecha)
-    screen: 'RegistroCategoria',
-    param: 'IdCategoria',
+    screen: 'RegistroIngreso',
+    param: 'IdIngreso',
   },
   {
     id: 'medios',
