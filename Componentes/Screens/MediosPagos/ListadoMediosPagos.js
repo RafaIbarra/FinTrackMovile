@@ -4,7 +4,7 @@ import { Surface } from 'react-native-paper';
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
-
+import Esperando from "../../Procesando/Espera";
 import Alerta from "../../Procesando/Alerta";
 import { useApi } from "../../../Apis/useApi";
 
@@ -23,7 +23,7 @@ export default function ListadoMediosPagos({ navigation }) {
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
-
+  const [titulo,setTitulo]=useState('CARGANDO MEDIOS PAGOS')
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const estilos = {
@@ -40,10 +40,8 @@ export default function ListadoMediosPagos({ navigation }) {
   };
 
   const cargardatos = async () => {
-    setReady(false)
-    actualizarEstadocomponente('tituloloading', 'CARGANDO MEDIOS PAGOS');
-    actualizarEstadocomponente('loading', true);
     
+    setReady(false)
     const endpoint = `ref/ListadoMedioPagosUser/0/`;
 
     const result = await apiRequest(endpoint, 'GET', {});
@@ -65,17 +63,18 @@ export default function ListadoMediosPagos({ navigation }) {
       setDataresumen(result.data.resumen)
       setDatamediosresult(registros)
     } else {
-      const msj = result.data?.message || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'MEDIOS', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      // const msj = result.data?.message || 'Error en la solicitud';
+      // asignar_opciones_alerta(true, 'ERROR', msj, 'MEDIOS', '', false);
+      // actualizarEstadocomponente('alerta_estado', true);
     }
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
-    setReady(true);
+    setReady(true)
+    
   };
 
   useEffect(() => {
+    
     cargardatos();
+    
   }, [estadocomponente.bandera_registro_medio_pago]);
 
   
@@ -102,7 +101,7 @@ export default function ListadoMediosPagos({ navigation }) {
 
   const hayBusqueda = query.trim().length > 0;
 
-  if (!ready) return null;
+  if (!ready) return <Esperando titulo={titulo}/>;
 
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>

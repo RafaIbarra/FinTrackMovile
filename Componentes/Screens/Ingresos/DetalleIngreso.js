@@ -17,6 +17,9 @@ import { AuthContext } from "../../../AuthContext";
 
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
 import Confirmacion from "../../Procesando/Confirmacion";
+import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
+
 import Alerta from "../../Procesando/AlertaNew";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,6 +37,20 @@ export default function DetalleIngreso({ navigation }) {
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
+
+  const [tituloespera, setTituloespera] = useState('');
+  const [ready, setReady] = useState(false);
+
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'bandera_registro_concepto_ingreso',
+                                                          valor_estado:'',
+                                                          navnivel1:'TabBasicosGroup',
+                                                          navnivel2:'StackIngresosGroup',
+                                                          navnivel3:'ConceptosIngresos',
+                                                        })
 
   const {
     estadocomponente,
@@ -79,57 +96,62 @@ export default function DetalleIngreso({ navigation }) {
     // navigation.goBack();
   };
 
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
+
   const eliminarRegistro = async () => {
     const id_del = registroPrincipal.Id;
-    actualizarEstadocomponente("tituloloading", "Eliminando Ingreso..");
-    actualizarEstadocomponente("loading", true);
+    
+    setReady(false)
+    setTituloespera("Eliminando Ingreso..")
 
     const endpoint = `ref/OperacionesIngresoUser/${id_del}/`;
     const metodo = "DELETE";
     const result = await apiRequest(endpoint, metodo, {});
 
     if (result.sessionExpired) {
-      actualizarEstadocomponente("tituloloading", "");
-      actualizarEstadocomponente("loading", false);
+      
       return;
     }
 
     if (result.resp_correcta) {
+      setReady(true);
       const nuevo = !estadocomponente.bandera_registro_concepto_ingreso;
       const mensajeExito = "Ingreso Eliminado";
-      asignar_opciones_alerta(
-        false,
-        "REGISTRO INGRESOS",
-        mensajeExito,
-        "TabBasicosGroup",
-        "ConceptosIngresos",
-        "bandera_registro_concepto_ingreso",
-        nuevo
-      );
-      // actualizarEstadocomponente("alerta_estado", true);
-      actualizarEstadocomponente("bandera_registro_concepto_ingreso", nuevo);
-      setMostrarConfirmacion(true);
-      navigation.goBack();
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
+      
+      
+      
 
     } else {
-      const msj = result.data?.message || "Error en la solicitud";
-      asignar_opciones_alerta(
-        true,
-        "ERROR",
-        msj,
-        "Ingresos",
-        "ConceptosIngresos",
-        false
-      );
-      actualizarEstadocomponente("alerta_estado", true);
+      const msj = result.data?.message || 'Error en la solicitud';
+        
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+        
     }
 
-    actualizarEstadocomponente("tituloloading", "");
-    actualizarEstadocomponente("loading", false);
+    
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      setReady(true);
       setRegistroPrincipal(item);
       
     });
@@ -142,68 +164,82 @@ export default function DetalleIngreso({ navigation }) {
     }
   }, [confirmarEliminacion]);
 
+  if (!ready) return <Esperando titulo={tituloespera}/>;
+  if (ready){
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.screen_componente_estilos.color_fondo,
+        }}
+      >
+        {/* {estadocomponente.alerta_estado && <Alerta  navigation={navigation} />} */}
+        {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
   
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.screen_componente_estilos.color_fondo,
-      }}
-    >
-      {/* {estadocomponente.alerta_estado && <Alerta  navigation={navigation} />} */}
-
-      {mostrarConfirmacion && (
-        <Confirmacion
-          title="Detalle Ingreso"
-          question={mensajeConfirmacion}
+        {mostrarConfirmacion && (
+          <Confirmacion
+            title="Detalle Ingreso"
+            question={mensajeConfirmacion}
+            navigation={navigation}
+            onYes={handleYes}
+            onNo={handleNo}
+          />
+        )}
+  
+        <CabaceraRegistros
+          title={`Detalle Ingreso`}
           navigation={navigation}
-          onYes={handleYes}
-          onNo={handleNo}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          showbottons={true}
         />
-      )}
-
-      <CabaceraRegistros
-        title={`Detalle Ingreso`}
-        navigation={navigation}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-        showbottons={true}
-      />
-      <TouchableOpacity onPress={() => handleDelete('')}>
-                  <Text >✕</Text>
-                </TouchableOpacity>
-      <ScrollView style={styles.scroll} bounces={false}>
-        {/* ═══════════════════════════════════════════════
-            HERO — Enfoque en Nombre + ID
-        ═══════════════════════════════════════════════ */}
-        <View
-          style={[
-            styles.hero,
-            {
-              backgroundColor:
-                colors.screen_componente_estilos.color_fondo_cards,
-            },
-          ]}
-        >
-          {/* Fila superior: Nombre grande + ID */}
-          <View style={styles.heroTop}>
-            <Text
-              style={[
-                styles.nombreRegistro,
-                {
-                  fontFamily: fonts.balsamiqbold.fontFamily,
-                  color: colors.screen_componente_estilos.color_texto,
-                },
-              ]}
-            >
-              {registroPrincipal.NombreIngreso}
-            </Text>
-
-            <View style={styles.idBadge}>
+        
+        <ScrollView style={styles.scroll} bounces={false}>
+          {/* ═══════════════════════════════════════════════
+              HERO — Enfoque en Nombre + ID
+          ═══════════════════════════════════════════════ */}
+          <View
+            style={[
+              styles.hero,
+              {
+                backgroundColor:
+                  colors.screen_componente_estilos.color_fondo_cards,
+              },
+            ]}
+          >
+            {/* Fila superior: Nombre grande + ID */}
+            <View style={styles.heroTop}>
               <Text
                 style={[
-                  styles.idText,
+                  styles.nombreRegistro,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color: colors.screen_componente_estilos.color_texto,
+                  },
+                ]}
+              >
+                {registroPrincipal.NombreIngreso}
+              </Text>
+  
+              <View style={styles.idBadge}>
+                <Text
+                  style={[
+                    styles.idText,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos.color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  ID {registroPrincipal.Id}
+                </Text>
+              </View>
+  
+              <Text
+                style={[
+                  styles.fechaRegistro,
                   {
                     fontFamily: fonts.balsamiqregular.fontFamily,
                     color:
@@ -211,194 +247,181 @@ export default function DetalleIngreso({ navigation }) {
                   },
                 ]}
               >
-                ID {registroPrincipal.Id}
+                Registrado el {registroPrincipal.FechaRegistro}
               </Text>
             </View>
-
-            <Text
+  
+            {/* Fila inferior: Totales y métricas */}
+            <View
               style={[
-                styles.fechaRegistro,
+                styles.heroMeta,
                 {
-                  fontFamily: fonts.balsamiqregular.fontFamily,
-                  color:
-                    colors.screen_componente_estilos.color_texto_subtitulo,
+                  borderTopColor:
+                    colors.screen_componente_estilos.color_fondo,
                 },
               ]}
             >
-              Registrado el {registroPrincipal.FechaRegistro}
-            </Text>
-          </View>
-
-          {/* Fila inferior: Totales y métricas */}
-          <View
-            style={[
-              styles.heroMeta,
-              {
-                borderTopColor:
-                  colors.screen_componente_estilos.color_fondo,
-              },
-            ]}
-          >
-            
-            <View style={{ alignItems: "center" }}>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                REGISTROS
-              </Text>
-              <Text
-                style={[
-                  styles.metaValue,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos.color_texto,
-                  },
-                ]}
-              >
-                {registroPrincipal.CantidadConcepto ?? 0}
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end" }}>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                TOTAL
-              </Text>
-              <Text
-                style={[
-                  styles.totalAmount,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_importante,
-                  },
-                ]}
-              >
-                Gs.{" "}
-                {Number(
-                  registroPrincipal.TotalIngreso
-                ).toLocaleString("es-ES")}
-              </Text>
-            </View>
-
-
-          </View>
-
-          {/* <View style={[
-              styles.heroMeta,
-              {
-                borderTopColor:
-                  colors.screen_componente_estilos.color_fondo,
-              },
-            ]}>
-              <Text>
-                 {registroPrincipal.Observacion}
-              </Text>
-
-          </View> */}
-          <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
-              <Text
-                style={[
-                  styles.observacionLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color: colors.screen_componente_estilos.color_texto_subtitulo,
-                  },
-                ]}
-              >
-                TIPO INGRESO:
-              </Text>
-              <View
-                style={[
-                  styles.observacionBubble,
-                  {
-                    backgroundColor: colors.screen_componente_estilos.color_fondo,
-                    borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
-                  },
-                ]}
-              >
+              
+              <View style={{ alignItems: "center" }}>
                 <Text
                   style={[
-                    styles.observacionText,
+                    styles.metaLabel,
                     {
                       fontFamily: fonts.balsamiqregular.fontFamily,
-                      color: colors.screen_componente_estilos.color_texto,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_subtitulo,
                     },
                   ]}
                 >
-                  {registroPrincipal.NombreTipoIngreso || "Sin observación"}
+                  REGISTROS
                 </Text>
-              </View>
-          </View>
-
-          <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
-              <Text
-                style={[
-                  styles.observacionLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color: colors.screen_componente_estilos.color_texto_subtitulo,
-                  },
-                ]}
-              >
-                OBSERVACIÓN
-              </Text>
-              <View
-                style={[
-                  styles.observacionBubble,
-                  {
-                    backgroundColor: colors.screen_componente_estilos.color_fondo,
-                    borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
-                  },
-                ]}
-              >
                 <Text
                   style={[
-                    styles.observacionText,
+                    styles.metaValue,
                     {
-                      fontFamily: fonts.balsamiqregular.fontFamily,
-                      color: colors.screen_componente_estilos.color_texto,
+                      fontFamily: fonts.balsamiqbold.fontFamily,
+                      color:
+                        colors.screen_componente_estilos.color_texto,
                     },
                   ]}
                 >
-                  {registroPrincipal.Observacion || "Sin observación"}
+                  {registroPrincipal.CantidadConcepto ?? 0}
                 </Text>
               </View>
+  
+              <View style={{ alignItems: "flex-end" }}>
+                <Text
+                  style={[
+                    styles.metaLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  TOTAL
+                </Text>
+                <Text
+                  style={[
+                    styles.totalAmount,
+                    {
+                      fontFamily: fonts.balsamiqbold.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_importante,
+                    },
+                  ]}
+                >
+                  Gs.{" "}
+                  {Number(
+                    registroPrincipal.TotalIngreso
+                  ).toLocaleString("es-ES")}
+                </Text>
+              </View>
+  
+  
+            </View>
+  
+            {/* <View style={[
+                styles.heroMeta,
+                {
+                  borderTopColor:
+                    colors.screen_componente_estilos.color_fondo,
+                },
+              ]}>
+                <Text>
+                   {registroPrincipal.Observacion}
+                </Text>
+  
+            </View> */}
+            <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
+                <Text
+                  style={[
+                    styles.observacionLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color: colors.screen_componente_estilos.color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  TIPO INGRESO:
+                </Text>
+                <View
+                  style={[
+                    styles.observacionBubble,
+                    {
+                      backgroundColor: colors.screen_componente_estilos.color_fondo,
+                      borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.observacionText,
+                      {
+                        fontFamily: fonts.balsamiqregular.fontFamily,
+                        color: colors.screen_componente_estilos.color_texto,
+                      },
+                    ]}
+                  >
+                    {registroPrincipal.NombreTipoIngreso || "Sin observación"}
+                  </Text>
+                </View>
+            </View>
+  
+            <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
+                <Text
+                  style={[
+                    styles.observacionLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color: colors.screen_componente_estilos.color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  OBSERVACIÓN
+                </Text>
+                <View
+                  style={[
+                    styles.observacionBubble,
+                    {
+                      backgroundColor: colors.screen_componente_estilos.color_fondo,
+                      borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.observacionText,
+                      {
+                        fontFamily: fonts.balsamiqregular.fontFamily,
+                        color: colors.screen_componente_estilos.color_texto,
+                      },
+                    ]}
+                  >
+                    {registroPrincipal.Observacion || "Sin observación"}
+                  </Text>
+                </View>
+            </View>
+  
+  
           </View>
-
-
-        </View>
-
-      
-
+  
         
-        {/* Espacio inferior para scroll cómodo */}
-        <View style={{ height: 24 }} />
-      </ScrollView>
-
-     
-      
-    </View>
-  );
+  
+          
+          {/* Espacio inferior para scroll cómodo */}
+          <View style={{ height: 24 }} />
+        </ScrollView>
+  
+       
+        
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

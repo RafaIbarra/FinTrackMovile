@@ -9,6 +9,7 @@ import { useApi } from '../../../Apis/useApi';
 import Alerta from '../../Procesando/Alerta';
 import Switch from '../../Switch/Switch';
 import SegmentedToggle from '../../Switch/SegmentedToggle';
+import Esperando from '../../Procesando/Espera';
 // Victory Native (legacy - basado en SVG, funciona en Expo Go)
 import {
     VictoryPie,
@@ -38,7 +39,7 @@ export default function EstadisticasMes({ navigation }) {
     const [leyendaconceptos, setLeyendaconceptos] = useState(false);
     const [leyendamedios, setLeyendamedios] = useState(false);
     const [leyendasemana, setLeyendasemana] = useState(false);
-
+    const [titulo,setTitulo]=useState('CARGANDO ESTADISTICAS')
     const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
     const estilos = {
@@ -69,9 +70,8 @@ export default function EstadisticasMes({ navigation }) {
     };
 
     const cargardatos = async () => {
+        
         setReady(false);
-        actualizarEstadocomponente('tituloloading', 'CARGANDO ESTADISTICAS');
-        actualizarEstadocomponente('loading', true);
         const anno_storage = sesiondatadate.dataanno;
         const mes_storage = sesiondatadate.datames;
         const endpoint = `analitic/EstadisticaMes/${anno_storage}/${mes_storage}/`;
@@ -85,17 +85,18 @@ export default function EstadisticasMes({ navigation }) {
             
             setStatsData(result.data);
         } else {
-            const msj = result.data?.message || 'Error en la solicitud';
-            asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
-            actualizarEstadocomponente('alerta_estado', true);
+            // const msj = result.data?.message || 'Error en la solicitud';
+            // asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
+            // actualizarEstadocomponente('alerta_estado', true);
         }
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
+        
         setReady(true);
     };
 
     useEffect(() => {
+        
         cargardatos();
+        
     }, [estadocomponente.bandera_registro_gasto, estadocomponente.bandera_registro_ingreso]);
 
     useEffect(() => {
@@ -198,11 +199,7 @@ export default function EstadisticasMes({ navigation }) {
 
     if (!ready || !statsData) {
         return (
-            <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color }}>
-                    Cargando estadísticas...
-                </Text>
-            </View>
+            <Esperando titulo={titulo}/>
         );
     }
 

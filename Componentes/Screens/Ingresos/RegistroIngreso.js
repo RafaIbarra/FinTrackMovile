@@ -12,7 +12,9 @@ import { AuthContext } from '../../../AuthContext';
 import { useApi } from '../../../Apis/useApi';
 import { useRoute } from "@react-navigation/native";
 
-import Alerta from '../../Procesando/Alerta';
+
+import Notificacion from '../../Notificacion/Notificacion';
+import Esperando from '../../Procesando/Espera';
 import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -127,8 +129,22 @@ export default function RegistroIngreso({ navigation }) {
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdIngreso } } = useRoute();
-  const [titulo, setTitulo] = useState('');
-  const [cargando, setCargando] = useState(true);
+  const [titulocabecera, setTitulocabecera] = useState('');
+  const [tituloespera, setTituloespera] = useState('');
+  
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const [ready, setReady] = useState(false);
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'bandera_registro_concepto_ingreso',
+                                                        valor_estado:'',
+                                                        navnivel1:'TabBasicosGroup',
+                                                        navnivel2:'StackIngresosGroup',
+                                                        navnivel3:'ConceptosIngresos',
+                                                      })
+  
+  
 
   // ── Data registrada (para edición) ────────────────────────────────────────
   const [dataingresoregistrado, setDataingresoregistrado] = useState(null);
@@ -148,6 +164,8 @@ export default function RegistroIngreso({ navigation }) {
 
   // ── Carga datos ───────────────────────────────────────────────────────────
   const carga_registrado = async () => {
+    setReady(false)
+    setTituloespera('Carga de datos registrados')
     const endpoint = `ref/ListarIngresosUser/${IdIngreso}/`;
     const result = await apiRequest(endpoint, 'GET', {});
     
@@ -160,30 +178,45 @@ export default function RegistroIngreso({ navigation }) {
         setNombreingreso(mov.NombreIngreso);
         setDescripcion(mov.Observacion);
         setFecharegistro(mov.FechaRegistro);
-        // Si el backend retorna TipoIngreso, lo usamos; si no, default 1
         setTipoingreso(mov.TipoIngreso ?? 1);
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS - Referenciales',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
     } catch (e) {
       const msj = e || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS - Referenciales',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     } finally {
-      setCargando(false);
+      
+      setReady(true)
     }
   };
 
   useEffect(() => {
+    
     if (IdIngreso === 0) {
-      setTitulo('Nuevo Ingreso');
-      setCargando(false);
+      setTitulocabecera('Nuevo Ingreso');
+      setReady(true)
+      
     } else {
-      setTitulo(`Editar Ingreso`);
+      setTitulocabecera(`Editar Ingreso`);
       carga_registrado();
     }
+    
   }, []);
 
   const resetForm = () => {
@@ -195,8 +228,11 @@ export default function RegistroIngreso({ navigation }) {
   const cancelar = () => {
     navigation.goBack();
   };
-
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
   const guardar = async () => {
+    setReady(false);
     const esEdicion = IdIngreso > 0;
     const formData = new FormData();
     formData.append('nombre', nombreingreso);
@@ -207,9 +243,9 @@ export default function RegistroIngreso({ navigation }) {
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..');
-      actualizarEstadocomponente('loading', true);
-
+      
+      const texto_titulo=esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..'
+      setTituloespera(texto_titulo)
       const endpoint = esEdicion 
         ? `ref/OperacionesIngresoUser/${IdIngreso}/` 
         : `ref/OperacionesIngresoUser/`;
@@ -217,8 +253,7 @@ export default function RegistroIngreso({ navigation }) {
       const result = await apiRequest(endpoint, metodo, formData);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      actualizarEstadocomponente('tituloloading', '');
-      actualizarEstadocomponente('loading', false);
+      
 
       if (result.sessionExpired) {
         return;
@@ -226,60 +261,69 @@ export default function RegistroIngreso({ navigation }) {
 
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
+        setReady(true);
         const nuevo = !estadocomponente.bandera_registro_concepto_ingreso;
-        // const mensajeExito = esEdicion ? 'Ingreso actualizado correctamente' : 'Registro del Ingreso';
-        // asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabBasicosGroup', 'ConceptosIngresos', 'bandera_registro_concepto_ingreso', nuevo);
-        // actualizarEstadocomponente('alerta_estado', true);
-        actualizarEstadocomponente('bandera_registro_concepto_ingreso',nuevo);
-        // navigate('TabBasicosGroup', {screen: 'ConceptosIngresos'});
-        // navigation.navigate('TabBasicosGroup', {screen: 'ConceptosIngresos',initial: false })
-        // navigation.pop(1)
-        // navigation.getParent('TabBasicos')?.navigate('ConceptosIngresos');
-        //navigation.goBack()
-        navigate('TabBasicosGroup', {
-        screen: "StackIngresosGroup",           // nombre del tab
-        params: {
-          screen: "ConceptosIngresos",  // pantalla dentro del stack del tab
-          
-        }
-      })
+        const mensajeExito = esEdicion ? 'Ingreso actualizado correctamente' : 'Registro del Ingreso';
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
+
+  
         
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_concepto_ingreso', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+        
       }
     } catch (e) {
-      asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'ConceptosIngresos', 'bandera_registro_concepto_ingreso', false);
-      actualizarEstadocomponente('alerta_estado', true);
-      Alert.alert('Error', 'Ocurrió un error al guardar.');
+      
+      setReady(true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESOS',
+          mensaje: 'Ocurrió un error al guardar.',
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+
+
+      
     } finally {
       setEnviando(false);
+      setReady(true);
     }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (cargando) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: estilos.pantalla_color_fondo }}>
-        <ActivityIndicator color={estilos.font_importe_color} size="large" />
-        <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, marginTop: 12 }}>
-          Cargando...
-        </Text>
-      </View>
-    );
-  }
+  
+  if (!ready) return <Esperando titulo={tituloespera}/>;
+
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* {estadocomponente.alerta_estado && <Alerta  navigation={navigation} />} */}
-      {/* {estadocomponente.alerta_estado && <Alerta />} */}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
+      
       
       <CabeceraRegistros
-        title={titulo}
+        title={titulocabecera}
         navigation={navigation}
         onDelete={() => {}}
         onEdit={() => {}}

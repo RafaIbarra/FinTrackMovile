@@ -8,7 +8,7 @@ import { useTheme } from '@react-navigation/native';
 import Alerta from "../../Procesando/Alerta";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import { useApi } from "../../../Apis/useApi";
-
+import Esperando from "../../Procesando/Espera";
 export default function ListadoMovimientosGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
@@ -24,7 +24,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
-
+  const [titulo,setTitulo]=useState('CARGANDO MOVIMIENTOS GASTOS')
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const estilos = {
@@ -42,8 +42,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
 
   const cargardatos = async () => {
     setReady(false);
-    actualizarEstadocomponente('tituloloading', 'CARGANDO GASTOS');
-    actualizarEstadocomponente('loading', true);
+    
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
     const endpoint = `operaciones/ListadoMovimientoGastosMesUser/${anno_storage}/${mes_storage}/`;
@@ -65,17 +64,18 @@ export default function ListadoMovimientosGastos({ navigation }) {
       setDataegresosresult(registros);
       setDataresumen(result.data.resumen);
     } else {
-      const msj = result.data?.message || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      // const msj = result.data?.message || 'Error en la solicitud';
+      // asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
+      // actualizarEstadocomponente('alerta_estado', true);
     }
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
     setReady(true);
+    
   };
 
   useEffect(() => {
+    
     cargardatos();
+    
   }, [estadocomponente.bandera_registro_gasto]);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
 
   const hayBusqueda = query.trim().length > 0;
 
-  if (!ready) return null;
+  if (!ready) return <Esperando titulo={titulo}/>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>

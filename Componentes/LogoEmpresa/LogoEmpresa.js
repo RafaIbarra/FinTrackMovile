@@ -5,7 +5,7 @@ import { API_BASE_IMG } from '../../Apis/ApiBase';
 
 const LogoEmpresa = ({ imagePath }) => {
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Inicia en true directamente
   const { colors } = useTheme();
   
   const imageUrl = imagePath ? `${API_BASE_IMG}/Media/${imagePath}` : null;
@@ -30,8 +30,8 @@ const LogoEmpresa = ({ imagePath }) => {
       <Image
         source={{ uri: imageUrl }}
         style={[styles.logo, { opacity: loading ? 0 : 1 }]}
-        resizeMode="contain"  // 🔥 Cambiado de "cover" a "contain"
-        onLoadStart={() => setLoading(true)}
+        resizeMode="contain"
+        // ❌ Eliminado onLoadStart
         onLoadEnd={() => setLoading(false)}
         onError={(e) => {
           setError(true);
@@ -47,7 +47,6 @@ const LogoEmpresa = ({ imagePath }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     width: 50,

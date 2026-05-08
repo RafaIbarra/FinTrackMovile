@@ -9,7 +9,7 @@ import Handelstorage from '../../../Storage/HandelStorage';
 import { useApi } from '../../../Apis/useApi';
 
 import Alerta from '../../Procesando/Alerta';
-
+import Esperando from '../../Procesando/Espera';
 // ─── Helper para formatear números como moneda ───────────────────────────────
 const formatCurrency = (value) => {
     if (value === undefined || value === null) return '0';
@@ -25,6 +25,7 @@ export default function ResumenMovimientos({ navigation }) {
     const { reiniciarvalores } = useContext(AuthContext);
     const { sesiondatadate } = useContext(AuthContext);
     const [ready, setReady] = useState(false);
+    const [titulo,setTitulo]=useState('CARGANDO RESUMEN')
 
     // ─── Estado para la data ────────────────────────────────────────────────
     const [dataResumen, setDataResumen] = useState(null);
@@ -48,9 +49,8 @@ export default function ResumenMovimientos({ navigation }) {
     };
 
     const cargardatos = async () => {
+        
         setReady(false);
-        actualizarEstadocomponente('tituloloading', 'CARGANDO RESUMEN');
-        actualizarEstadocomponente('loading', true);
         const anno_storage = sesiondatadate.dataanno;
         const mes_storage = sesiondatadate.datames;
         const endpoint = `analitic/ResumenMovimientoMes/${anno_storage}/${mes_storage}/`;
@@ -63,6 +63,7 @@ export default function ResumenMovimientos({ navigation }) {
         if (result.resp_correcta) {
             const data=result.data
             setDataResumen(result.data);
+            console.log(result.data)
             serResultado(result.data.ResultadoDelMes)
             const filas_Tipos = [];
             if (data.ResumenPorTipos) {
@@ -112,17 +113,18 @@ export default function ResumenMovimientos({ navigation }) {
 
 
         } else {
-            const msj = result.data?.message || 'Error en la solicitud';
-            asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
-            actualizarEstadocomponente('alerta_estado', true);
+            // const msj = result.data?.message || 'Error en la solicitud';
+            // asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
+            // actualizarEstadocomponente('alerta_estado', true);
         }
-        actualizarEstadocomponente('tituloloading', '');
-        actualizarEstadocomponente('loading', false);
         setReady(true);
+        
     };
 
     useEffect(() => {
+        
         cargardatos();
+        
     }, [estadocomponente.bandera_registro_gasto, estadocomponente.bandera_registro_ingreso]);
 
     useEffect(() => {
@@ -170,7 +172,7 @@ export default function ResumenMovimientos({ navigation }) {
             </Text>
         </View>
     );
-
+    if (!ready) return <Esperando titulo={titulo}/>;
     if(ready){
 
         return (

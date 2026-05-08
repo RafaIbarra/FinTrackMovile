@@ -6,6 +6,7 @@ import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 
 import Alerta from "../../Procesando/Alerta";
+import Esperando from "../../Procesando/Espera";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import { useApi } from "../../../Apis/useApi";
 
@@ -24,6 +25,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
+  const [titulo,setTitulo]=useState('CARGANDO MOVIMIENTOS INGRESOS')
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -41,9 +43,8 @@ export default function ListadoMovimientosIngresos({ navigation }) {
   };
 
   const cargardatos = async () => {
+    
     setReady(false)
-    actualizarEstadocomponente('tituloloading', 'CARGANDO INGRESOS');
-    actualizarEstadocomponente('loading', true);
     const anno_storage = sesiondatadate.dataanno;
     const mes_storage = sesiondatadate.datames;
     const endpoint = `operaciones/ListadoMovimientosIngresosMesUser/${anno_storage}/${mes_storage}/`;
@@ -66,17 +67,18 @@ export default function ListadoMovimientosIngresos({ navigation }) {
       setDataresumen(result.data.resumen)
       setDataingresosresult(registros)
     } else {
-      const msj = result.data?.message || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'INGRESOS', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      // const msj = result.data?.message || 'Error en la solicitud';
+      // asignar_opciones_alerta(true, 'ERROR', msj, 'INGRESOS', '', false);
+      // actualizarEstadocomponente('alerta_estado', true);
     }
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
-    setReady(true);
+    
+    setReady(true)
   };
 
   useEffect(() => {
+    
     cargardatos();
+    
   }, [estadocomponente.bandera_registro_ingreso]);
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
 
   const hayBusqueda = query.trim().length > 0;
 
-  if (!ready) return null;
+  if (!ready) return <Esperando titulo={titulo}/>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
