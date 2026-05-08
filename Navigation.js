@@ -66,6 +66,7 @@ import RegistroIngreso from './Componentes/Screens/Ingresos/RegistroIngreso';
 import ListadosGastos from './Componentes/Screens/Gastos/ListadosGastos';
 
 import AddBasic from './Componentes/AddBasic/AddBasic2';
+import Alerta from './Componentes/Procesando/Alerta';
 
 import { tema_colores_activo } from './Utils/Temas';
 
@@ -200,8 +201,8 @@ function DrawerInicio({navigation}) {
           }}
       />
 
-      <DrawerNav.Screen name="StackBasicoskGroup" 
-        component={StackBasicoskGroup}
+      <DrawerNav.Screen name="TabBasicosGroup" 
+        component={TabBasicosGroup}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -597,7 +598,7 @@ function HomeStackGroup(){
   
   return(
     <HomeStack.Navigator 
-    options
+    
     >
       <HomeStack.Screen name="TabsGroup" component={TabsGroup} 
       options={{ headerShown: false }}
@@ -655,6 +656,7 @@ function Navigation({notificationData,setNotificationData}) {
               <>
                 {estadocomponente.loading && <Cargando />}
                 {estadocomponente.componente_plus_basic && <AddBasic />}
+                {/* {estadocomponente.alerta_estado && <Alerta />} */}
                 <DrawerInicio />
               </>
           ) : (
@@ -753,7 +755,7 @@ function TabBasicosGroup({ navigation }) {
   }
   return (
     <TabBasicos.Navigator
-      initialRouteName="Categorias"
+      initialRouteName="StackCategoriasGroup"
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
@@ -765,10 +767,11 @@ function TabBasicosGroup({ navigation }) {
         },
        
       }}
+      
     >
       <TabBasicos.Screen
-        name="Categorias"
-        component={ListadoCategoriasGastos}
+        name="StackCategoriasGroup"
+        component={StackCategoriasGroup}
          options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -792,8 +795,8 @@ function TabBasicosGroup({ navigation }) {
         }}
       />
       <TabBasicos.Screen
-        name="ConceptosGastos"
-        component={ListadosGastos}
+        name="StackGastosGroup"
+        component={StackGastosGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -842,8 +845,8 @@ function TabBasicosGroup({ navigation }) {
 
 
       <TabBasicos.Screen
-        name="MediosPagos"
-        component={ListadoMediosPagos}
+        name="StackMediosPagosGroup"
+        component={StackMediosPagosGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -873,8 +876,8 @@ function TabBasicosGroup({ navigation }) {
         }}
       />
       <TabBasicos.Screen
-        name="ConceptosIngresos"
-        component={ListadoIngresos}
+        name="StackIngresosGroup"
+        component={StackIngresosGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -910,53 +913,56 @@ function TabBasicosGroup({ navigation }) {
  
 }
 
-const StackBasicos = createNativeStackNavigator();
-function StackBasicoskGroup(){
-  const { colors,fonts } = useTheme();
-  
-  return(
-    <StackBasicos.Navigator 
-    options
-    >
-      <StackBasicos.Screen name="TabBasicosGroup" component={TabBasicosGroup} 
-      options={{ headerShown: false }}
-      />
 
-      <StackBasicos.Screen name="DetalleCategoriaGasto" 
-        component={DetalleCategoriaGasto} 
-        options={{ headerShown: false }}
-      /> 
-
-      <StackBasicos.Screen name="RegistroCategoria" 
-        component={RegistroCategoria} 
-        options={{ headerShown: false }}
-      /> 
-
-      <StackBasicos.Screen name="DetalleMedioPago" 
-        component={DetalleMedioPago} 
-        options={{ headerShown: false }}
-      />
-
-      <StackBasicos.Screen name="RegistroMedioPago" 
-        component={RegistroMedioPago} 
-        options={{ headerShown: false }}
-      /> 
-
-      <StackBasicos.Screen name="DetalleIngreso" 
-        component={DetalleIngreso} 
-        options={{ headerShown: false }}
-      />
-      <StackBasicos.Screen name="RegistroIngreso" 
-        component={RegistroIngreso} 
-        options={{ headerShown: false }}
-      />
-      
-
-      
-    </StackBasicos.Navigator>
-  )
-
+// Stack Categorias
+const StackCategorias = createNativeStackNavigator();
+function StackCategoriasGroup() {
+  return (
+    <StackCategorias.Navigator>
+      <StackCategorias.Screen name="ListadoCategorias" component={ListadoCategoriasGastos} options={{ headerShown: false }} />
+      <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleCategoriaGasto} options={{ headerShown: false }} />
+      <StackCategorias.Screen name="RegistroCategoria" component={RegistroCategoria} options={{ headerShown: false }} />
+    </StackCategorias.Navigator>
+  );
 }
+
+
+// Stack Gastos
+const StackGastos = createNativeStackNavigator();
+function StackGastosGroup() {
+  return (
+    <StackGastos.Navigator>
+      <StackGastos.Screen name="ListadosGastos" component={ListadosGastos} options={{ headerShown: false }} />
+      {/* <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleG} options={{ headerShown: false }} />
+      <StackCategorias.Screen name="RegistroCategoria" component={RegistroCategoria} options={{ headerShown: false }} /> */}
+    </StackGastos.Navigator>
+  );
+}
+
+// Stack Medios de Pago
+const StackMediosPagos = createNativeStackNavigator();
+function StackMediosPagosGroup() {
+  return (
+    <StackMediosPagos.Navigator>
+      <StackMediosPagos.Screen name="ListadoMediosPagos" component={ListadoMediosPagos} options={{ headerShown: false }} />
+      <StackMediosPagos.Screen name="DetalleMedioPago" component={DetalleMedioPago} options={{ headerShown: false }} />
+      <StackMediosPagos.Screen name="RegistroMedioPago" component={RegistroMedioPago} options={{ headerShown: false }} />
+    </StackMediosPagos.Navigator>
+  );
+}
+
+// Stack Ingresos
+const StackIngresos = createNativeStackNavigator();
+function StackIngresosGroup() {
+  return (
+    <StackIngresos.Navigator>
+      <StackIngresos.Screen name="ConceptosIngresos" component={ListadoIngresos} options={{ headerShown: false }} />
+      <StackIngresos.Screen name="DetalleIngreso" component={DetalleIngreso} options={{ headerShown: false }} />
+      <StackIngresos.Screen name="RegistroIngreso" component={RegistroIngreso} options={{ headerShown: false }} />
+    </StackIngresos.Navigator>
+  );
+}
+
   
  const styles = StyleSheet.create({
       iconContainer: {

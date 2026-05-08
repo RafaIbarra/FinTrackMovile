@@ -28,6 +28,7 @@ const BOTONES = [
     navigateTo: 'RegistroCategoria',
     paramKey: 'IdCategoria',
     paramValue: 0,
+    stackname:'StackCategoriasGroup',
     screen: 'RegistroCategoria',
     param: 'IdCategoria',
   },
@@ -37,6 +38,7 @@ const BOTONES = [
     icon: 'cash-minus',
     iconSet: 'MaterialCommunityIcons',
     angle: -50, // 1 hora (arriba-derecha)
+    stackname:'StackGastosGroup',
     screen: 'RegistroCategoria',
     param: 'IdCategoria',
   },
@@ -46,6 +48,7 @@ const BOTONES = [
     icon: 'cash-plus',
     iconSet: 'MaterialCommunityIcons',
     angle: 0, // 3 horas (derecha)
+    stackname:'StackIngresosGroup',
     screen: 'RegistroIngreso',
     param: 'IdIngreso',
   },
@@ -55,6 +58,7 @@ const BOTONES = [
     icon: 'wallet-outline',
     iconSet: 'MaterialCommunityIcons',
     angle: 180, // 9 horas (izquierda)
+    stackname:'StackMediosPagosGroup',
     screen: 'RegistroMedioPago',
     param: 'IdMedio',
   },
@@ -131,16 +135,7 @@ function AddBasic({ navigation }) {
       });
     }, 200);
   };
-   const ir_medio = () => {
-    cerrar();
-    setTimeout(() => {
-      const IdMedio = 0;
-      navigate('StackBasicoskGroup', {
-        screen: 'RegistroMedioPago',
-        params: { IdMedio },
-      });
-    }, 200);
-  };
+
 
   
   const renderIcono = (boton, color) => {
@@ -161,13 +156,26 @@ function AddBasic({ navigation }) {
     };
   };
 
-  const navegarA = (screen, param) => {
+  const navegarA = (stackname,screen, param) => {
+  console.log(screen)
   cerrar();
   setTimeout(() => {
-    navigate('StackBasicoskGroup', {
-      screen: screen,
-      params: { [param]: 0 },
-    });
+
+    navigate('TabBasicosGroup', {
+    screen: stackname,           // nombre del tab
+    params: {
+      screen: screen,  // pantalla dentro del stack del tab
+       params: { [param]: 0 }
+    }
+  });
+    // navigate('TabBasicosGroup', {
+    //   screen: screen,
+    //   params: { [param]: 0 },
+    // });
+
+
+
+
   }, 200);
 };
 
@@ -219,7 +227,7 @@ function AddBasic({ navigation }) {
                 <TouchableOpacity
                   onPress={() => {
                     if (boton.screen && boton.param) {
-                      navegarA(boton.screen, boton.param);
+                      navegarA(boton.stackname,boton.screen, boton.param);
                     } else {
                       cerrar();
                     }

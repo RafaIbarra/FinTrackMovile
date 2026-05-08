@@ -1,116 +1,110 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useMemo, useCallback } from 'react';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [activarsesion, setActivarsesion] = useState(false);
-  const [versionsys,setVersionsys]=useState('1.0')
+  const [versionsys, setVersionsys] = useState('1.0');
   const [sesiondata, setSesiondata] = useState();
   const [sesiondatadate, setSesiondatadate] = useState();
   const [periodo, setPeriodo] = useState(false);
 
-  const [estadocomponente,setEstadocomponente]=useState({
-        
-        datositem:[],
-        
-        
-        
-        obtuvopermiso:false,
-        isHeaderVisible:true,
-        bandera_registro_gasto:false, 
-        bandera_registro_ingreso:false, 
+  const [estadocomponente, setEstadocomponente] = useState({
+    datositem: [],
+    obtuvopermiso: false,
+    isHeaderVisible: true,
+    bandera_registro_gasto: false,
+    bandera_registro_ingreso: false,
+    bandera_registro_categoria: false,
+    bandera_registro_medio_pago: false,
+    bandera_registro_concepto_ingreso: false,
+    bandera_registro_concepto_gasto: false,
+    loading: false,
+    tituloloading: 'CARGANDO..',
+    isKeyboardVisible: false,
+    TipoCambiopass: 0,
+    alerta_estado: false,
+    alerta_componente: [],
+    alerto_tipo: '',
+    alerta_mensaje: '',
+    ComponenteActivoBottonTab: '',
+    componente_plus_basic: false,
+  });
 
-        bandera_registro_categoria:false,
-        bandera_registro_medio_pago:false,
-        bandera_registro_concepto_ingreso:false,
-        bandera_registro_concepto_gasto:false,
-        
-        loading:false,
-        tituloloading:'CARGANDO..',
+  // 🔑 useCallback evita que las funciones se recreen en cada render
+  const actualizarEstadocomponente = useCallback((campo, valor) => {
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      [campo]: valor,
+    }));
+  }, []); // sin dependencias, nunca se recrea
 
-       
-        
-        
-        isKeyboardVisible : false,
-        TipoCambiopass:0,
-        
+  const reiniciarvalores = useCallback(() => {
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      diasmarcados: [],
+      obtuvopermiso: false,
+      isHeaderVisible: true,
+      loading: false,
+      tituloloading: '',
+      compresumen: true,
+      IdDiaSeleccion: 0,
+      comphome: true,
+      datahome: [],
+    }));
+  }, []); // 🔑 un solo setEstadocomponente en lugar de múltiples actualizarEstadocomponente
 
-        alerta_estado:false,
-        alerta_componente:[],
-        alerto_tipo:'',
-        alerta_mensaje:'',
-        ComponenteActivoBottonTab:'',
+  const recargar_componentes = useCallback(() => {
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      compresumen: true,
+      comphome: true,
+      datahome: [],
+    }));
+  }, []);
 
-        componente_plus_basic:false
-        
-    
-      })
-  const reiniciarvalores=()=>{
-        
-        
-        actualizarEstadocomponente('diasmarcados',[])
-        actualizarEstadocomponente('obtuvopermiso',false)
-    
-        
-        actualizarEstadocomponente('isHeaderVisible',true)
-        
-        
-        actualizarEstadocomponente('loading',false)
-        actualizarEstadocomponente('tituloloading','')
-        actualizarEstadocomponente('compresumen',true)
-        
-        actualizarEstadocomponente('IdDiaSeleccion',0)
-        actualizarEstadocomponente('comphome',true)
-        actualizarEstadocomponente('datahome',[])
-        
-        
-        
-    
-      }
+  const asignar_opciones_alerta = useCallback((error, titulo, mensaje, grupo_destino, destino, estado_actualizar, valor_estado) => {
+    const body_alerta = {
+      is_error: error,
+      titulo,
+      mensaje,
+      nav_grupo: grupo_destino,
+      nav_destino: destino,
+      estado_actualizar,
+      valor_estado,
+    };
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      alerta_componente: body_alerta,
+    }));
+  }, []);
 
-  const recargar_componentes=()=>{
-        
-        actualizarEstadocomponente('compresumen',true)
-        actualizarEstadocomponente('comphome',true)
-        actualizarEstadocomponente('datahome',[])
-        
-        
-      }
-  const asignar_opciones_alerta=(error,titulo,mensaje,grupo_destino,destino,estado_actualizar,valor_estado)=>{
-  
-    const body_alerta={
-      is_error:error,
-      titulo:titulo,
-      mensaje:mensaje,
-      nav_grupo:grupo_destino,
-      nav_destino:destino,
+  // 🔑 useMemo evita que el objeto value se recree en cada render
+  const contextValue = useMemo(() => ({
+    activarsesion, setActivarsesion,
+    versionsys, setVersionsys,
+    sesiondata, setSesiondata,
+    estadocomponente, actualizarEstadocomponente,
+    reiniciarvalores,
+    recargar_componentes,
+    periodo, setPeriodo,
+    sesiondatadate, setSesiondatadate,
+    asignar_opciones_alerta,
+  }), [
+    activarsesion,
+    versionsys,
+    sesiondata,
+    estadocomponente,
+    actualizarEstadocomponente,
+    reiniciarvalores,
+    recargar_componentes,
+    periodo,
+    sesiondatadate,
+    asignar_opciones_alerta,
+  ]);
 
-      estado_actualizar:estado_actualizar,
-      valor_estado:valor_estado
-    }
-    
-    actualizarEstadocomponente('alerta_componente',body_alerta)
-    
-  }
-
-  const actualizarEstadocomponente = (campo, valor) => {
-        setEstadocomponente(prevState => ({
-          ...prevState,
-          [campo]: valor,
-        }));
-      };
   return (
-    <AuthContext.Provider value={{ 
-       activarsesion, setActivarsesion,
-          versionsys,setVersionsys,
-          sesiondata, setSesiondata,
-          estadocomponente,actualizarEstadocomponente,
-          reiniciarvalores,
-          recargar_componentes,
-          periodo, setPeriodo,
-          sesiondatadate, setSesiondatadate,
-          asignar_opciones_alerta
-      }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

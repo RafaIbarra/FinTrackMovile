@@ -227,9 +227,23 @@ export default function RegistroIngreso({ navigation }) {
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
         const nuevo = !estadocomponente.bandera_registro_concepto_ingreso;
-        const mensajeExito = esEdicion ? 'Ingreso actualizado correctamente' : 'Registro del Ingreso';
-        asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabBasicosGroup', 'ConceptosIngresos', 'bandera_registro_concepto_ingreso', nuevo);
-        actualizarEstadocomponente('alerta_estado', true);
+        // const mensajeExito = esEdicion ? 'Ingreso actualizado correctamente' : 'Registro del Ingreso';
+        // asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabBasicosGroup', 'ConceptosIngresos', 'bandera_registro_concepto_ingreso', nuevo);
+        // actualizarEstadocomponente('alerta_estado', true);
+        actualizarEstadocomponente('bandera_registro_concepto_ingreso',nuevo);
+        // navigate('TabBasicosGroup', {screen: 'ConceptosIngresos'});
+        // navigation.navigate('TabBasicosGroup', {screen: 'ConceptosIngresos',initial: false })
+        // navigation.pop(1)
+        // navigation.getParent('TabBasicos')?.navigate('ConceptosIngresos');
+        //navigation.goBack()
+        navigate('TabBasicosGroup', {
+        screen: "StackIngresosGroup",           // nombre del tab
+        params: {
+          screen: "ConceptosIngresos",  // pantalla dentro del stack del tab
+          
+        }
+      })
+        
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
         asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_concepto_ingreso', false);
@@ -261,7 +275,8 @@ export default function RegistroIngreso({ navigation }) {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {estadocomponente.alerta_estado && <Alerta />}
+      {/* {estadocomponente.alerta_estado && <Alerta  navigation={navigation} />} */}
+      {/* {estadocomponente.alerta_estado && <Alerta />} */}
       
       <CabeceraRegistros
         title={titulo}

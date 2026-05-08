@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo,useRef } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 
-import Alerta from "../../Procesando/Alerta";
+
 import { useApi } from "../../../Apis/useApi";
 
 export default function ListadoCategoriasGastos({ navigation }) {
@@ -38,8 +38,10 @@ export default function ListadoCategoriasGastos({ navigation }) {
     boton_color_fondo: colors.screen_componente_estilos.color_fondo_botones,
     boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
   };
-
+  const cargando = useRef(false);
   const cargardatos = async () => {
+    if (cargando.current) return; // 🔑 evita ejecuciones simultáneas
+    cargando.current = true;
     setReady(false)
     console.log(estadocomponente.bandera_registro_categoria)
     actualizarEstadocomponente('tituloloading', 'CARGANDO CATEGORIAS');
@@ -72,16 +74,15 @@ export default function ListadoCategoriasGastos({ navigation }) {
     }
     actualizarEstadocomponente('tituloloading', '');
     actualizarEstadocomponente('loading', false);
+    cargando.current = false; // 🔑 libera al terminar
     setReady(true);
   };
   
 
   useEffect(() => {
-    console.log('>>> MONTO / EJECUTO cargardatos');
+    console.log('>>> EFECTO DISPARADO - bandera:', estadocomponente.bandera_registro_categoria);
     cargardatos();
-    return () => {
-    console.log('>>> DESMONTO');
-  };
+    
   }, [estadocomponente.bandera_registro_categoria]);
 
   
@@ -111,10 +112,10 @@ export default function ListadoCategoriasGastos({ navigation }) {
   const hayBusqueda = query.trim().length > 0;
 
   if (!ready) return null;
-
+  console.log('>>> RENDER ListadoCategoriasGastos');
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
-      {estadocomponente.alerta_estado && <Alerta />}
+      {/* {estadocomponente.alerta_estado && <Alerta />} */}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 

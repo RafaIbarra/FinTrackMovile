@@ -92,7 +92,8 @@ export default function Alerta({ navigation }) {
                     estadocomponente.alerta_componente.valor_estado
                 );
                 // navigate(estadocomponente.alerta_componente.nav_destino);
-                navigation.navigate(estadocomponente.alerta_componente.nav_grupo, {screen: estadocomponente.alerta_componente.nav_destino});
+                // navigation.navigate(estadocomponente.alerta_componente.nav_grupo, {screen: estadocomponente.alerta_componente.nav_destino});
+                navigation.navigate(estadocomponente.alerta_componente.nav_destino);
             }
             actualizarEstadocomponente('alerta_estado', false);
         });
