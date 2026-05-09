@@ -39,8 +39,8 @@ const BOTONES = [
     iconSet: 'MaterialCommunityIcons',
     angle: -50, // 1 hora (arriba-derecha)
     stackname:'StackGastosGroup',
-    screen: 'RegistroCategoria',
-    param: 'IdCategoria',
+    screen: 'RegistroGasto',
+    param: 'IdGasto',
   },
   {
     id: 'ingresos',

@@ -64,6 +64,7 @@ import DetalleIngreso from './Componentes/Screens/Ingresos/DetalleIngreso';
 import RegistroIngreso from './Componentes/Screens/Ingresos/RegistroIngreso';
 
 import ListadosGastos from './Componentes/Screens/Gastos/ListadosGastos';
+import RegistroGasto from './Componentes/Screens/Gastos/RegistroGasto';
 
 import AddBasic from './Componentes/AddBasic/AddBasic2';
 import Alerta from './Componentes/Procesando/Alerta';
@@ -933,8 +934,8 @@ function StackGastosGroup() {
   return (
     <StackGastos.Navigator>
       <StackGastos.Screen name="ListadosGastos" component={ListadosGastos} options={{ headerShown: false }} />
-      {/* <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleG} options={{ headerShown: false }} />
-      <StackCategorias.Screen name="RegistroCategoria" component={RegistroCategoria} options={{ headerShown: false }} /> */}
+      {/* <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleG} options={{ headerShown: false }} /> */}
+      <StackCategorias.Screen name="RegistroGasto" component={RegistroGasto} options={{ headerShown: false }} />
     </StackGastos.Navigator>
   );
 }
