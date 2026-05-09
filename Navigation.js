@@ -919,7 +919,7 @@ const StackCategorias = createNativeStackNavigator();
 function StackCategoriasGroup() {
   return (
     <StackCategorias.Navigator>
-      <StackCategorias.Screen name="ListadoCategorias" component={ListadoCategoriasGastos} options={{ headerShown: false }} />
+      <StackCategorias.Screen name="ListadoCategoriasGastos" component={ListadoCategoriasGastos} options={{ headerShown: false }} />
       <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleCategoriaGasto} options={{ headerShown: false }} />
       <StackCategorias.Screen name="RegistroCategoria" component={RegistroCategoria} options={{ headerShown: false }} />
     </StackCategorias.Navigator>

@@ -20,7 +20,7 @@ import Confirmacion from "../../Procesando/Confirmacion";
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
 
-import Alerta from "../../Procesando/AlertaNew";
+
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -40,7 +40,6 @@ export default function DetalleIngreso({ navigation }) {
 
   const [tituloespera, setTituloespera] = useState('');
   const [ready, setReady] = useState(false);
-
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                           titulo:'',
@@ -55,7 +54,7 @@ export default function DetalleIngreso({ navigation }) {
   const {
     estadocomponente,
     actualizarEstadocomponente,
-    asignar_opciones_alerta,
+    
     activarsesion,
     setActivarsesion,
     reiniciarvalores,
@@ -134,15 +133,15 @@ export default function DetalleIngreso({ navigation }) {
     } else {
       const msj = result.data?.message || 'Error en la solicitud';
         
-        setReady(true);
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO INGRESOS',
-          mensaje: msj,
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
+      setReady(true);
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo:'REGISTRO INGRESOS',
+        mensaje: msj,
+        is_error: true,
+        valor_estado:''
+      }));
+      setEstadonotificacion(true)
         
     }
 
@@ -174,7 +173,7 @@ export default function DetalleIngreso({ navigation }) {
           backgroundColor: colors.screen_componente_estilos.color_fondo,
         }}
       >
-        {/* {estadocomponente.alerta_estado && <Alerta  navigation={navigation} />} */}
+        
         {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
   
         {mostrarConfirmacion && (

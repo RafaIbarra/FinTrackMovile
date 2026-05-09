@@ -17,7 +17,9 @@ import { AuthContext } from "../../../AuthContext";
 
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
 import Confirmacion from "../../Procesando/Confirmacion";
-import Alerta from "../../Procesando/Alerta";
+import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
+
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -35,14 +37,28 @@ export default function DetalleMedioPago({ navigation }) {
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
+  const [tituloespera, setTituloespera] = useState('');
+  const [ready, setReady] = useState(false);
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                              titulo:'',
+                                                              is_error:false,
+                                                              estado_actualizar:'bandera_registro_medio_pago',
+                                                              valor_estado:'',
+                                                              navnivel1:'TabBasicosGroup',
+                                                              navnivel2:'StackMediosPagosGroup',
+                                                              navnivel3:'ListadoMediosPagos',
+                                                            })
+
   const {
     estadocomponente,
     actualizarEstadocomponente,
-    asignar_opciones_alerta,
     activarsesion,
     setActivarsesion,
     reiniciarvalores,
   } = useContext(AuthContext);
+
+
 
   const apiRequest = useApi({
     setActivarsesion,
@@ -75,54 +91,56 @@ export default function DetalleMedioPago({ navigation }) {
     setMensajeConfirmacion(`Desea eliminar el medio de pago con ID ${id_del}?`);
     setMostrarConfirmacion(true);
   };
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
+
 
   const eliminarRegistro = async () => {
     const id_del = registroPrincipal.Id;
-    actualizarEstadocomponente("tituloloading", "Eliminando MedioPago..");
-    actualizarEstadocomponente("loading", true);
+    setReady(false)
+    setTituloespera("Eliminando Medio Pago..")
 
     const endpoint = `ref/OperacionesMediosPagosUser/${id_del}/`;
     const metodo = "DELETE";
     const result = await apiRequest(endpoint, metodo, {});
 
     if (result.sessionExpired) {
-      actualizarEstadocomponente("tituloloading", "");
-      actualizarEstadocomponente("loading", false);
+      
       return;
     }
 
     if (result.resp_correcta) {
+      setReady(true);
       const nuevo = !estadocomponente.bandera_registro_medio_pago;
-      const mensajeExito = "Categoria Eliminada";
-      asignar_opciones_alerta(
-        false,
-        "REGISTRO MEDIOS PAGOS",
-        mensajeExito,
-        "TabBasicosGroup",
-        "MediosPagos",
-        "bandera_registro_medio_pago",
-        nuevo
-      );
-      actualizarEstadocomponente("alerta_estado", true);
+      const mensajeExito = "Medio Eliminado";
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO MEDIO PAGO',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true);
     } else {
       const msj = result.data?.message || "Error en la solicitud";
-      asignar_opciones_alerta(
-        true,
-        "ERROR",
-        msj,
-        "Medios",
-        "bandera_registro_medio_pago",
-        false
-      );
-      actualizarEstadocomponente("alerta_estado", true);
+      setReady(true);
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo:'REGISTRO MEDIO PAGO',
+        mensaje: msj,
+        is_error: true,
+        valor_estado:''
+      }));
+      setEstadonotificacion(true)
     }
 
-    actualizarEstadocomponente("tituloloading", "");
-    actualizarEstadocomponente("loading", false);
+    
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      setReady(true);
       setRegistroPrincipal(item);
       
     });
@@ -135,7 +153,7 @@ export default function DetalleMedioPago({ navigation }) {
     }
   }, [confirmarEliminacion]);
 
-  
+  if (!ready) return <Esperando titulo={tituloespera}/>;  
 
   return (
     <View
@@ -144,7 +162,7 @@ export default function DetalleMedioPago({ navigation }) {
         backgroundColor: colors.screen_componente_estilos.color_fondo,
       }}
     >
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {mostrarConfirmacion && (
         <Confirmacion

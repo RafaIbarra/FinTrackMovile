@@ -12,16 +12,14 @@ import { useApi } from "../../../Apis/useApi";
 export default function ListadoIngresos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
-  
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
 
   const [dataingresos, setDataingresos] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
   const [dataingresosresult, setDataingresosresult] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
-  const { activarsesion, setActivarsesion } = useContext(AuthContext);
-  const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
   const [titulo,setTitulo]=useState('CARGANDO INGRESOS')
@@ -76,8 +74,7 @@ export default function ListadoIngresos({ navigation }) {
       setReady(true);
     } else {
       const msj = result.data?.message || 'Error en la solicitud';
-      // asignar_opciones_alerta(true, 'ERROR', msj, 'MEDIOS', '', false);
-      // actualizarEstadocomponente('alerta_estado', true);
+     
       setReady(true);
       setBodynotificacion(prevState => ({
           ...prevState,
@@ -125,7 +122,7 @@ export default function ListadoIngresos({ navigation }) {
   const hayBusqueda = query.trim().length > 0;
 
   if (!ready) return <Esperando titulo={titulo}/>;
-
+  
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}

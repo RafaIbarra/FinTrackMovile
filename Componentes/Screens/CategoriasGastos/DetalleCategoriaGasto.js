@@ -17,7 +17,8 @@ import { AuthContext } from "../../../AuthContext";
 
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
 import Confirmacion from "../../Procesando/Confirmacion";
-import Alerta from "../../Procesando/Alerta";
+import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -34,11 +35,23 @@ export default function DetalleCategoriaGasto({ navigation }) {
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
+  const [tituloespera, setTituloespera] = useState('');
+  const [ready, setReady] = useState(false);
+
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                              titulo:'',
+                                                              is_error:false,
+                                                              estado_actualizar:'bandera_registro_categoria',
+                                                              valor_estado:'',
+                                                              navnivel1:'TabBasicosGroup',
+                                                              navnivel2:'StackCategoriasGroup',
+                                                              navnivel3:'ListadoCategoriasGastos',
+                                                            })
 
   const {
     estadocomponente,
     actualizarEstadocomponente,
-    asignar_opciones_alerta,
     activarsesion,
     setActivarsesion,
     reiniciarvalores,
@@ -75,54 +88,55 @@ export default function DetalleCategoriaGasto({ navigation }) {
     setMensajeConfirmacion(`Desea eliminar la categoria con ID ${id_del}?`);
     setMostrarConfirmacion(true);
   };
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
 
   const eliminarRegistro = async () => {
     const id_del = registroPrincipal.Id;
-    actualizarEstadocomponente("tituloloading", "Eliminando Categoria..");
-    actualizarEstadocomponente("loading", true);
+    
+    setReady(false)
+    setTituloespera("Eliminando Categoria..")
 
     const endpoint = `ref/OperacionesCategoriasGastosUser/${id_del}/`;
     const metodo = "DELETE";
     const result = await apiRequest(endpoint, metodo, {});
 
     if (result.sessionExpired) {
-      actualizarEstadocomponente("tituloloading", "");
-      actualizarEstadocomponente("loading", false);
       return;
     }
 
     if (result.resp_correcta) {
+      setReady(true);
       const nuevo = !estadocomponente.bandera_registro_categoria;
       const mensajeExito = "Categoria Eliminada";
-      asignar_opciones_alerta(
-        false,
-        "REGISTRO CATEGORIAS",
-        mensajeExito,
-        "TabBasicosGroup",
-        "Categorias",
-        "bandera_registro_categoria",
-        nuevo
-      );
-      actualizarEstadocomponente("alerta_estado", true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO CATEGORIAS',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
     } else {
       const msj = result.data?.message || "Error en la solicitud";
-      asignar_opciones_alerta(
-        true,
-        "ERROR",
-        msj,
-        "Gastos",
-        "bandera_registro_gasto",
-        false
-      );
-      actualizarEstadocomponente("alerta_estado", true);
+      setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO CATEGORIAS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     }
 
-    actualizarEstadocomponente("tituloloading", "");
-    actualizarEstadocomponente("loading", false);
+    
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      setReady(true);
       setRegistroPrincipal(item);
       setListaDetalles(item?.DetalleGastos || []);
     });
@@ -291,65 +305,80 @@ export default function DetalleCategoriaGasto({ navigation }) {
       </Text>
     </View>
   );
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.screen_componente_estilos.color_fondo,
-      }}
-    >
-      {estadocomponente.alerta_estado && <Alerta />}
-
-      {mostrarConfirmacion && (
-        <Confirmacion
-          title="Detalle Categoria"
-          question={mensajeConfirmacion}
+  if (!ready) return <Esperando titulo={tituloespera}/>;
+  if (ready){
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.screen_componente_estilos.color_fondo,
+        }}
+      >
+        {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
+  
+        {mostrarConfirmacion && (
+          <Confirmacion
+            title="Detalle Categoria"
+            question={mensajeConfirmacion}
+            navigation={navigation}
+            onYes={handleYes}
+            onNo={handleNo}
+          />
+        )}
+  
+        <CabaceraRegistros
+          title={`Detalle de la categoria`}
           navigation={navigation}
-          onYes={handleYes}
-          onNo={handleNo}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          showbottons={true}
         />
-      )}
-
-      <CabaceraRegistros
-        title={`Detalle de la categoria`}
-        navigation={navigation}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-        showbottons={true}
-      />
-
-      <ScrollView style={styles.scroll} bounces={false}>
-        {/* ═══════════════════════════════════════════════
-            HERO — Enfoque en Nombre + ID
-        ═══════════════════════════════════════════════ */}
-        <View
-          style={[
-            styles.hero,
-            {
-              backgroundColor:
-                colors.screen_componente_estilos.color_fondo_cards,
-            },
-          ]}
-        >
-          {/* Fila superior: Nombre grande + ID */}
-          <View style={styles.heroTop}>
-            <Text
-              style={[
-                styles.nombreCategoria,
-                {
-                  fontFamily: fonts.balsamiqbold.fontFamily,
-                  color: colors.screen_componente_estilos.color_texto,
-                },
-              ]}
-            >
-              {registroPrincipal.NombreCategoria}
-            </Text>
-
-            <View style={styles.idBadge}>
+  
+        <ScrollView style={styles.scroll} bounces={false}>
+          {/* ═══════════════════════════════════════════════
+              HERO — Enfoque en Nombre + ID
+          ═══════════════════════════════════════════════ */}
+          <View
+            style={[
+              styles.hero,
+              {
+                backgroundColor:
+                  colors.screen_componente_estilos.color_fondo_cards,
+              },
+            ]}
+          >
+            {/* Fila superior: Nombre grande + ID */}
+            <View style={styles.heroTop}>
               <Text
                 style={[
-                  styles.idText,
+                  styles.nombreCategoria,
+                  {
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color: colors.screen_componente_estilos.color_texto,
+                  },
+                ]}
+              >
+                {registroPrincipal.NombreCategoria}
+              </Text>
+  
+              <View style={styles.idBadge}>
+                <Text
+                  style={[
+                    styles.idText,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos.color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  ID {registroPrincipal.Id}
+                </Text>
+              </View>
+  
+              <Text
+                style={[
+                  styles.fechaRegistro,
                   {
                     fontFamily: fonts.balsamiqregular.fontFamily,
                     color:
@@ -357,234 +386,222 @@ export default function DetalleCategoriaGasto({ navigation }) {
                   },
                 ]}
               >
-                ID {registroPrincipal.Id}
+                Registrado el {registroPrincipal.FechaRegistro}
               </Text>
             </View>
-
-            <Text
-              style={[
-                styles.fechaRegistro,
-                {
-                  fontFamily: fonts.balsamiqregular.fontFamily,
-                  color:
-                    colors.screen_componente_estilos.color_texto_subtitulo,
-                },
-              ]}
-            >
-              Registrado el {registroPrincipal.FechaRegistro}
-            </Text>
-          </View>
-          
-
-          {/* Fila inferior: Totales y métricas */}
-          <View
-            style={[
-              styles.heroMeta,
-              {
-                borderTopColor:
-                  colors.screen_componente_estilos.color_fondo,
-              },
-            ]}
-          >
-            <View>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                CONCEPTOS
-              </Text>
-              <Text
-                style={[
-                  styles.metaValue,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos.color_texto,
-                  },
-                ]}
-              >
-                {registroPrincipal.CantidadConceptoGastos ?? 0}
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "center" }}>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                REGISTROS
-              </Text>
-              <Text
-                style={[
-                  styles.metaValue,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos.color_texto,
-                  },
-                ]}
-              >
-                {registroPrincipal.CantidadGastosCategoria ?? 0}
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end" }}>
-              <Text
-                style={[
-                  styles.metaLabel,
-                  {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_subtitulo,
-                  },
-                ]}
-              >
-                TOTAL
-              </Text>
-              <Text
-                style={[
-                  styles.totalAmount,
-                  {
-                    fontFamily: fonts.balsamiqbold.fontFamily,
-                    color:
-                      colors.screen_componente_estilos
-                        .color_texto_importante,
-                  },
-                ]}
-              >
-                Gs.{" "}
-                {Number(
-                  registroPrincipal.TotalGastoCategoria
-                ).toLocaleString("es-ES")}
-              </Text>
-            </View>
-          </View>
-
-          <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
-            <Text
-              style={[
-                styles.observacionLabel,
-                {
-                  fontFamily: fonts.balsamiqregular.fontFamily,
-                  color: colors.screen_componente_estilos.color_texto_subtitulo,
-                },
-              ]}
-            >
-              OBSERVACIÓN
-            </Text>
+            
+  
+            {/* Fila inferior: Totales y métricas */}
             <View
               style={[
-                styles.observacionBubble,
+                styles.heroMeta,
                 {
-                  backgroundColor: colors.screen_componente_estilos.color_fondo,
-                  borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
+                  borderTopColor:
+                    colors.screen_componente_estilos.color_fondo,
+                },
+              ]}
+            >
+              <View>
+                <Text
+                  style={[
+                    styles.metaLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  CONCEPTOS
+                </Text>
+                <Text
+                  style={[
+                    styles.metaValue,
+                    {
+                      fontFamily: fonts.balsamiqbold.fontFamily,
+                      color:
+                        colors.screen_componente_estilos.color_texto,
+                    },
+                  ]}
+                >
+                  {registroPrincipal.CantidadConceptoGastos ?? 0}
+                </Text>
+              </View>
+  
+              <View style={{ alignItems: "center" }}>
+                <Text
+                  style={[
+                    styles.metaLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  REGISTROS
+                </Text>
+                <Text
+                  style={[
+                    styles.metaValue,
+                    {
+                      fontFamily: fonts.balsamiqbold.fontFamily,
+                      color:
+                        colors.screen_componente_estilos.color_texto,
+                    },
+                  ]}
+                >
+                  {registroPrincipal.CantidadGastosCategoria ?? 0}
+                </Text>
+              </View>
+  
+              <View style={{ alignItems: "flex-end" }}>
+                <Text
+                  style={[
+                    styles.metaLabel,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_subtitulo,
+                    },
+                  ]}
+                >
+                  TOTAL
+                </Text>
+                <Text
+                  style={[
+                    styles.totalAmount,
+                    {
+                      fontFamily: fonts.balsamiqbold.fontFamily,
+                      color:
+                        colors.screen_componente_estilos
+                          .color_texto_importante,
+                    },
+                  ]}
+                >
+                  Gs.{" "}
+                  {Number(
+                    registroPrincipal.TotalGastoCategoria
+                  ).toLocaleString("es-ES")}
+                </Text>
+              </View>
+            </View>
+  
+            <View style={[styles.observacionContainer,{borderTopColor: colors.screen_componente_estilos.color_fondo}]}>
+              <Text
+                style={[
+                  styles.observacionLabel,
+                  {
+                    fontFamily: fonts.balsamiqregular.fontFamily,
+                    color: colors.screen_componente_estilos.color_texto_subtitulo,
+                  },
+                ]}
+              >
+                OBSERVACIÓN
+              </Text>
+              <View
+                style={[
+                  styles.observacionBubble,
+                  {
+                    backgroundColor: colors.screen_componente_estilos.color_fondo,
+                    borderColor: colors.screen_componente_estilos.color_borde_cards || '#2a2f45',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.observacionText,
+                    {
+                      fontFamily: fonts.balsamiqregular.fontFamily,
+                      color: colors.screen_componente_estilos.color_texto,
+                    },
+                  ]}
+                >
+                  {registroPrincipal.Observacion || "Sin observación"}
+                </Text>
+              </View>
+          </View>
+          </View>
+  
+          {/* ═══════════════════════════════════════════════
+              TABLA DE DETALLES — Scroll horizontal
+          ═══════════════════════════════════════════════ */}
+  
+          {listaDetalles.length > 0 ? (
+          <View style={styles.cardsContainer}>
+            <View
+              style={[
+                styles.card,
+                {
+                  backgroundColor:
+                    colors.screen_componente_estilos.color_fondo_cards,
                 },
               ]}
             >
               <Text
                 style={[
-                  styles.observacionText,
+                  styles.cardTitle,
                   {
-                    fontFamily: fonts.balsamiqregular.fontFamily,
-                    color: colors.screen_componente_estilos.color_texto,
+                    fontFamily: fonts.balsamiqbold.fontFamily,
+                    color:
+                      colors.screen_componente_estilos
+                        .color_texto_subtitulo,
                   },
                 ]}
               >
-                {registroPrincipal.Observacion || "Sin observación"}
+                DETALLE DE CONCEPTOS
               </Text>
+  
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator
+                contentContainerStyle={styles.tablaScrollContent}
+              >
+                <View style={styles.tablaWrapper}>
+                  {renderTablaHeader()}
+                  {listaDetalles.map((fila, idx) => renderTablaFila(fila, idx))}
+                </View>
+              </ScrollView>
             </View>
-        </View>
-        </View>
-
-        {/* ═══════════════════════════════════════════════
-            TABLA DE DETALLES — Scroll horizontal
-        ═══════════════════════════════════════════════ */}
-
-        {listaDetalles.length > 0 ? (
-        <View style={styles.cardsContainer}>
-          <View
+          </View>
+          ):(
+          <View style={styles.sinDatosContainer}>
+          <MaterialCommunityIcons
+            name="inbox-remove-outline"
+            size={40}
+            color={colors.screen_componente_estilos.color_texto_subtitulo}
+          />
+          <Text
             style={[
-              styles.card,
+              styles.sinDatosTexto,
               {
-                backgroundColor:
-                  colors.screen_componente_estilos.color_fondo_cards,
+                fontFamily: fonts.balsamiqregular.fontFamily,
+                color: colors.screen_componente_estilos.color_texto_subtitulo,
               },
             ]}
           >
-            <Text
-              style={[
-                styles.cardTitle,
-                {
-                  fontFamily: fonts.balsamiqbold.fontFamily,
-                  color:
-                    colors.screen_componente_estilos
-                      .color_texto_subtitulo,
-                },
-              ]}
-            >
-              DETALLE DE CONCEPTOS
-            </Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator
-              contentContainerStyle={styles.tablaScrollContent}
-            >
-              <View style={styles.tablaWrapper}>
-                {renderTablaHeader()}
-                {listaDetalles.map((fila, idx) => renderTablaFila(fila, idx))}
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-        ):(
-        <View style={styles.sinDatosContainer}>
-        <MaterialCommunityIcons
-          name="inbox-remove-outline"
-          size={40}
-          color={colors.screen_componente_estilos.color_texto_subtitulo}
-        />
-        <Text
-          style={[
-            styles.sinDatosTexto,
-            {
-              fontFamily: fonts.balsamiqregular.fontFamily,
-              color: colors.screen_componente_estilos.color_texto_subtitulo,
-            },
-          ]}
-        >
-          Sin Gastos asociados
-        </Text>
-      </View>)
-      }
+            Sin Gastos asociados
+          </Text>
+        </View>)
+        }
+          
+          
+  
+  
+          <View style={{ height: 24 }} />
+        </ScrollView>
+  
+        {/* ═══════════════════════════════════════════════
+            MODAL COMPROBANTE (se mantiene la funcionalidad)
+        ═══════════════════════════════════════════════ */}
         
-        
+      </View>
+    );
 
-
-        <View style={{ height: 24 }} />
-      </ScrollView>
-
-      {/* ═══════════════════════════════════════════════
-          MODAL COMPROBANTE (se mantiene la funcionalidad)
-      ═══════════════════════════════════════════════ */}
-      
-    </View>
-  );
+  }
 }
 
 const styles = StyleSheet.create({

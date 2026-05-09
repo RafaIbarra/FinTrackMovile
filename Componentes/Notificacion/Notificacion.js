@@ -94,6 +94,9 @@ export default function Notificacion({ navigation,bodynotificacion,onOk }) {
                 // navigate(estadocomponente.alerta_componente.nav_grupo, {screen: estadocomponente.alerta_componente.nav_destino});
                 
                 // navigate('TabBasicosGroup', {screen: "StackIngresosGroup",params: {screen: "ConceptosIngresos",}})
+                // console.log('bodynotificacion?.navnivel1',bodynotificacion?.navnivel1)
+                // console.log('bodynotificacion?.navnivel2',bodynotificacion?.navnivel2)
+                // console.log('bodynotificacion?.navnivel3',bodynotificacion?.navnivel3)
                 navigate(bodynotificacion?.navnivel1, {screen: bodynotificacion?.navnivel2,params: {screen: bodynotificacion?.navnivel3,}})
                 
             }

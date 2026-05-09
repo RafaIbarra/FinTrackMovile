@@ -123,15 +123,15 @@ export default function RegistroIngreso({ navigation }) {
   };
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdIngreso } } = useRoute();
   const [titulocabecera, setTitulocabecera] = useState('');
+
   const [tituloespera, setTituloespera] = useState('');
-  
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const [ready, setReady] = useState(false);
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
@@ -179,11 +179,13 @@ export default function RegistroIngreso({ navigation }) {
         setDescripcion(mov.Observacion);
         setFecharegistro(mov.FechaRegistro);
         setTipoingreso(mov.TipoIngreso ?? 1);
+        setReady(true)
       } else {
+        setReady(true)
         const msj = result.data?.message || 'Error en la solicitud';
         setBodynotificacion(prevState => ({
           ...prevState,
-          titulo:'REGISTRO INGRESOS - Referenciales',
+          titulo:'REGISTRO INGRESOS',
           mensaje: msj,
           is_error: true,
           valor_estado:''
@@ -191,10 +193,11 @@ export default function RegistroIngreso({ navigation }) {
         setEstadonotificacion(true)
       }
     } catch (e) {
+      setReady(true)
       const msj = e || 'Error en la solicitud';
       setBodynotificacion(prevState => ({
           ...prevState,
-          titulo:'REGISTRO INGRESOS - Referenciales',
+          titulo:'REGISTRO INGRESOS ',
           mensaje: msj,
           is_error: true,
           valor_estado:''

@@ -5,7 +5,8 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
-import Alerta from "../../Procesando/Alerta";
+import Notificacion from "../../Notificacion/Notificacion";
+import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
 
 export default function ListadoMediosPagos({ navigation }) {
@@ -16,14 +17,26 @@ export default function ListadoMediosPagos({ navigation }) {
   const [datamedios, setDatamedios] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
   const [datamediosresult, setDatamediosresult] = useState([]);
-
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
-  const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
   const [titulo,setTitulo]=useState('CARGANDO MEDIOS PAGOS')
+
+  const [ready, setReady] = useState(false);
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                            titulo:'',
+                                                            is_error:false,
+                                                            estado_actualizar:'bandera_registro_medio_pago',
+                                                            valor_estado:'',
+                                                            navnivel1:'TabBasicosGroup',
+                                                            navnivel2:'StackMediosPagosGroup',
+                                                            navnivel3:'ListadoMediosPagos',
+                                                          })
+
+
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const estilos = {
@@ -62,15 +75,26 @@ export default function ListadoMediosPagos({ navigation }) {
       setDatamedios(registros);
       setDataresumen(result.data.resumen)
       setDatamediosresult(registros)
+      setReady(true);
     } else {
-      // const msj = result.data?.message || 'Error en la solicitud';
-      // asignar_opciones_alerta(true, 'ERROR', msj, 'MEDIOS', '', false);
-      // actualizarEstadocomponente('alerta_estado', true);
+      const msj = result.data?.message || 'Error en la solicitud';
+      setReady(true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'LISTADO MEDIOS PAGOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+      
     }
-    setReady(true)
+    
     
   };
-
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
   useEffect(() => {
     
     cargardatos();
@@ -105,7 +129,7 @@ export default function ListadoMediosPagos({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
@@ -173,50 +197,56 @@ export default function ListadoMediosPagos({ navigation }) {
       )}
 
       {/* ═══ LISTA ═══ */}
-      <FlatList
-        data={datamediosresult}
-        contentContainerStyle={styles.flatlistContenido}
-        style={{ flex: 1 }}
-        renderItem={({ item }) => {
-            return (
-                <TouchableOpacity
-                    style={[styles.contenedordatos,{
-                    backgroundColor: estilos.cards_color_fondo,
-                    borderRightColor: estilos.cards_color_border,
-                    borderBottomColor:estilos.cards_color_border
-                    }]}
-                    onPress={() => { navigate('DetalleMedioPago', { item }); }}
-                    activeOpacity={0.85}
-                >
-                    
-                    <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            {item.NombreMedioPago}
-                        </Text>
+      {datamediosresult.length>0? (
 
-                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            {item.FechaRegistro}
-                        </Text>
-
-                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            ID: {item.Id}
-                        </Text>
-
-                    </View>
-
-                    <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            Gs. {Number(item.TotalPagoMedio).toLocaleString('es-ES')}
-                        </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            Cant: {item.CantidadPagoMedio}
-                        </Text>
-                     </View>
-                </TouchableOpacity>
-            );
-        }}
-        keyExtractor={item => item.key}
-      />
+        <FlatList
+          data={datamediosresult}
+          contentContainerStyle={styles.flatlistContenido}
+          style={{ flex: 1 }}
+          renderItem={({ item }) => {
+              return (
+                  <TouchableOpacity
+                      style={[styles.contenedordatos,{
+                      backgroundColor: estilos.cards_color_fondo,
+                      borderRightColor: estilos.cards_color_border,
+                      borderBottomColor:estilos.cards_color_border
+                      }]}
+                      onPress={() => { navigate('DetalleMedioPago', { item }); }}
+                      activeOpacity={0.85}
+                  >
+                      
+                      <View style={styles.columnaInfo}>
+                          <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                              {item.NombreMedioPago}
+                          </Text>
+  
+                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
+                              {item.FechaRegistro}
+                          </Text>
+  
+                          <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
+                              ID: {item.Id}
+                          </Text>
+  
+                      </View>
+  
+                      <View style={styles.columnaTotal}>
+                          <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                              Gs. {Number(item.TotalPagoMedio).toLocaleString('es-ES')}
+                          </Text>
+                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
+                              Cant: {item.CantidadPagoMedio}
+                          </Text>
+                       </View>
+                  </TouchableOpacity>
+              );
+          }}
+          keyExtractor={item => item.key}
+        />
+      ):(
+       <Empty />
+      )
+      }
     </View>
   );
 }

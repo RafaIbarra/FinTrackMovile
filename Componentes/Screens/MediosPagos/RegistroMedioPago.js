@@ -12,8 +12,9 @@ import { AuthContext } from '../../../AuthContext';
 import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
 
-import Alerta from '../../Procesando/Alerta';
 
+import Notificacion from '../../Notificacion/Notificacion';
+import Esperando from '../../Procesando/Espera';
 import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
 
 import { useApi } from '../../../Apis/useApi';
@@ -41,15 +42,27 @@ export default function RegistroMedioPago({ navigation }) {
   };
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdMedio } } = useRoute();
   const [titulo, setTitulo] = useState('');
-  const [mostraralerta, setMostraralerta] = useState(false);
-  const [cargando, setCargando] = useState(true);
+  
+  const [tituloespera, setTituloespera] = useState('');
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const [ready, setReady] = useState(false);
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'bandera_registro_medio_pago',
+                                                        valor_estado:'',
+                                                        navnivel1:'TabBasicosGroup',
+                                                        navnivel2:'StackMediosPagosGroup',
+                                                        navnivel3:'ListadoMediosPagos',
+                                                      })
+  
 
   // ── Data registrada (para edición) ────────────────────────────────────────
   const [datamedioregistrado, setDatamedioregistrado] = useState(null);
@@ -70,6 +83,8 @@ export default function RegistroMedioPago({ navigation }) {
 
   // ── Carga datos ───────────────────────────────────────────────────────────
   const carga_registrado = async () => {
+    setReady(false)
+    setTituloespera('Carga de datos registrados')
     const endpoint = `ref/ListadoMedioPagosUser/${IdMedio}/`;
     const result = await apiRequest(endpoint, 'GET', {});
     
@@ -82,24 +97,39 @@ export default function RegistroMedioPago({ navigation }) {
         setNombremedio(mov.NombreMedioPago);
         setDescripcion(mov.Observacion);
         setFecharegistro(mov.FechaRegistro);
+        setReady(true)
       } else {
+        setReady(true)
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO MEDIO PAGO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
     } catch (e) {
+      setReady(true)
       const msj = e || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo:'REGISTRO MEDIO PAGO',
+        mensaje: msj,
+        is_error: true,
+        valor_estado:''
+      }));
+      setEstadonotificacion(true)
     } finally {
-      setCargando(false);
+      setReady(true)
     }
   };
 
   useEffect(() => {
     if (IdMedio === 0) {
       setTitulo('Nuevo Medio Pago');
-      setCargando(false);
+      setReady(true)
     } else {
       setTitulo(`Editar Medio Pago`);
       carga_registrado();
@@ -114,8 +144,12 @@ export default function RegistroMedioPago({ navigation }) {
   const cancelar = () => {
     navigation.goBack();
   };
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
 
   const guardar = async () => {
+    setReady(false);
     const esEdicion = IdMedio > 0;
     const formData = new FormData();
     formData.append('nombre', nombremedio);
@@ -125,8 +159,9 @@ export default function RegistroMedioPago({ navigation }) {
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Medio Pago..' : 'Registrando Medio Pago..');
-      actualizarEstadocomponente('loading', true);
+      
+      const texto_titulo=esEdicion ? 'Actualizando Medio Pago..' : 'Registrando Medio Pago..'
+      setTituloespera(texto_titulo)
 
       const endpoint = esEdicion 
         ? `ref/OperacionesMediosPagosUser/${IdMedio}/` 
@@ -135,8 +170,7 @@ export default function RegistroMedioPago({ navigation }) {
       const result = await apiRequest(endpoint, metodo, formData);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      actualizarEstadocomponente('tituloloading', '');
-      actualizarEstadocomponente('loading', false);
+      
 
       if (result.sessionExpired) {
         return;
@@ -144,42 +178,54 @@ export default function RegistroMedioPago({ navigation }) {
 
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
+        setReady(true);
         const nuevo = !estadocomponente.bandera_registro_medio_pago;
         const mensajeExito = esEdicion ? 'Medio actualizada correctamente' : 'Registro del Medio de Pago';
-        asignar_opciones_alerta(false, 'REGISTRO MEDIOS PAGOS', mensajeExito, 'TabBasicosGroup', 'MediosPagos', 'bandera_registro_medio_pago', nuevo);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO MEDIO PAGO',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_medio_pago', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO MEDIO PAGO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
     } catch (e) {
-      asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'MediosPagos', 'bandera_registro_medio_pago', false);
-      actualizarEstadocomponente('alerta_estado', true);
-      Alert.alert('Error', 'Ocurrió un error al guardar.');
+      setReady(true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO MEDIO PAGO',
+          mensaje: 'Ocurrió un error al guardar.',
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     } finally {
       setEnviando(false);
+      setReady(true)
     }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (cargando) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: estilos.pantalla_color_fondo }}>
-        <ActivityIndicator color={estilos.font_importe_color} size="large" />
-        <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, marginTop: 12 }}>
-          Cargando...
-        </Text>
-      </View>
-    );
-  }
+  if (!ready) return <Esperando titulo={tituloespera}/>;
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
       
       <CabeceraRegistros
         title={titulo}

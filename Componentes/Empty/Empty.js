@@ -7,7 +7,7 @@ function Empty({  }) {
     
     const { colors, fonts } = useTheme();
     return (
-        <View style={[styles.overlay,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+        <View style={[styles.overlay,{backgroundColor:colors.screen_componente_estilos.color_fondo}]}>
             <Text style={[styles.texto, { fontFamily: fonts.balsamiqregular.fontFamily,color:colors.navigation_estilos.color_fondo }]}>
                 Sin Datos
             </Text>

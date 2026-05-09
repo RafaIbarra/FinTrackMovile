@@ -5,7 +5,8 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
-
+import Notificacion from "../../Notificacion/Notificacion";
+import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
 
 export default function ListadoCategoriasGastos({ navigation }) {
@@ -24,6 +25,16 @@ export default function ListadoCategoriasGastos({ navigation }) {
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
   const [titulo,setTitulo]=useState('CARGANDO CATEGORIAS')
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                            titulo:'',
+                                                            is_error:false,
+                                                            estado_actualizar:'bandera_registro_categoria',
+                                                            valor_estado:'',
+                                                            navnivel1:'TabBasicosGroup',
+                                                            navnivel2:'StackCategoriasGroup',
+                                                            navnivel3:'ListadoCategoriasGastos',
+                                                          })
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -64,16 +75,26 @@ export default function ListadoCategoriasGastos({ navigation }) {
       setDatacategorias(registros);
       setDataresumen(result.data.resumen)
       setDatacategoriasresult(registros)
+      setReady(true);
     } else {
-      // const msj = result.data?.message || 'Error en la solicitud';
-      // asignar_opciones_alerta(true, 'ERROR', msj, 'INGRESOS', '', false);
-      // actualizarEstadocomponente('alerta_estado', true);
+      const msj = result.data?.message || 'Error en la solicitud';
+      
+      setReady(true)
+      setReady(true);
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'LISTADO DE CETAGORIAS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     }
-    
-    setReady(true)
-    
+
   };
-  
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
 
   useEffect(() => {
     
@@ -112,7 +133,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
   
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
-      {/* {estadocomponente.alerta_estado && <Alerta />} */}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
@@ -180,50 +201,57 @@ export default function ListadoCategoriasGastos({ navigation }) {
       )}
 
       {/* ═══ LISTA ═══ */}
-      <FlatList
-        data={datacategoriasresult}
-        contentContainerStyle={styles.flatlistContenido}
-        style={{ flex: 1 }}
-        renderItem={({ item }) => {
-            return (
-                <TouchableOpacity
-                    style={[styles.contenedordatos,{
-                    backgroundColor: estilos.cards_color_fondo,
-                    borderRightColor: estilos.cards_color_border,
-                    borderBottomColor:estilos.cards_color_border
-                    }]}
-                    onPress={() => { navigate('DetalleCategoriaGasto', { item }); }}
-                    activeOpacity={0.85}
-                >
-                    
-                    <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreEmpresa, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            {item.NombreCategoria}
-                        </Text>
+      { datacategoriasresult.length> 0? (
 
-                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            {item.FechaRegistro}
-                        </Text>
+        <FlatList
+          data={datacategoriasresult}
+          contentContainerStyle={styles.flatlistContenido}
+          style={{ flex: 1 }}
+          renderItem={({ item }) => {
+              return (
+                  <TouchableOpacity
+                      style={[styles.contenedordatos,{
+                      backgroundColor: estilos.cards_color_fondo,
+                      borderRightColor: estilos.cards_color_border,
+                      borderBottomColor:estilos.cards_color_border
+                      }]}
+                      onPress={() => { navigate('DetalleCategoriaGasto', { item }); }}
+                      activeOpacity={0.85}
+                  >
+                      
+                      <View style={styles.columnaInfo}>
+                          <Text style={[styles.nombreEmpresa, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                              {item.NombreCategoria}
+                          </Text>
+  
+                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
+                              {item.FechaRegistro}
+                          </Text>
+  
+                          <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
+                              ID: {item.Id}
+                          </Text>
+  
+                      </View>
+  
+                      <View style={styles.columnaTotal}>
+                          <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                              Gs. {Number(item.TotalGastoCategoria).toLocaleString('es-ES')}
+                          </Text>
+                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
+                              Cant: {item.CantidadGastosCategoria}
+                          </Text>
+                       </View>
+                  </TouchableOpacity>
+              );
+          }}
+          keyExtractor={item => item.key}
+        />
+      ):(
+        <Empty />
+      )
 
-                        <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                            ID: {item.Id}
-                        </Text>
-
-                    </View>
-
-                    <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            Gs. {Number(item.TotalGastoCategoria).toLocaleString('es-ES')}
-                        </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                            Cant: {item.CantidadGastosCategoria}
-                        </Text>
-                     </View>
-                </TouchableOpacity>
-            );
-        }}
-        keyExtractor={item => item.key}
-      />
+      }
     </View>
   );
 }
