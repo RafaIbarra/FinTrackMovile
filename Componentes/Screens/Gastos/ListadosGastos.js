@@ -212,7 +212,7 @@ export default function ListadosGastos({ navigation }) {
                     borderRightColor: estilos.cards_color_border,
                     borderBottomColor:estilos.cards_color_border
                     }]}
-                    onPress={() => { navigate('DetalleMedioPago', { item }); }}
+                    onPress={() => { navigate('DetalleGasto', { item }); }}
                     activeOpacity={0.85}
                 >
                     
