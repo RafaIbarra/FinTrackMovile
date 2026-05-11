@@ -5,8 +5,9 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 
-import Alerta from "../../Procesando/Alerta";
 import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
+import Empty from "../../Empty/Empty";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import { useApi } from "../../../Apis/useApi";
 
@@ -20,12 +21,22 @@ export default function ListadoMovimientosIngresos({ navigation }) {
   const [dataingresosresult, setDataingresosresult] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
-  const [titulo,setTitulo]=useState('CARGANDO MOVIMIENTOS INGRESOS')
+  const [titulo,setTitulo]=useState('Movimientos Ingresos')
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'bandera_registro_ingreso',
+                                                          valor_estado:'',
+                                                          navnivel1:'Home',
+                                                          navnivel2:'MovIngresosStackGroup',
+                                                          navnivel3:'ListadoMovimientosIngresos',
+                                                        })
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -66,15 +77,26 @@ export default function ListadoMovimientosIngresos({ navigation }) {
       setDataingresos(registros);
       setDataresumen(result.data.resumen)
       setDataingresosresult(registros)
+      setReady(true);
     } else {
-      // const msj = result.data?.message || 'Error en la solicitud';
-      // asignar_opciones_alerta(true, 'ERROR', msj, 'INGRESOS', '', false);
-      // actualizarEstadocomponente('alerta_estado', true);
+      const msj = result.data?.message || 'Error en la solicitud';
+      setReady(true)
+        
+      setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'MOVIMIENTOS INGRESOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     }
     
     setReady(true)
   };
-
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
   useEffect(() => {
     
     cargardatos();
@@ -83,6 +105,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      setReady(true)
       actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosIngresos');
     });
     return unsubscribe;
@@ -115,7 +138,7 @@ export default function ListadoMovimientosIngresos({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
@@ -183,45 +206,51 @@ export default function ListadoMovimientosIngresos({ navigation }) {
       )}
 
       {/* ═══ LISTA ═══ */}
-      <FlatList
-        data={dataingresosresult}
-        contentContainerStyle={styles.flatlistContenido}
-        style={{ flex: 1 }}
-        renderItem={({ item }) => {
-            return (
-                <TouchableOpacity
-                    style={[styles.contenedordatos,{
-                    backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                    borderRightColor:colors.screen_componente_estilos.color_borde_cards,
-                    borderBottomColor:colors.screen_componente_estilos.color_borde_cards
-                    }]}
-                    onPress={() => { navigate('DetalleMovimientoIngreso', { item }); }}
-                    activeOpacity={0.85}
-                >
-                    <View style={styles.columnaLogo}>
-                        <LogoEmpresa imagePath={item.LogoEmpresa} />
-                    </View>
-                    <View style={styles.columnaInfo}>
-                        <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
-                            {item.NombreEmpresa}
-                        </Text>
-                        <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                            {item.FechaRegistro}
-                        </Text>
-                        <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                            ID: {item.Id}
-                        </Text>
-                        </View>
-                        <View style={styles.columnaTotal}>
-                        <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
-                            Gs. {Number(item.MontoIngreso).toLocaleString('es-ES')}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            );
-        }}
-        keyExtractor={item => item.key}
-      />
+      {dataingresosresult.length>0 ?(
+
+        <FlatList
+          data={dataingresosresult}
+          contentContainerStyle={styles.flatlistContenido}
+          style={{ flex: 1 }}
+          renderItem={({ item }) => {
+              return (
+                  <TouchableOpacity
+                      style={[styles.contenedordatos,{
+                      backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                      borderRightColor:colors.screen_componente_estilos.color_borde_cards,
+                      borderBottomColor:colors.screen_componente_estilos.color_borde_cards
+                      }]}
+                      onPress={() => { navigate('DetalleMovimientoIngreso', { item }); }}
+                      activeOpacity={0.85}
+                  >
+                      <View style={styles.columnaLogo}>
+                          <LogoEmpresa imagePath={item.LogoEmpresa} />
+                      </View>
+                      <View style={styles.columnaInfo}>
+                          <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto}]}>
+                              {item.NombreEmpresa}
+                          </Text>
+                          <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                              {item.FechaRegistro}
+                          </Text>
+                          <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                              ID: {item.Id}
+                          </Text>
+                          </View>
+                          <View style={styles.columnaTotal}>
+                          <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                              Gs. {Number(item.MontoIngreso).toLocaleString('es-ES')}
+                          </Text>
+                      </View>
+                  </TouchableOpacity>
+              );
+          }}
+          keyExtractor={item => item.key}
+        />
+      ):(
+        <Empty />
+      )
+     }
     </View>
   );
 }

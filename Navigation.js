@@ -180,7 +180,7 @@ function DrawerInicio({navigation}) {
     >
       <DrawerNav.Screen 
         name="Home" 
-        component={HomeStackGroup} 
+        component={TabsHome} 
         options={{
          
           drawerLabel: ({ color, size,focused }) => {
@@ -362,10 +362,13 @@ const CentralTabButton = ({ onPress, colors   }) => {
     // Determinar a qué pantalla navegar según el componente activo
     if (estadocomponente.ComponenteActivoBottonTab === 'ListadoMovimientosIngresos') {
       const IdMovIngreso=0
-      navigation.navigate('RegistroMovimientoIngreso',{IdMovIngreso});
+      // navigation.navigate('RegistroMovimientoIngreso',{IdMovIngreso});
+      navigation.navigate('MovIngresosStackGroup',{screen:'RegistroMovimientoIngreso',params:{IdMovIngreso}});
+
     } else {
       const IdMovGasto=0
-      navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
+      // navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
+      navigation.navigate('MovGastosStackGroup',{screen:'RegistroMovimientoGasto',params:{IdMovGasto}});
     }
     
   };
@@ -420,7 +423,7 @@ const CentralTabButton = ({ onPress, colors   }) => {
 };
 
 const Tab = createBottomTabNavigator();
-function TabsGroup({ navigation }) {
+function TabsHome({ navigation }) {
   
   const { colors,fonts } = useTheme();
   const estilos= {
@@ -436,7 +439,7 @@ function TabsGroup({ navigation }) {
   }
   return (
     <Tab.Navigator
-      initialRouteName="ListadoMovimientosGastos"
+      initialRouteName="MovGastosStackGroup"
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
@@ -450,8 +453,8 @@ function TabsGroup({ navigation }) {
       }}
     >
       <Tab.Screen
-        name="ListadoMovimientosGastos"
-        component={ListadoMovimientosGastos}
+        name="MovGastosStackGroup"
+        component={MovGastosStackGroup}
          options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -475,8 +478,8 @@ function TabsGroup({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="ListadoMovimientosIngresos"
-        component={ListadoMovimientosIngresos}
+        name="MovIngresosStackGroup"
+        component={MovIngresosStackGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -525,8 +528,8 @@ function TabsGroup({ navigation }) {
 
 
       <Tab.Screen
-        name="ResumenMovimientos"
-        component={ResumenMovimientos}
+        name="ResumenStackGroup"
+        component={ResumenStackGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -556,8 +559,8 @@ function TabsGroup({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="Estats"
-        component={EstadisticasMes}
+        name="EstadisticasMesStackGroup"
+        component={EstadisticasMesStackGroup}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -593,43 +596,50 @@ function TabsGroup({ navigation }) {
  
 }
 
-const HomeStack = createNativeStackNavigator();
 
-function HomeStackGroup(){
-  const { colors,fonts } = useTheme();
-  
+const MovGastosStack = createNativeStackNavigator();
+function MovGastosStackGroup(){
   return(
-    <HomeStack.Navigator 
-    
-    >
-      <HomeStack.Screen name="TabsGroup" component={TabsGroup} 
-      options={{ headerShown: false }}
-      />
+    <MovGastosStack.Navigator>
+      <MovGastosStack.Screen name="ListadoMovimientosGastos" component={ListadoMovimientosGastos} options={{ headerShown: false }} />
+      <MovGastosStack.Screen name="DetalleMovimientoGasto" component={DetalleMovimientoGasto} options={{ headerShown: false }} />
+      <MovGastosStack.Screen name="RegistroMovimientoGasto" component={RegistroMovimientoGasto} options={{ headerShown: false }} />
+    </MovGastosStack.Navigator>
+  )
+}
 
-      <HomeStack.Screen name="DetalleMovimientoGasto" 
-        component={DetalleMovimientoGasto} 
-        options={{ headerShown: false }}
-      /> 
+const MovIngresosStack = createNativeStackNavigator();
+function MovIngresosStackGroup(){
+  return(
+    <MovIngresosStack.Navigator>
+      <MovIngresosStack.Screen name="ListadoMovimientosIngresos" component={ListadoMovimientosIngresos} options={{ headerShown: false }} />
+      <MovIngresosStack.Screen name="DetalleMovimientoIngreso" component={DetalleMovimientoIngreso} options={{ headerShown: false }} />
+      <MovIngresosStack.Screen name="RegistroMovimientoIngreso" component={RegistroMovimientoIngreso} options={{ headerShown: false }} />
+    </MovIngresosStack.Navigator>
+  )
+}
 
-      <HomeStack.Screen name="RegistroMovimientoGasto" 
-        component={RegistroMovimientoGasto} 
-        options={{ headerShown: false }}
-      /> 
 
-      <HomeStack.Screen name="DetalleMovimientoIngreso" 
-        component={DetalleMovimientoIngreso} 
-        options={{ headerShown: false }}
-      />
-
-      <HomeStack.Screen name="RegistroMovimientoIngreso" 
-        component={RegistroMovimientoIngreso} 
-        options={{ headerShown: false }}
-      /> 
-      
-    </HomeStack.Navigator>
+const ResumenStack = createNativeStackNavigator();
+function ResumenStackGroup(){
+  return(
+    <ResumenStack.Navigator>
+      <ResumenStack.Screen name="ResumenMovimientos" component={ResumenMovimientos} options={{ headerShown: false }} />
+    </ResumenStack.Navigator>
   )
 
 }
+
+const EstadisticasMesStack = createNativeStackNavigator();
+function EstadisticasMesStackGroup(){
+  return(
+    <EstadisticasMesStack.Navigator>
+      <EstadisticasMesStack.Screen name="EstadisticasMes" component={EstadisticasMes} options={{ headerShown: false }} />
+    </EstadisticasMesStack.Navigator>
+  )
+}
+
+
 
 const Stack = createNativeStackNavigator();
 function NavigationLogin(){

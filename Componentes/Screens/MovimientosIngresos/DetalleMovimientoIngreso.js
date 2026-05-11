@@ -10,9 +10,12 @@ import { AuthContext } from "../../../AuthContext";
 
 
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
+
 import CabaceraRegistros from "../../CabeceraRegistros/CabaceraRegistros";
 import Confirmacion from "../../Procesando/Confirmacion";
-import Alerta from "../../Procesando/Alerta";
+import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
+
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -30,9 +33,22 @@ export default function DetalleMovimientoIngreso({ navigation }) {
   const [showconfirmacion,setShowconfirmacion]=useState(false)
   const [mensajeconfirmacion,setMensajeconfirmacion]=useState(false)
   const [confirmaciondelete,setConfirmaciondelete]=useState(false)
+  const [tituloespera, setTituloespera] = useState('');
+  const [ready, setReady] = useState(false);
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                            titulo:'',
+                                                            is_error:false,
+                                                            estado_actualizar:'bandera_registro_ingreso',
+                                                            valor_estado:'',
+                                                            navnivel1:'Home',
+                                                            navnivel2:'MovIngresosStackGroup',
+                                                            navnivel3:'ListadoMovimientosIngresos',
+                                                          })
+  
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
@@ -62,11 +78,14 @@ export default function DetalleMovimientoIngreso({ navigation }) {
     setShowconfirmacion(true)
     
   };
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
 
   const eliminar_registro =async()=>{
     const id_del= datositem.Id
-    actualizarEstadocomponente('tituloloading', 'Eliminando Gasto..');
-    actualizarEstadocomponente('loading', true);
+    setReady(false)
+    setTituloespera("Eliminando Movimiento Ingreso..")
     
     const endpoint = `operaciones/EliminarMovimientoIngresoUser/${id_del}/` 
     const metodo = 'DELETE'
@@ -75,24 +94,36 @@ export default function DetalleMovimientoIngreso({ navigation }) {
         return; // Salimos de la función
       }
     if (result.resp_correcta) {
-        
+        setReady(true);
         const nuevo = !estadocomponente.bandera_registro_gasto;
         const mensajeExito =  'Movimiento Ingreso Eliminado';
-        asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosIngresos', 'bandera_registro_ingreso', nuevo);
-        actualizarEstadocomponente('alerta_estado', true); 
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'MOVIMIENTO INGRESO',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
         
       } else {
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_ingreso', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'MOVIMIENTO GASTO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
+    
 
   }
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      
+      setReady(true);
       setDatositem(item);
       
       
@@ -107,10 +138,11 @@ export default function DetalleMovimientoIngreso({ navigation }) {
           
   }, [confirmaciondelete]);
   const tieneComprobante = !!datositem.UrlImg;
+  if (!ready) return <Esperando titulo={tituloespera}/>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo}}>
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {showconfirmacion &&
           <Confirmacion

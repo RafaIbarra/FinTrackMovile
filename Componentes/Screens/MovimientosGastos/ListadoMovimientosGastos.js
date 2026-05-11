@@ -5,10 +5,12 @@ import { Surface } from 'react-native-paper';
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
-import Alerta from "../../Procesando/Alerta";
+import Esperando from "../../Procesando/Espera";
+import Notificacion from "../../Notificacion/Notificacion";
+import Empty from "../../Empty/Empty";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import { useApi } from "../../../Apis/useApi";
-import Esperando from "../../Procesando/Espera";
+
 export default function ListadoMovimientosGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
@@ -19,12 +21,22 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const [dataresumen, setDataresumen] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
-  const [titulo,setTitulo]=useState('CARGANDO MOVIMIENTOS GASTOS')
+  const [titulo,setTitulo]=useState('Movimientos gastos')
+  const[estadonotificacion,setEstadonotificacion]=useState(false)
+  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'bandera_registro_gasto',
+                                                          valor_estado:'',
+                                                          navnivel1:'Home',
+                                                          navnivel2:'MovGastosStackGroup',
+                                                          navnivel3:'ListadoMovimientosGastos',
+                                                        })
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const estilos = {
@@ -63,15 +75,27 @@ export default function ListadoMovimientosGastos({ navigation }) {
       setDataegresos(registros);
       setDataegresosresult(registros);
       setDataresumen(result.data.resumen);
+      setReady(true);
     } else {
-      // const msj = result.data?.message || 'Error en la solicitud';
-      // asignar_opciones_alerta(true, 'ERROR', msj, 'GASTOS', '', false);
-      // actualizarEstadocomponente('alerta_estado', true);
+        const msj = result.data?.message || 'Error en la solicitud';
+        
+        setReady(true)
+        
+        setBodynotificacion(prevState => ({
+            ...prevState,
+            titulo:'MOVIMIENTOS GASTOS',
+            mensaje: msj,
+            is_error: true,
+            valor_estado:''
+          }));
+          setEstadonotificacion(true)
     }
-    setReady(true);
+    
     
   };
-
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
   useEffect(() => {
     
     cargardatos();
@@ -80,6 +104,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      setReady(true)
       actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
     });
     return unsubscribe;
@@ -116,7 +141,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
       <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
@@ -183,48 +208,57 @@ export default function ListadoMovimientosGastos({ navigation }) {
       )}
 
       {/* ═══ LISTA ═══ */}
-      <FlatList
-        data={dataegresosresult}
-        contentContainerStyle={styles.flatlistContenido}
-        style={{ flex: 1 }}
-        renderItem={({ item }) => {
-          return (
-            <TouchableOpacity
-              style={[
-                styles.contenedordatos,
-                {
-                  backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-                  borderRightColor: colors.screen_componente_estilos.color_borde_cards,
-                  borderBottomColor: colors.screen_componente_estilos.color_borde_cards,
-                },
-              ]}
-              onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
-              activeOpacity={0.85}
-            >
-              <View style={styles.columnaLogo}>
-                <LogoEmpresa imagePath={item.LogoEmpresa} />
-              </View>
-              <View style={styles.columnaInfo}>
-                <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
-                  {item.NombreEmpresa}
-                </Text>
-                <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                  {item.FechaRegistro}
-                </Text>
-                <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
-                  ID: {item.Id}
-                </Text>
-              </View>
-              <View style={styles.columnaTotal}>
-                <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
-                  Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-        keyExtractor={item => item.key}
-      />
+
+      {dataegresosresult.length>0? (
+
+        <FlatList
+          data={dataegresosresult}
+          contentContainerStyle={styles.flatlistContenido}
+          style={{ flex: 1 }}
+          renderItem={({ item }) => {
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.contenedordatos,
+                  {
+                    backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+                    borderRightColor: colors.screen_componente_estilos.color_borde_cards,
+                    borderBottomColor: colors.screen_componente_estilos.color_borde_cards,
+                  },
+                ]}
+                onPress={() => { navigate('DetalleMovimientoGasto', { item }); }}
+                activeOpacity={0.85}
+              >
+                <View style={styles.columnaLogo}>
+                  <LogoEmpresa imagePath={item.LogoEmpresa} />
+                </View>
+                <View style={styles.columnaInfo}>
+                  <Text style={[styles.nombreEmpresa, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                    {item.NombreEmpresa}
+                  </Text>
+                  <Text style={[styles.fechaRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                    {item.FechaRegistro}
+                  </Text>
+                  <Text style={[styles.idRegistro, { fontFamily: fonts.balsamiqregular.fontFamily, color: colors.screen_componente_estilos.color_texto_subtitulo }]}>
+                    ID: {item.Id}
+                  </Text>
+                </View>
+                <View style={styles.columnaTotal}>
+                  <Text style={[styles.totalMovimiento, { fontFamily: fonts.balsamiqbold.fontFamily, color: colors.screen_componente_estilos.color_texto }]}>
+                    Gs. {Number(item.TotalMovimiento).toLocaleString('es-ES')}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+          keyExtractor={item => item.key}
+        />
+      ):(
+        <Empty />
+      )
+      }
+
+
     </View>
   );
 }

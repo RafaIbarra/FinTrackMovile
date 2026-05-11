@@ -37,7 +37,6 @@ export default function DetalleCategoriaGasto({ navigation }) {
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
   const [tituloespera, setTituloespera] = useState('');
   const [ready, setReady] = useState(false);
-
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                               titulo:'',

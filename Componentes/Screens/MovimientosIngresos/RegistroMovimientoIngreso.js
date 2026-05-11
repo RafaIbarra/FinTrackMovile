@@ -15,8 +15,9 @@ import { AuthContext } from '../../../AuthContext';
 import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
 
-import Alerta from '../../Procesando/Alerta';
-import Modelo from '../Modelo/Modelo';
+
+import Notificacion from '../../Notificacion/Notificacion';
+import Esperando from '../../Procesando/Espera';
 import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
 
 import { useApi } from '../../../Apis/useApi';
@@ -328,14 +329,26 @@ export default function RegistroMovimientoIngreso({ navigation }) {
   };
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdMovIngreso } } = useRoute();
   const [titulo, setTitulo] = useState('');
-  const [mostraralerta, setMostraralerta] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [tituloespera, setTituloespera] = useState('');
+  const [estadonotificacion,setEstadonotificacion]=useState(false)
+  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                              titulo:'',
+                                                              is_error:false,
+                                                              estado_actualizar:'bandera_registro_ingreso',
+                                                              valor_estado:'',
+                                                              navnivel1:'Home',
+                                                              navnivel2:'MovIngresosStackGroup',
+                                                              navnivel3:'ListadoMovimientosIngresos',
+                                                            })
+  
 
   // ── Data registrada (para edición) ────────────────────────────────────────
   const [dataingresoregistrado, setDataingresoregistrado] = useState(null);
@@ -436,6 +449,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
 
   // ── Carga datos ───────────────────────────────────────────────────────────
   const carga_movimiento_registrado = async () => {
+    setReady(false)
     const endpoint = `operaciones/DatosReferencialesCargaMovimientoIngreso/${IdMovIngreso}/`;
     const result = await apiRequest(endpoint, 'GET', {});
     
@@ -452,22 +466,39 @@ export default function RegistroMovimientoIngreso({ navigation }) {
         setDataempresaregistrada(mov.Empresa);
         setFechamovimiento(mov.FechaIngreso);
         setImageUri(mov.UrlImg);
+        setReady(true)
       } else {
+        setReady(true)
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+              }));
+              setEstadonotificacion(true)
       }
     } catch (e) {
-      const msj = e || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+         setReady(true)
+         const msj = e || 'Error en la solicitud'; // toma el error
+         setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+           }));
+         setEstadonotificacion(true)
     } finally {
       setCargando(false);
+      setReady(true)
     }
   };
 
   const cargardatos = async () => {
     try {
+      setReady(false)
       const endpoint = `operaciones/ReferencialesCargaIngreso/`;
       const result = await apiRequest(endpoint, 'GET', {});
 
@@ -495,17 +526,33 @@ export default function RegistroMovimientoIngreso({ navigation }) {
         if (empresaPorDefecto) {
           setEmpresaSeleccionada(empresaPorDefecto);
         }
+        setReady(true)
       } else {
+        setReady(true)
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REFERENCIALES',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true);
       }
     } catch (e) {
+       setReady(true)
       const msj = e || 'Error en la solicitud';
-      asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false);
-      actualizarEstadocomponente('alerta_estado', true);
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo:'REFERENCIALES',
+        mensaje: msj,
+        is_error: true,
+        valor_estado:''
+      }));
+      setEstadonotificacion(true)
     } finally {
       setCargando(false);
+       setReady(true)
     }
   };
 
@@ -516,6 +563,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
   useEffect(() => {
     if (IdMovIngreso === 0) {
       setTitulo('Nuevo Movimiento Ingreso');
+      setReady(true)
     } else {
       setTitulo(`Editar Movimiento ID: ${IdMovIngreso}`);
       carga_movimiento_registrado();
@@ -580,10 +628,14 @@ export default function RegistroMovimientoIngreso({ navigation }) {
     navigation.goBack();
   };
 
+  const onOk=()=>{
+    setEstadonotificacion(false)
+  }
+
   const guardar = async () => {
     const error = validar();
     if (error) { Alert.alert('Atención', error); return; }
-
+    setReady(false);
     const esEdicion = IdMovIngreso > 0;
 
     const formData = new FormData();
@@ -606,8 +658,9 @@ export default function RegistroMovimientoIngreso({ navigation }) {
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..');
-      actualizarEstadocomponente('loading', true);
+      
+      const texto_titulo=esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..'
+      setTituloespera(texto_titulo)
 
       const endpoint = esEdicion 
         ? `operaciones/EditarMovimientoIngresoUser/${IdMovIngreso}/` 
@@ -625,42 +678,55 @@ export default function RegistroMovimientoIngreso({ navigation }) {
 
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
+        setReady(true);
         const nuevo = !estadocomponente.bandera_registro_ingreso;
         const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
-        asignar_opciones_alerta(false, 'REGISTRO INGRESOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosIngresos', 'bandera_registro_ingreso', nuevo);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
       } else {
+        
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Ingresos', 'bandera_registro_ingreso', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
     } catch (e) {
-      asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'Ingresos', 'bandera_registro_ingreso', false);
-      actualizarEstadocomponente('alerta_estado', true);
-      Alert.alert('Error', 'Ocurrió un error al guardar.');
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
     } finally {
       setEnviando(false);
+      setReady(true);
     }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (cargando) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: estilos.pantalla_color_fondo }}>
-        <ActivityIndicator color={estilos.font_importe_color} size="large" />
-        <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, marginTop: 12 }}>
-          Cargando...
-        </Text>
-      </View>
-    );
-  }
-
+  
+  if (!ready) return <Esperando titulo={tituloespera}/>;
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
       <CabeceraRegistros
         title={titulo}
         navigation={navigation}

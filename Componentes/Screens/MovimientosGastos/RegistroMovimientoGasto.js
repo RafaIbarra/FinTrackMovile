@@ -14,8 +14,10 @@ import { AuthContext } from '../../../AuthContext';
 import Handelstorage from '../../../Storage/HandelStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
 
-import Alerta from '../../Procesando/Alerta';
-import Modelo from '../Modelo/Modelo';
+
+import Notificacion from '../../Notificacion/Notificacion';
+import Esperando from '../../Procesando/Espera';
+
 import CabeceraRegistros from '../../CabeceraRegistros/CabaceraRegistros';
 import CameraScreen from '../Camerascreen/Camarascreen';
 
@@ -766,7 +768,19 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
   
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  const { asignar_opciones_alerta } = useContext(AuthContext);
+  const [ready, setReady] = useState(false);
+  const [tituloespera, setTituloespera] = useState('');
+  const [estadonotificacion,setEstadonotificacion]=useState(false)
+  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
+                                                                titulo:'',
+                                                                is_error:false,
+                                                                estado_actualizar:'bandera_registro_gasto',
+                                                                valor_estado:'',
+                                                                navnivel1:'Home',
+                                                                navnivel2:'MovGastosStackGroup',
+                                                                navnivel3:'ListadoMovimientosGastos',
+                                                              })
+  
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
 
@@ -774,7 +788,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdMovGasto } } = useRoute();
   const [titulo,setTitulo]=useState('')
-  const [mostraralerta,setMostraralerta]=useState(false)
+  
   // ── Data registrados ──────────────────────────────────────────────────────
   const [datagastosregistrados,setDatagastosregistrados]=useState([])
   const [datamediosregistrados,setDatamediosregistrados]=useState([])
@@ -865,6 +879,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   // ── Carga datos ───────────────────────────────────────────────────────────
 
   const carga_movimiento_registrado= async()=>{
+    setReady(false)
      const endpoint = `operaciones/DatosReferencialesCargosMovimiento/${IdMovGasto}/`;
      const result = await apiRequest(endpoint, 'GET', {});
      try {
@@ -891,21 +906,35 @@ export default function RegistroMovimientoGasto({ navigation }) {
               setDataempresaregistrada(empresa_id);
               setFechamovimiento(fecha_mov)
               setImageUri(result.data[0].UrlImg)
-              
+              setReady(true)
 
              
           }else{
+              setReady(true)
               const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-              asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
-              actualizarEstadocomponente('alerta_estado', true);
+              setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+              }));
+              setEstadonotificacion(true)
           }
       } catch (e) {
-      // Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+          setReady(true)
           const msj = e || 'Error en la solicitud'; // toma el error
-          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
-          actualizarEstadocomponente('alerta_estado', true);
+          setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+              }));
+              setEstadonotificacion(true)
     } finally {
       setCargando(false);
+      setReady(true)
     }
   }
 
@@ -913,7 +942,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
     try {
       
       
-      
+      setReady(false)
       const endpoint = `operaciones/ReferencialesCargaGasto/`;
       
       const result = await apiRequest(endpoint, 'GET', {});
@@ -946,18 +975,34 @@ export default function RegistroMovimientoGasto({ navigation }) {
           if (empresaPorDefecto) {
             setEmpresaSeleccionada(empresaPorDefecto);
           }
+          setReady(true)
       }else{
+          setReady(true)
           const msj = result.data?.message || 'Error en la solicitud'; // toma el error
-          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
-          actualizarEstadocomponente('alerta_estado', true);
+          setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+              }));
+              setEstadonotificacion(true)
       }
     } catch (e) {
       // Alert.alert('Error', 'No se pudieron cargar los datos referenciales.');
+          setReady(true)
           const msj = e || 'Error en la solicitud'; // toma el error
-          asignar_opciones_alerta(true, 'ERROR', msj, 'Referenciales', '', false); // muestra el mensaje en la alerta personalizada
-          actualizarEstadocomponente('alerta_estado', true);
+          setBodynotificacion(prevState => ({
+                ...prevState,
+                titulo:'REFERENCIALES',
+                mensaje: msj,
+                is_error: true,
+                valor_estado:''
+              }));
+              setEstadonotificacion(true)
     } finally {
       setCargando(false);
+      setReady(true)
     }
   };
 
@@ -968,6 +1013,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   useEffect(() => {
     if (IdMovGasto===0){
           setTitulo('Nuevo Movimiento Gasto')
+          setReady(true)
       }else{
         setTitulo(`Editar Movimiento ID: ${IdMovGasto}`)
         carga_movimiento_registrado()
@@ -1123,7 +1169,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   const guardar = async () => {
     const error = validar();
     if (error) { Alert.alert('Atención', error); return; }
-
+    setReady(false);
     const esEdicion = IdMovGasto > 0;
 
     const body = {
@@ -1167,17 +1213,16 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
     try {
       setEnviando(true);
-      actualizarEstadocomponente('tituloloading', esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..');
-      actualizarEstadocomponente('loading', true);
       
+      const texto_titulo=esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..'
+      setTituloespera(texto_titulo)
       //const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
       const endpoint = esEdicion ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/` :`operaciones/RegistroMovimientoGastoUser/`
       const metodo = esEdicion ? 'PUT' : 'POST';
       const result = await apiRequest(endpoint, metodo, formData);
 
       await new Promise((resolve) => setTimeout(resolve, 1500));  
-      actualizarEstadocomponente('tituloloading', '');
-      actualizarEstadocomponente('loading', false);
+      
       
       if (result.sessionExpired) {
         return; // Salimos de la función
@@ -1185,38 +1230,64 @@ export default function RegistroMovimientoGasto({ navigation }) {
       
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
+        setReady(true);
         const nuevo = !estadocomponente.bandera_registro_gasto;
         const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
-        asignar_opciones_alerta(false, 'REGISTRO GASTOS', mensajeExito, 'TabsGroup', 'ListadoMovimientosGastos', 'bandera_registro_gasto', nuevo);
-        actualizarEstadocomponente('alerta_estado', true); 
+        
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
         
       } else {
+        setReady(true);
         const msj = result.data?.message || 'Error en la solicitud';
-        asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
-        actualizarEstadocomponente('alerta_estado', true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
       
     } catch (e) {
-        asignar_opciones_alerta(true, 'ERROR', 'Ocurrió un error al guardar.', 'Gastos', 'bandera_registro_gasto', false);
-        actualizarEstadocomponente('alerta_estado', true);
-      Alert.alert('Error', 'Ocurrió un error al guardar.');
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: 'Ocurrió un error al guardar.',
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+      
     } finally {
       setEnviando(false);
+      setReady(true);
     }
   };
-
-  // ── Render ────────────────────────────────────────────────────────────────
-  if (cargando) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: estilos.pantalla_color_fondo }}>
-        <ActivityIndicator color={estilos.font_importe_color} size="large" />
-        <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, marginTop: 12 }}>
-          Cargando...
-        </Text>
-      </View>
-    );
+  const onOk=()=>{
+    setEstadonotificacion(false)
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
+  // if (cargando) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: estilos.pantalla_color_fondo }}>
+  //       <ActivityIndicator color={estilos.font_importe_color} size="large" />
+  //       <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, marginTop: 12 }}>
+  //         Cargando...
+  //       </Text>
+  //     </View>
+  //   );
+  // }
+  if (!ready) return <Esperando titulo={tituloespera}/>;
   
   const hayDistribucion = Object.values(distribucion).some((v) => parseFloat(v) > 0);
 
@@ -1226,7 +1297,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {estadocomponente.alerta_estado && <Alerta />}
+      {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
       <CabeceraRegistros
                 title={titulo}
                 navigation={navigation}

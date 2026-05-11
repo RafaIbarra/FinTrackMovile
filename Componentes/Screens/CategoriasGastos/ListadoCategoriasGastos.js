@@ -80,7 +80,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
       const msj = result.data?.message || 'Error en la solicitud';
       
       setReady(true)
-      setReady(true);
+      
       setBodynotificacion(prevState => ({
           ...prevState,
           titulo:'LISTADO DE CETAGORIAS',
