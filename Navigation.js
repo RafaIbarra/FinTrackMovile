@@ -20,6 +20,7 @@ import DrawerContentInicio from './Componentes/DrawerContentInicio/DrawerContent
 
 //Screens
 import Login from './Componentes/Screens/Login/Login';
+import RegistroUsuario from './Componentes/Screens/Usuarios/RegistroUsuario';
 import Settings from './Componentes/Screens/Settings';
 import Modelo from './Componentes/Screens/Modelo/Modelo';
 
@@ -225,70 +226,7 @@ function DrawerInicio({navigation}) {
 
        />
 
-      <DrawerNav.Screen name="InicioCategoriaGastos" 
-        component={Modelo}
-        options={{
-          drawerLabel: ({ color, size,focused }) => {
-            
-            let familyname
-            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
-            
-            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Categoria Gastos
-                      </Text>
-                    </View>)
-          },
-          drawerIcon: ({size, color})=>(
-            <Feather name="align-left"  size={sizeicon} color={color_icono} />
-          ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
-         }}
-
-      />
-
-      <DrawerNav.Screen name="GastosStackGroup" 
-        component={Modelo}
-        options={{
-          drawerLabel: ({ color, size,focused }) => {
-            
-            let familyname
-            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
-            
-            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Conceptos Gastos
-                      </Text>
-                    </View>)
-          },
-          drawerIcon: ({size, color})=>(
-            <Feather name="trending-down"  size={sizeicon} color={color_icono} />
-          ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
-         }}
-
-      />
-      <DrawerNav.Screen name="MediosPagosStackGroup" 
-        component={Modelo}
-        options={{
-          drawerLabel: ({ color, size,focused }) => {
-            
-            let familyname
-            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
-            
-            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Medios de Pagos
-                      </Text>
-                    </View>)
-          },
-          drawerIcon: ({size, color})=>(
-            <FontAwesome6 name="hand-holding-dollar"  size={sizeicon} color={color_icono} />
-          ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
-         }}
-
-       />
+      
       
       <DrawerNav.Screen name="ConsultaIA" 
         component={Modelo}
@@ -300,7 +238,7 @@ function DrawerInicio({navigation}) {
             
             return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
                       <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Consulta a la IA
+                        Asistente
                       </Text>
                     </View>)
           },
@@ -312,27 +250,7 @@ function DrawerInicio({navigation}) {
 
        />
 
-       <DrawerNav.Screen name="ModeloScreen" 
-        component={Modelo}
-        options={{
-          drawerLabel: ({ color, size,focused }) => {
-            
-            let familyname
-            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
-            
-            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
-                      <Text style={{fontFamily: familyname,color:color_texto}}> 
-                        Modelo pantalla
-                      </Text>
-                    </View>)
-          },
-          drawerIcon: ({size, color})=>(
-            <FontAwesome name="wpforms"  size={sizeicon} color={color_icono} />
-          ),
-          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
-         }}
-
-       />
+       
       
     </DrawerNav.Navigator>
   );
@@ -647,6 +565,7 @@ function NavigationLogin(){
     
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="RegistroUsuario" component={RegistroUsuario} />
       </Stack.Navigator>
     
   );

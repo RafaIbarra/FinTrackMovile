@@ -87,8 +87,8 @@ export default function Alerta({ navigation }) {
             }),
         ]).start(() => {
             if (!isError) {
-                console.log(estadocomponente.alerta_componente.estado_actualizar)
-                console.log(estadocomponente.alerta_componente.valor_estado)
+                // console.log(estadocomponente.alerta_componente.estado_actualizar)
+                // console.log(estadocomponente.alerta_componente.valor_estado)
                 actualizarEstadocomponente(
                     estadocomponente.alerta_componente.estado_actualizar,
                     estadocomponente.alerta_componente.valor_estado

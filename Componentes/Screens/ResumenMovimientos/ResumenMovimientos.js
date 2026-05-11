@@ -63,7 +63,7 @@ export default function ResumenMovimientos({ navigation }) {
         if (result.resp_correcta) {
             const data=result.data
             setDataResumen(result.data);
-            console.log(result.data)
+            
             serResultado(result.data.ResultadoDelMes)
             const filas_Tipos = [];
             if (data.ResumenPorTipos) {
@@ -90,7 +90,7 @@ export default function ResumenMovimientos({ navigation }) {
             }
             setFilasTipos(filas_Tipos)
 
-            console.log(result.data.ResultadoDelMes.PorcentajeUtilizado)
+            
 
             const valor = parseFloat(result.data.ResultadoDelMes.PorcentajeUtilizado);
             if (isNaN(valor)) {

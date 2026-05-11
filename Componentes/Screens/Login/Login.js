@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Alert, ImageBackground } from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
-
+import { useNavigation } from "@react-navigation/native";
 import Iniciarsesion from '../../../Apis/ApiInicioSesion';
 import Handelstorage from '../../../Storage/HandelStorage';
 import ComprobarStorage from '../../../Storage/VerificarStorage';
@@ -11,6 +11,7 @@ import Generarpeticion from '../../../Apis/ApiPeticiones';
 
 export default function Login() {
   const { colors, fonts } = useTheme();
+  const { navigate } = useNavigation();
   const [ready, setReady] = useState(false);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -44,8 +45,8 @@ export default function Login() {
     const resp = datos['status'];
 
     if (resp === 200) {
-      console.log(datos['data']['sesion'])
-      console.log(datos['data']['token'])
+      // console.log(datos['data']['sesion'])
+      // console.log(datos['data']['token'])
       const userdata = {
         token: datos['data']['token'],
         sesion: datos['data']['sesion'],
@@ -85,6 +86,10 @@ export default function Login() {
   const handleContrasenaChange = (text) => {
     setContrasena(text);
   };
+
+  const registrarse=()=>{
+
+  }
 
   const cargardatos = async () => {
     setReady(false);
@@ -292,6 +297,7 @@ export default function Login() {
                     fontSize: 14,
                     fontFamily: texto_negrita,
                   }}
+                  onPress={() => { navigate('RegistroUsuario'); }}
                 >
                   ¿No tenés cuenta? Registrate
                 </Button>

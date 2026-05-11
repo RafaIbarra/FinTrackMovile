@@ -47,8 +47,8 @@ export default function Modelo({ navigation }){
             return; // SI LA SESION NO ES VALIDA
         }
         if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
+            // console.log('respuesta correcta del backend')
+            // console.log(result.data) // la data del backend
         }else {
             const msj = result.data?.message || 'Error en la solicitud'; // toma el error
             asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false); // muestra el mensaje en la alerta personalizada
@@ -77,8 +77,8 @@ export default function Modelo({ navigation }){
             return; // SI LA SESION NO ES VALIDA
         }
         if (result.resp_correcta) {
-            console.log('respuesta correcta del backend')
-            console.log(result.data) // la data del backend
+            // console.log('respuesta correcta del backend')
+            // console.log(result.data) // la data del backend
             const nuevo_valor_bandera=!estadocomponente.bandera_registro_gasto // ES PARA CONTROLAR EL ESTADO DEL COMPONENTE PARA SU ACTUALIZACION
             asignar_opciones_alerta(false,'REGISTRO GASTOS','Registro correcto del movimiento','Gastos','bandera_registro_gasto',nuevo_valor_bandera)
             actualizarEstadocomponente('alerta_estado', true);
@@ -91,7 +91,7 @@ export default function Modelo({ navigation }){
     }
 
     const accion_boton=()=>{
-        console.log('boton')
+        // console.log('boton')
     }
 
     const cargardatos =async()=>{
