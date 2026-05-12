@@ -1,5 +1,5 @@
  
-const ip='192.168.1.100'
+const ip='127.0.0.1'
 const puerto='8000'
 export const API_BASE=`http://${ip}:${puerto}/api`
 export const API_BASE_IMG=`http://${ip}:${puerto}`
