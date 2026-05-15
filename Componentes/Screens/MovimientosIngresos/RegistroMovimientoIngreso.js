@@ -632,92 +632,96 @@ export default function RegistroMovimientoIngreso({ navigation }) {
     setEstadonotificacion(false)
   }
 
-  const guardar = async () => {
-    const error = validar();
-    if (error) { Alert.alert('Atención', error); return; }
-    setReady(false);
-    const esEdicion = IdMovIngreso > 0;
+ const guardar = async () => {
+  const error = validar();
+  if (error) { Alert.alert('Atención', error); return; }
+  setReady(false);
+  const esEdicion = IdMovIngreso > 0;
 
-    const formData = new FormData();
-    formData.append('codingreso', ingresoSeleccionado.id);
-    formData.append('montoingreso', montoIngreso);
-    formData.append('fecha', fechaSeleccionada);
-    formData.append('empresa', empresaSeleccionada.id);
-    formData.append('observacion', '');
-    if (esEdicion) formData.append('IdMovIngreso', IdMovIngreso);
+  const formData = new FormData();
+  formData.append('codingreso', ingresoSeleccionado.id);
+  formData.append('montoingreso', montoIngreso);
+  formData.append('fecha', fechaSeleccionada);
+  formData.append('empresa', empresaSeleccionada.id);
+  formData.append('observacion', '');
+  if (esEdicion) formData.append('IdMovIngreso', IdMovIngreso);
 
-    if (imageUri) {
-      formData.append('imagen', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'foto.jpg',
-      });
-    } else {
-      formData.append('imagen', '');
+  if (imageUri) {
+    const extension = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+    const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+    const mimeType = mimeMap[extension] || 'image/jpeg';
+    const fileName = `foto_${Date.now()}.${extension}`;
+
+    formData.append('imagen', {
+      uri: imageUri,
+      type: mimeType,
+      name: fileName,
+    });
+  } else {
+    formData.append('imagen', '');
+  }
+
+  try {
+    setEnviando(true);
+
+    const texto_titulo = esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..';
+    setTituloespera(texto_titulo);
+
+    const endpoint = esEdicion
+      ? `operaciones/EditarMovimientoIngresoUser/${IdMovIngreso}/`
+      : `operaciones/RegistroMovimientoIngresoUser/`;
+    const metodo = esEdicion ? 'PUT' : 'POST';
+    const result = await apiRequest(endpoint, metodo, formData);
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    actualizarEstadocomponente('tituloloading', '');
+    actualizarEstadocomponente('loading', false);
+
+    if (result.sessionExpired) {
+      return;
     }
 
-    try {
-      setEnviando(true);
-      
-      const texto_titulo=esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..'
-      setTituloespera(texto_titulo)
-
-      const endpoint = esEdicion 
-        ? `operaciones/EditarMovimientoIngresoUser/${IdMovIngreso}/` 
-        : `operaciones/RegistroMovimientoIngresoUser/`;
-      const metodo = esEdicion ? 'PUT' : 'POST';
-      const result = await apiRequest(endpoint, metodo, formData);
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      actualizarEstadocomponente('tituloloading', '');
-      actualizarEstadocomponente('loading', false);
-
-      if (result.sessionExpired) {
-        return;
-      }
-
-      if (result.resp_correcta) {
-        if (!esEdicion) resetForm();
-        setReady(true);
-        const nuevo = !estadocomponente.bandera_registro_ingreso;
-        const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO INGRESO',
-          mensaje: mensajeExito,
-          is_error: false,
-          valor_estado:nuevo
-        }));
-        setEstadonotificacion(true)
-      } else {
-        
-        const msj = result.data?.message || 'Error en la solicitud';
-        setReady(true);
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO INGRESO',
-          mensaje: msj,
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
-      }
-    } catch (e) {
-        setReady(true);
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO INGRESO',
-          mensaje: msj,
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
-    } finally {
-      setEnviando(false);
+    if (result.resp_correcta) {
+      if (!esEdicion) resetForm();
       setReady(true);
+      const nuevo = !estadocomponente.bandera_registro_ingreso;
+      const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo: 'REGISTRO INGRESO',
+        mensaje: mensajeExito,
+        is_error: false,
+        valor_estado: nuevo,
+      }));
+      setEstadonotificacion(true);
+    } else {
+      const msj = result.data?.message || 'Error en la solicitud';
+      setReady(true);
+      setBodynotificacion(prevState => ({
+        ...prevState,
+        titulo: 'REGISTRO INGRESO',
+        mensaje: msj,
+        is_error: true,
+        valor_estado: '',
+      }));
+      setEstadonotificacion(true);
     }
-  };
-
+  } catch (e) {
+    const msj = e?.message || String(e) || 'Error en la solicitud'; // ← Fix: declarar msj desde el error capturado
+    setReady(true);
+    setBodynotificacion(prevState => ({
+      ...prevState,
+      titulo: 'REGISTRO INGRESO',
+      mensaje: msj,
+      is_error: true,
+      valor_estado: '',
+    }));
+    setEstadonotificacion(true);
+  } finally {
+    setEnviando(false);
+    setReady(true);
+  }
+};
   // ── Render ────────────────────────────────────────────────────────────────
   
   if (!ready) return <Esperando titulo={tituloespera}/>;

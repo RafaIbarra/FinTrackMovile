@@ -6,13 +6,13 @@ import {View,StyleSheet,Text,TouchableOpacity,ScrollView,
 
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 
 import Handelstorage from '../../../Storage/HandelStorage';
-import Generarpeticion from '../../../Apis/ApiPeticiones';
 
 
 import Notificacion from '../../Notificacion/Notificacion';
@@ -823,6 +823,22 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
   //── CAMARA ───────────────────────────────────────────────────────────────
   const [imageUri, setImageUri] = useState(null);
+  const [imageSize, setImageSize] = useState(null);
+
+  const obtenerTamanioImagen = async (uri) => {
+    try {
+      const info = await FileSystem.getInfoAsync(uri);
+      if (info.exists && typeof info.size === 'number') {
+        setImageSize(info.size);
+        return info.size;
+      }
+    } catch (error) {
+      console.warn('No se pudo obtener tamaño de imagen', error);
+    }
+    setImageSize(null);
+    return null;
+  };
+
   // --- Tomar foto con la cámara ---
   const tomarFoto = async () => {
       const { granted } = await ImagePicker.requestCameraPermissionsAsync();
@@ -833,13 +849,14 @@ export default function RegistroMovimientoGasto({ navigation }) {
   
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
-        quality: 0.85,
+        quality: 0.6,
       });
   
       if (result.canceled) return;
   
       const uri = result.assets[0].uri;
       setImageUri(uri);
+      await obtenerTamanioImagen(uri);
   
       // Guardar en galería (opcional)
       const { granted: mediaGranted } = await MediaLibrary.requestPermissionsAsync();
@@ -858,12 +875,14 @@ export default function RegistroMovimientoGasto({ navigation }) {
   
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        quality: 0.85,
+        quality: 0.6,
       });
   
       if (result.canceled) return;
   
-      setImageUri(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setImageUri(uri);
+      await obtenerTamanioImagen(uri);
     };
 
 
@@ -1166,112 +1185,247 @@ export default function RegistroMovimientoGasto({ navigation }) {
      navigation.goBack();
   }
 
-  const guardar = async () => {
-    const error = validar();
-    if (error) { Alert.alert('Atención', error); return; }
-    setReady(false);
-    const esEdicion = IdMovGasto > 0;
 
-    const body = {
-      gastos: gastosSeleccionados.map((g) => ({
-        idgasto: g.id,
-        monto: parseFloat(g.monto),
-      })),
-      medios: construirMedios(),
-      fecha: fechaSeleccionada,
-      empresa: empresaSeleccionada.id,
-      imagen: { uri: imageUri, type: 'image/jpeg', name: 'foto.jpg' },
-      ...(esEdicion && { IdMovGasto }),
-    };
+const prepararImagenParaEnvio = async (imageUri) => {
+  if (!imageUri) return null;
+
+  const fileName = imageUri.split('/').pop() || 'foto.jpg';
+  const extensionMatch = fileName.match(/\.([^.]+)$/);
+  const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'jpg';
+  const normalizedFileName = fileName.includes('.') ? fileName : `${fileName}.${extension}`;
+  const destUri = `${FileSystem.cacheDirectory}${normalizedFileName}`;
+
+  const copyFileToCache = async () => {
+    await FileSystem.copyAsync({
+      from: imageUri,
+      to: destUri,
+    });
+    const fileInfo = await FileSystem.getInfoAsync(destUri);
+    if (!fileInfo.exists) {
+      throw new Error('No se pudo copiar la imagen al cache');
+    }
+    return destUri;
+  };
+
+  const writeFileToCacheFromBase64 = async () => {
+    const base64 = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    await FileSystem.writeAsStringAsync(destUri, base64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const fileInfo = await FileSystem.getInfoAsync(destUri);
+    if (!fileInfo.exists) {
+      throw new Error('No se pudo escribir la imagen en cache');
+    }
+    return destUri;
+  };
+
+  try {
+    return await copyFileToCache();
+  } catch (error) {
+    if (imageUri.startsWith('content://')) {
+      try {
+        return await writeFileToCacheFromBase64();
+      } catch {
+        // Fallback al URI original si no se puede copiar.
+      }
+    }
+    return imageUri;
+  }
+};
+
+
+
+const guardar = async () => {
+  const error = validar();
+  if (error) {
+    Alert.alert('Atención', error);
+    return;
+  }
+  
+  const imageSizeMb = imageSize ? Number((imageSize / 1024 / 1024).toFixed(2)) : null;
+  if (imageSizeMb && imageSizeMb > 3) {
+    Alert.alert(
+      'Imagen muy grande',
+      `La imagen seleccionada pesa ${imageSizeMb} MB. Reduce la resolución o elige otra imagen.`
+    );
+    return;
+  }
+
+  setReady(false);
+  const esEdicion = IdMovGasto > 0;
+  
+  try {
+    setEnviando(true);
+    const texto_titulo = esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..';
+    setTituloespera(texto_titulo);
 
     const formData = new FormData();
-    formData.append('gastos', JSON.stringify(gastosSeleccionados.map(g => ({
-      idgasto: g.id,
-      monto: parseFloat(g.monto),
-    }))));
+    
+    formData.append('gastos', JSON.stringify(
+      gastosSeleccionados.map((g) => ({
+        idgasto: g.id,
+        monto: parseFloat(g.monto),
+      }))
+    ));
     formData.append('medios', JSON.stringify(construirMedios()));
     formData.append('fecha', fechaSeleccionada);
-    formData.append('empresa', empresaSeleccionada.id);
-    if (esEdicion) formData.append('IdMovGasto', IdMovGasto);
+    formData.append('empresa', String(empresaSeleccionada.id));
+    if (esEdicion) formData.append('IdMovGasto', String(IdMovGasto));
 
-    // Agregar la imagen como archivo (objeto con uri, type, name)
-    // formData.append('imagen', {
-    //   uri: imageUri,
-    //   type: 'image/jpeg',
-    //   name: 'foto.jpg',
-    // });
+    let debugImageInfo = {
+      imageUri,
+      uriPreparado: null,
+      fileName: null,
+      mimeType: null,
+    };
+
+    // ========== FIX: PREPARAR IMAGEN ANTES DE ENVIAR ==========
     if (imageUri) {
-        formData.append('imagen', {
-          uri: imageUri,
-          type: 'image/jpeg',
-          name: 'foto.jpg',
-        });
-      } else {
-        formData.append('imagen', '');   // string vacío para indicar "sin imagen"
-      }
+      const uriPreparado = await prepararImagenParaEnvio(imageUri);
+      const fileName = uriPreparado.split('/').pop() || 'foto.jpg';
+      const extension = (fileName.match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || 'jpg';
+      const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
+      const imageFile = {
+        uri: uriPreparado,
+        type: mimeType,
+        name: fileName,
+      };
+      formData.append('imagen', imageFile);
+      debugImageInfo = { imageUri, uriPreparado, fileName, mimeType };
+    } else {
+      formData.append('imagen', '');
+    }
+    setReady(true);
 
+    const endpoint = esEdicion
+      ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/`
+      : `operaciones/RegistroMovimientoGastoUser/`;
+    const metodo = esEdicion ? 'PUT' : 'POST';
+
+    console.log('RegistroMovimientoGasto: enviando imagen', {
+      endpoint,
+      metodo,
+      ...debugImageInfo,
+    });
+
+    // TEMPORAL: Mostrar en Alert para debugging
+    Alert.alert('Debug', `Enviando: ${endpoint}\nImagen: ${debugImageInfo.uriPreparado || 'sin imagen'}`);
 
     try {
-      setEnviando(true);
-      
-      const texto_titulo=esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..'
-      setTituloespera(texto_titulo)
-      //const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
-      const endpoint = esEdicion ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/` :`operaciones/RegistroMovimientoGastoUser/`
-      const metodo = esEdicion ? 'PUT' : 'POST';
-      const result = await apiRequest(endpoint, metodo, formData);
+      const result = await apiRequest(endpoint, metodo, formData, { timeout: 30000 });
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));  
-      
-      
-      if (result.sessionExpired) {
-        return; // Salimos de la función
-      }
-      
-      if (result.resp_correcta) {
-        if (!esEdicion) resetForm();
-        setReady(true);
-        const nuevo = !estadocomponente.bandera_registro_gasto;
-        const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
-        
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO GASTOS',
-          mensaje: mensajeExito,
-          is_error: false,
-          valor_estado:nuevo
-        }));
-        setEstadonotificacion(true)
-        
-      } else {
-        setReady(true);
-        const msj = result.data?.message || 'Error en la solicitud';
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO GASTOS',
-          mensaje: msj,
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
-      }
-      
-    } catch (e) {
-        setReady(true);
-        setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'REGISTRO GASTOS',
-          mensaje: 'Ocurrió un error al guardar.',
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
-      
-    } finally {
-      setEnviando(false);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    if (result.sessionExpired) return;
+
+    if (result.resp_correcta) {
+      if (!esEdicion) resetForm();
       setReady(true);
+      const nuevo = !estadocomponente.bandera_registro_gasto;
+      const mensajeExito = esEdicion
+        ? 'Movimiento actualizado correctamente'
+        : 'Registro correcto del movimiento';
+
+      setBodynotificacion((prevState) => ({
+        ...prevState,
+        titulo: 'REGISTRO GASTOS',
+        mensaje: mensajeExito,
+        is_error: false,
+        valor_estado: nuevo,
+      }));
+      setEstadonotificacion(true);
+    } else {
+      setReady(true);
+      
+      // Extraer mensaje de error de todas las formas posibles
+      let msj = 'Error en la solicitud';
+      
+      if (result.data?.message) {
+        msj = result.data.message;
+      } else if (result.data?.detail) {
+        msj = result.data.detail;
+      } else if (result.data?.error) {
+        msj = typeof result.data.error === 'string' 
+          ? result.data.error 
+          : JSON.stringify(result.data.error);
+      } else if (typeof result.data === 'string') {
+        msj = result.data;
+      } else if (result.data?.raw) {
+        msj = typeof result.data.raw === 'string'
+          ? result.data.raw.slice(0, 300)
+          : JSON.stringify(result.data.raw);
+      } else if (result.data && typeof result.data === 'object') {
+        // Errores de campo de Django REST Framework
+        const errores = Object.entries(result.data)
+          .filter(([k]) => !['message', 'detail', 'error', 'non_field_errors'].includes(k))
+          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+          .join('\n');
+        if (errores) msj = errores;
+      }
+      
+      // Si hay non_field_errors de DRF
+      if (result.data?.non_field_errors) {
+        msj = Array.isArray(result.data.non_field_errors) 
+          ? result.data.non_field_errors.join(', ')
+          : result.data.non_field_errors;
+      }
+
+      // Agregar info de status si está disponible
+      if (result.resp) {
+        msj += `\nStatus: ${result.resp}`;
+      }
+
+      setBodynotificacion((prevState) => ({
+        ...prevState,
+        titulo: 'REGISTRO GASTOS',
+        mensaje: msj,
+        is_error: true,
+        valor_estado: '',
+      }));
+      setEstadonotificacion(true);
     }
-  };
+    } catch (apiError) {
+      setReady(true);
+      console.error('RegistroMovimientoGasto: error en apiRequest', apiError);
+      // TEMPORAL: Mostrar error en Alert
+      Alert.alert('Error Debug', `Error al enviar: ${apiError.message}`);
+      setBodynotificacion((prevState) => ({
+        ...prevState,
+        titulo: 'REGISTRO GASTOS',
+        mensaje: `Error al enviar petición: ${apiError.message}`,
+        is_error: true,
+        valor_estado: '',
+      }));
+      setEstadonotificacion(true);
+    }
+    
+  } catch (e) {
+    setReady(true);
+    
+    // Mensaje de error descriptivo
+    let mensajeError = e.message || 'Ocurrió un error al guardar.';
+    
+    if (mensajeError.includes('Network request failed')) {
+      mensajeError = 'Error de red: No se pudo conectar al servidor.\n' +
+        'Verifica tu conexión a internet.';
+    }
+    
+    setBodynotificacion((prevState) => ({
+      ...prevState,
+      titulo: 'REGISTRO GASTOS',
+      mensaje: mensajeError,
+      is_error: true,
+      valor_estado: '',
+    }));
+    setEstadonotificacion(true);
+  } finally {
+    setEnviando(false);
+    setReady(true);
+  }
+};
+
   const onOk=()=>{
     setEstadonotificacion(false)
   }

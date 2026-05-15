@@ -20,7 +20,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.rafael86.FinTrackApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,6 +47,11 @@
           "photosPermission": "FinTrackApp necesita acceso a tus fotos."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2f350b97-3497-4b26-a73d-bd4ff526739d"
+      }
+    }
   }
 }

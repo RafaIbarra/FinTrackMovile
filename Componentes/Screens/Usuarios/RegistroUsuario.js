@@ -1,12 +1,21 @@
 import React, { useState, useContext } from 'react';
-import { View, StyleSheet, Text,ImageBackground } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 import { useNavigation } from "@react-navigation/native";
 import RegistroUser from '../../../Apis/ApiRegistroUsuario';
 import Handelstorage from '../../../Storage/HandelStorage';
-import { createIconSetFromFontello } from '@expo/vector-icons';
 
 export default function RegistroUsuario() {
   const { colors, fonts } = useTheme();
@@ -137,182 +146,166 @@ export default function RegistroUsuario() {
 
   return (
     <PaperProvider>
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colors.screen_componente_estilos.color_fondo },
-        ]}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={[styles.container, { backgroundColor: colors.screen_componente_estilos.color_fondo }]}
+        keyboardVerticalOffset={0}
       >
-        <Portal>
-          <Dialog visible={visibledialogo} onDismiss={hideDialog}>
-            <Dialog.Icon icon="alert-circle" size={50} color="red" />
-            <Dialog.Title>ERROR</Dialog.Title>
-            <Dialog.Content>
-              <Text variant="bodyMedium">{mensajeerror}</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={hideDialog}>OK</Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-
-        <View style={styles.centerContainer}>
-          <View style={styles.headerContainer}>
-            {/* <Text
-              style={[
-                styles.titulo,
-                {
-                  fontFamily: texto_negrita,
-                  color: colors.navigation_estilos.color_fondo,
-                },
-              ]}
-            >
-              FinTrack
-            </Text> */}
-            <Text
-              style={[
-                styles.subtitulo,
-                {
-                  fontFamily: texto_normal,
-                  color: colors.navigation_estilos.color_fondo,
-                },
-              ]}
-            >
-              Registrarse
-            </Text>
-          </View>
-
-          <Surface
-            style={[
-              styles.card,
-              { backgroundColor: colors.screen_componente_estilos.color_fondo_cards },
-            ]}
-            elevation={2}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <ImageBackground
-              source={require('../../../assets/logoapp.png')}
-              style={styles.imageBackground}
-              imageStyle={styles.imageStyle}
-            >
-              <View style={styles.formContainer}>
-                {/* <Text
+            <Portal>
+              <Dialog visible={visibledialogo} onDismiss={hideDialog}>
+                <Dialog.Icon icon="alert-circle" size={50} color="red" />
+                <Dialog.Title>ERROR</Dialog.Title>
+                <Dialog.Content>
+                  <Text variant="bodyMedium">{mensajeerror}</Text>
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <Button onPress={hideDialog}>OK</Button>
+                </Dialog.Actions>
+              </Dialog>
+            </Portal>
+
+            <View style={styles.centerContainer}>
+              <View style={styles.headerContainer}>
+                <Text
                   style={[
-                    styles.cardTitulo,
+                    styles.subtitulo,
                     {
                       fontFamily: texto_normal,
-                      color: colors.screen_componente_estilos.color_texto,
+                      color: colors.navigation_estilos.color_fondo,
                     },
                   ]}
                 >
                   Registrarse
-                </Text> */}
-
-                <TextInput
-                  label="Nombre"
-                  value={nombre}
-                  onChangeText={setNombre}
-                  {...inputProps}
-                  left={<TextInput.Icon icon="account" size={20} />}
-                />
-
-                <TextInput
-                  label="Apellido"
-                  value={apellido}
-                  onChangeText={setApellido}
-                  {...inputProps}
-                  left={<TextInput.Icon icon="account" size={20} />}
-                />
-
-                <TextInput
-                  label="Usuario"
-                  value={usuario}
-                  onChangeText={setUsuario}
-                  autoCapitalize="none"
-                  {...inputProps}
-                  left={<TextInput.Icon icon="account-circle" size={20} />}
-                />
-
-                <TextInput
-                  label="Correo"
-                  value={correo}
-                  onChangeText={setCorreo}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  {...inputProps}
-                  left={<TextInput.Icon icon="email" size={20} />}
-                />
-
-                <TextInput
-                  label="Contraseña"
-                  value={contrasena}
-                  onChangeText={setContrasena}
-                  secureTextEntry={!verContrasena}
-                  {...inputProps}
-                  left={<TextInput.Icon icon="lock" size={20} />}
-                  right={
-                    <TextInput.Icon
-                      icon={verContrasena ? 'eye-off' : 'eye'}
-                      size={20}
-                      onPress={() => setVerContrasena(!verContrasena)}
-                    />
-                  }
-                />
-
-                <TextInput
-                  label="Repetir Contraseña"
-                  value={confirmarContrasena}
-                  onChangeText={setConfirmarContrasena}
-                  secureTextEntry={!verConfirmarContrasena}
-                  {...inputProps}
-                  left={<TextInput.Icon icon="lock-check" size={20} />}
-                  right={
-                    <TextInput.Icon
-                      icon={verConfirmarContrasena ? 'eye-off' : 'eye'}
-                      size={20}
-                      onPress={() => setVerConfirmarContrasena(!verConfirmarContrasena)}
-                    />
-                  }
-                />
-
-                <Button
-                  mode="contained"
-                  style={[
-                    styles.botonRegistro,
-                    {
-                      backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
-                      borderColor: colors.navigation_estilos.color_fondo,
-                    },
-                  ]}
-                  contentStyle={styles.botonContenido}
-                  buttonColor={colors.screen_componente_estilos.color_fondo_botones}
-                  textColor={colors.screen_componente_estilos.color_texto}
-                  labelStyle={{
-                    fontFamily: texto_negrita,
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  }}
-                  onPress={ingresar}
-                >
-                  Registro
-                </Button>
-
-                <Button
-                  mode="text"
-                  textColor={colors.navigation_estilos.color_fondo}
-                  labelStyle={{
-                    fontSize: 14,
-                    fontFamily: texto_negrita,
-                    textDecorationLine: 'underline',
-                  }}
-                  onPress={() => navigate('Login')}
-                >
-                  Volver a Login
-                </Button>
+                </Text>
               </View>
-            </ImageBackground>
-          </Surface>
-        </View>
-      </View>
+
+              <Surface
+                style={[
+                  styles.card,
+                  { backgroundColor: colors.screen_componente_estilos.color_fondo_cards },
+                ]}
+                elevation={2}
+              >
+                <ImageBackground
+                  source={require('../../../assets/logoapp.png')}
+                  style={styles.imageBackground}
+                  imageStyle={styles.imageStyle}
+                >
+                  <View style={styles.formContainer}>
+                    <TextInput
+                      label="Nombre"
+                      value={nombre}
+                      onChangeText={setNombre}
+                      {...inputProps}
+                      left={<TextInput.Icon icon="account" size={20} />}
+                    />
+
+                    <TextInput
+                      label="Apellido"
+                      value={apellido}
+                      onChangeText={setApellido}
+                      {...inputProps}
+                      left={<TextInput.Icon icon="account" size={20} />}
+                    />
+
+                    <TextInput
+                      label="Usuario"
+                      value={usuario}
+                      onChangeText={setUsuario}
+                      autoCapitalize="none"
+                      {...inputProps}
+                      left={<TextInput.Icon icon="account-circle" size={20} />}
+                    />
+
+                    <TextInput
+                      label="Correo"
+                      value={correo}
+                      onChangeText={setCorreo}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      {...inputProps}
+                      left={<TextInput.Icon icon="email" size={20} />}
+                    />
+
+                    <TextInput
+                      label="Contraseña"
+                      value={contrasena}
+                      onChangeText={setContrasena}
+                      secureTextEntry={!verContrasena}
+                      {...inputProps}
+                      left={<TextInput.Icon icon="lock" size={20} />}
+                      right={
+                        <TextInput.Icon
+                          icon={verContrasena ? 'eye-off' : 'eye'}
+                          size={20}
+                          onPress={() => setVerContrasena(!verContrasena)}
+                        />
+                      }
+                    />
+
+                    <TextInput
+                      label="Repetir Contraseña"
+                      value={confirmarContrasena}
+                      onChangeText={setConfirmarContrasena}
+                      secureTextEntry={!verConfirmarContrasena}
+                      {...inputProps}
+                      left={<TextInput.Icon icon="lock-check" size={20} />}
+                      right={
+                        <TextInput.Icon
+                          icon={verConfirmarContrasena ? 'eye-off' : 'eye'}
+                          size={20}
+                          onPress={() => setVerConfirmarContrasena(!verConfirmarContrasena)}
+                        />
+                      }
+                    />
+
+                    <Button
+                      mode="contained"
+                      style={[
+                        styles.botonRegistro,
+                        {
+                          backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
+                          borderColor: colors.navigation_estilos.color_fondo,
+                        },
+                      ]}
+                      contentStyle={styles.botonContenido}
+                      buttonColor={colors.screen_componente_estilos.color_fondo_botones}
+                      textColor={colors.screen_componente_estilos.color_texto}
+                      labelStyle={{
+                        fontFamily: texto_negrita,
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      }}
+                      onPress={ingresar}
+                    >
+                      Registro
+                    </Button>
+
+                    <Button
+                      mode="text"
+                      textColor={colors.navigation_estilos.color_fondo}
+                      labelStyle={{
+                        fontSize: 14,
+                        fontFamily: texto_negrita,
+                        textDecorationLine: 'underline',
+                      }}
+                      onPress={() => navigate('Login')}
+                    >
+                      Volver a Login
+                    </Button>
+                  </View>
+                </ImageBackground>
+              </Surface>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </PaperProvider>
   );
 }
@@ -320,6 +313,9 @@ export default function RegistroUsuario() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 12,
   },
   centerContainer: {
@@ -327,6 +323,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    paddingVertical: 20,
   },
   headerContainer: {
     alignItems: 'center',
