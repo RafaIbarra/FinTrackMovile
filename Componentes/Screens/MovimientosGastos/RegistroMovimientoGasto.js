@@ -4,15 +4,17 @@ import {View,StyleSheet,Text,TouchableOpacity,ScrollView,
   ActivityIndicator,Alert,Image
 } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system';
 
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 
 import Handelstorage from '../../../Storage/HandelStorage';
+import Generarpeticion from '../../../Apis/ApiPeticiones';
 
 
 import Notificacion from '../../Notificacion/Notificacion';
@@ -96,8 +98,7 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
   const [montos, setMontos] = useState({});
   const [montosDisplay, setMontosDisplay] = useState({});
 
-  // Inicializar montos: para gastos ya seleccionados usar su monto, sino 0
-useEffect(() => {
+  useEffect(() => {
     if (visible) {
       const initialMontos = {};
       const initialDisplay = {};
@@ -112,7 +113,7 @@ useEffect(() => {
     }
   }, [visible, gastosData, selectedGastos]);
 
-const filtered = gastosData.filter((item) =>
+  const filtered = gastosData.filter((item) =>
     item.nombre.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -128,11 +129,7 @@ const filtered = gastosData.filter((item) =>
   const confirmar = () => {
     const seleccionados = gastosData
       .filter(g => montos[g.id] > 0)
-      .map(g => ({
-        id: g.id,
-        nombre: g.nombre,
-        monto: montos[g.id],
-      }));
+      .map(g => ({ id: g.id, nombre: g.nombre, monto: montos[g.id] }));
     onConfirm(seleccionados);
     onClose();
   };
@@ -144,22 +141,14 @@ const filtered = gastosData.filter((item) =>
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'flex-end' }}
         >
-          <View
+          <SafeAreaView
             style={[
               modalStyles.sheet,
               { backgroundColor: estilos.pantalla_color_fondo, height: '90%' },
             ]}
           >
-            {/* Header */}
             <View style={modalStyles.header}>
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-              >
+              <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 16, flex: 1 }}>
                 Seleccionar gastos
               </Text>
               <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -167,158 +156,61 @@ const filtered = gastosData.filter((item) =>
               </TouchableOpacity>
             </View>
 
-            {/* Buscador */}
-            <View
-                style={[
-                  modalStyles.searchBox,
-                  {
-                    backgroundColor: estilos.cards_color_fondo,
-                    borderColor: estilos.cards_color_border,
-                  },
-                ]}
-              >
-                <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
-                  <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
+            <View style={[modalStyles.searchBox, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
+              <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
+                <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
+              </View>
+              <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="Buscar..."
+                  placeholderTextColor={estilos.font_sub_color}
+                  style={{ flex: 1, fontFamily: estilos.font_normal, color: estilos.font_color, fontSize: 14, paddingVertical: 4, paddingHorizontal: 8 }}
+                  underlineColorAndroid="transparent"
+                />
+              </View>
+              {query.length > 0 && (
+                <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
+                  <TouchableOpacity onPress={() => setQuery('')}>
+                    <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
+                  </TouchableOpacity>
                 </View>
-                
-                <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
-                  <TextInput
-                    value={query}
-                    onChangeText={setQuery}
-                    placeholder="Buscar..."
-                    placeholderTextColor={estilos.font_sub_color}
-                    style={{
-                      flex: 1,
-                      fontFamily: estilos.font_normal,
-                      color: estilos.font_color,
-                      fontSize: 14,
-                      paddingVertical: 4,
-                      paddingHorizontal: 8,
-                    }}
-                    underlineColorAndroid="transparent"
-                    //autoFocus
-                  />
-                </View>
-                
-                {query.length > 0 && (
-                  <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
-                    <TouchableOpacity onPress={() => setQuery('')}>
-                      <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
+              )}
             </View>
 
-            {/* Lista con montos */}
             <FlatList
               data={filtered}
               keyExtractor={(item) => String(item.id)}
               keyboardShouldPersistTaps="handled"
               style={{ maxHeight: 500 }}
               renderItem={({ item }) => (
-                <View
-                  style={[
-                    modalStyles.gastoRow,
-                    {
-                      borderBottomColor: estilos.cards_color_border,
-                      backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent',
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      fontFamily: estilos.font_normal,
-                      color: estilos.font_color,
-                      flex: 1,
-                      fontSize: 14,
-                    }}
-                  >
-                    {item.nombre}
-                  </Text>
-                  <View
-                    style={[
-                      modalStyles.montoInputWrap,
-                      {
-                        backgroundColor: estilos.cards_color_fondo,
-                        borderColor: estilos.cards_color_border,
-                      },
-                    ]}
-                  >
+                <View style={[modalStyles.gastoRow, { borderBottomColor: estilos.cards_color_border, backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent' }]}>
+                  <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, flex: 1, fontSize: 14 }}>{item.nombre}</Text>
+                  <View style={[modalStyles.montoInputWrap, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
                     <TextInput
                       value={montosDisplay[item.id] ?? ''}
                       onChangeText={(v) => actualizarMonto(item.id, v)}
                       keyboardType="numeric"
                       placeholder="0"
                       placeholderTextColor={estilos.font_sub_color}
-                      style={{
-                        fontFamily: estilos.font_normal,
-                        color: estilos.font_importe_color,
-                        fontSize: 14,
-                        minWidth: 90,
-                        textAlign: 'right',
-                        paddingVertical: 2,
-                      }}
+                      style={{ fontFamily: estilos.font_normal, color: estilos.font_importe_color, fontSize: 14, minWidth: 90, textAlign: 'right', paddingVertical: 2 }}
                     />
                   </View>
                 </View>
               )}
-              ListEmptyComponent={
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    color: estilos.font_sub_color,
-                    fontFamily: estilos.font_normal,
-                    marginTop: 24,
-                    fontSize: 13,
-                  }}
-                >
-                  Sin resultados
-                </Text>
-              }
+              ListEmptyComponent={<Text style={{ textAlign: 'center', color: estilos.font_sub_color, fontFamily: estilos.font_normal, marginTop: 24, fontSize: 13 }}>Sin resultados</Text>}
             />
 
-            <View
-              style={[
-                distStyles.totalRow,
-                { borderTopColor: estilos.cards_color_border, marginTop: 8 },
-              ]}
-            >
-              <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>
-                Total seleccionado
-              </Text>
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 15,
-                }}
-              >
-                {totalModal.toLocaleString('es-PY')}
-              </Text>
+            <View style={[distStyles.totalRow, { borderTopColor: estilos.cards_color_border, marginTop: 8 }]}>
+              <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>Total seleccionado</Text>
+              <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>{totalModal.toLocaleString('es-PY')}</Text>
             </View>
 
-            <TouchableOpacity
-              style={[
-                modalStyles.confirmBtn,
-                {
-                  backgroundColor: estilos.boton_color_fondo,
-                  borderColor: estilos.boton_color_borde,
-                  marginTop: 12,
-                },
-              ]}
-              onPress={confirmar}
-            >
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 14,
-                }}
-              >
-                Confirmar selección
-              </Text>
+            <TouchableOpacity style={[modalStyles.confirmBtn, { backgroundColor: estilos.boton_color_fondo, borderColor: estilos.boton_color_borde, marginTop: 12 }]} onPress={confirmar}>
+              <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 14 }}>Confirmar selección</Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -646,7 +538,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={modalStyles.overlay}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <View
+          <SafeAreaView
             style={[
               modalStyles.sheet,
               { backgroundColor: estilos.pantalla_color_fondo, paddingBottom: 24, maxHeight: '85%' },
@@ -739,7 +631,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
                 Confirmar fecha
               </Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </View>
       </View>
     </Modal>
@@ -823,22 +715,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
   //── CAMARA ───────────────────────────────────────────────────────────────
   const [imageUri, setImageUri] = useState(null);
-  const [imageSize, setImageSize] = useState(null);
-
-  const obtenerTamanioImagen = async (uri) => {
-    try {
-      const info = await FileSystem.getInfoAsync(uri);
-      if (info.exists && typeof info.size === 'number') {
-        setImageSize(info.size);
-        return info.size;
-      }
-    } catch (error) {
-      console.warn('No se pudo obtener tamaño de imagen', error);
-    }
-    setImageSize(null);
-    return null;
-  };
-
+  const [imageLoading, setImageLoading] = useState(false);
   // --- Tomar foto con la cámara ---
   const tomarFoto = async () => {
       const { granted } = await ImagePicker.requestCameraPermissionsAsync();
@@ -849,14 +726,15 @@ export default function RegistroMovimientoGasto({ navigation }) {
   
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
-        quality: 0.6,
+        quality: 0.85,
       });
   
+
       if (result.canceled) return;
-  
+
       const uri = result.assets[0].uri;
       setImageUri(uri);
-      await obtenerTamanioImagen(uri);
+      setImageLoading(true);
   
       // Guardar en galería (opcional)
       const { granted: mediaGranted } = await MediaLibrary.requestPermissionsAsync();
@@ -875,14 +753,13 @@ export default function RegistroMovimientoGasto({ navigation }) {
   
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        quality: 0.6,
+        quality: 0.85,
       });
   
       if (result.canceled) return;
-  
-      const uri = result.assets[0].uri;
-      setImageUri(uri);
-      await obtenerTamanioImagen(uri);
+
+      setImageUri(result.assets[0].uri);
+      setImageLoading(true);
     };
 
 
@@ -925,6 +802,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
               setDataempresaregistrada(empresa_id);
               setFechamovimiento(fecha_mov)
               setImageUri(result.data[0].UrlImg)
+              setImageLoading(true)
               setReady(true)
 
              
@@ -1185,247 +1063,112 @@ export default function RegistroMovimientoGasto({ navigation }) {
      navigation.goBack();
   }
 
+  const guardar = async () => {
+    const error = validar();
+    if (error) { Alert.alert('Atención', error); return; }
+    setReady(false);
+    const esEdicion = IdMovGasto > 0;
 
-const prepararImagenParaEnvio = async (imageUri) => {
-  if (!imageUri) return null;
-
-  const fileName = imageUri.split('/').pop() || 'foto.jpg';
-  const extensionMatch = fileName.match(/\.([^.]+)$/);
-  const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'jpg';
-  const normalizedFileName = fileName.includes('.') ? fileName : `${fileName}.${extension}`;
-  const destUri = `${FileSystem.cacheDirectory}${normalizedFileName}`;
-
-  const copyFileToCache = async () => {
-    await FileSystem.copyAsync({
-      from: imageUri,
-      to: destUri,
-    });
-    const fileInfo = await FileSystem.getInfoAsync(destUri);
-    if (!fileInfo.exists) {
-      throw new Error('No se pudo copiar la imagen al cache');
-    }
-    return destUri;
-  };
-
-  const writeFileToCacheFromBase64 = async () => {
-    const base64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    await FileSystem.writeAsStringAsync(destUri, base64, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    const fileInfo = await FileSystem.getInfoAsync(destUri);
-    if (!fileInfo.exists) {
-      throw new Error('No se pudo escribir la imagen en cache');
-    }
-    return destUri;
-  };
-
-  try {
-    return await copyFileToCache();
-  } catch (error) {
-    if (imageUri.startsWith('content://')) {
-      try {
-        return await writeFileToCacheFromBase64();
-      } catch {
-        // Fallback al URI original si no se puede copiar.
-      }
-    }
-    return imageUri;
-  }
-};
-
-
-
-const guardar = async () => {
-  const error = validar();
-  if (error) {
-    Alert.alert('Atención', error);
-    return;
-  }
-  
-  const imageSizeMb = imageSize ? Number((imageSize / 1024 / 1024).toFixed(2)) : null;
-  if (imageSizeMb && imageSizeMb > 3) {
-    Alert.alert(
-      'Imagen muy grande',
-      `La imagen seleccionada pesa ${imageSizeMb} MB. Reduce la resolución o elige otra imagen.`
-    );
-    return;
-  }
-
-  setReady(false);
-  const esEdicion = IdMovGasto > 0;
-  
-  try {
-    setEnviando(true);
-    const texto_titulo = esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..';
-    setTituloespera(texto_titulo);
-
-    const formData = new FormData();
-    
-    formData.append('gastos', JSON.stringify(
-      gastosSeleccionados.map((g) => ({
+    const body = {
+      gastos: gastosSeleccionados.map((g) => ({
         idgasto: g.id,
         monto: parseFloat(g.monto),
-      }))
-    ));
-    formData.append('medios', JSON.stringify(construirMedios()));
-    formData.append('fecha', fechaSeleccionada);
-    formData.append('empresa', String(empresaSeleccionada.id));
-    if (esEdicion) formData.append('IdMovGasto', String(IdMovGasto));
-
-    let debugImageInfo = {
-      imageUri,
-      uriPreparado: null,
-      fileName: null,
-      mimeType: null,
+      })),
+      medios: construirMedios(),
+      fecha: fechaSeleccionada,
+      empresa: empresaSeleccionada.id,
+      imagen: { uri: imageUri, type: 'image/jpeg', name: 'foto.jpg' },
+      ...(esEdicion && { IdMovGasto }),
     };
 
-    // ========== FIX: PREPARAR IMAGEN ANTES DE ENVIAR ==========
+    const formData = new FormData();
+    formData.append('gastos', JSON.stringify(gastosSeleccionados.map(g => ({
+      idgasto: g.id,
+      monto: parseFloat(g.monto),
+    }))));
+    formData.append('medios', JSON.stringify(construirMedios()));
+    formData.append('fecha', fechaSeleccionada);
+    formData.append('empresa', empresaSeleccionada.id);
+    if (esEdicion) formData.append('IdMovGasto', IdMovGasto);
+
+    // Agregar la imagen como archivo (objeto con uri, type, name)
+    // formData.append('imagen', {
+    //   uri: imageUri,
+    //   type: 'image/jpeg',
+    //   name: 'foto.jpg',
+    // });
     if (imageUri) {
-      const uriPreparado = await prepararImagenParaEnvio(imageUri);
-      const fileName = uriPreparado.split('/').pop() || 'foto.jpg';
-      const extension = (fileName.match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || 'jpg';
-      const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
-      const imageFile = {
-        uri: uriPreparado,
-        type: mimeType,
-        name: fileName,
-      };
-      formData.append('imagen', imageFile);
-      debugImageInfo = { imageUri, uriPreparado, fileName, mimeType };
-    } else {
-      formData.append('imagen', '');
-    }
-    setReady(true);
+        formData.append('imagen', {
+          uri: imageUri,
+          type: 'image/jpeg',
+          name: 'foto.jpg',
+        });
+      } else {
+        formData.append('imagen', '');   // string vacío para indicar "sin imagen"
+      }
 
-    const endpoint = esEdicion
-      ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/`
-      : `operaciones/RegistroMovimientoGastoUser/`;
-    const metodo = esEdicion ? 'PUT' : 'POST';
-
-    console.log('RegistroMovimientoGasto: enviando imagen', {
-      endpoint,
-      metodo,
-      ...debugImageInfo,
-    });
-
-    // TEMPORAL: Mostrar en Alert para debugging
-    Alert.alert('Debug', `Enviando: ${endpoint}\nImagen: ${debugImageInfo.uriPreparado || 'sin imagen'}`);
 
     try {
-      const result = await apiRequest(endpoint, metodo, formData, { timeout: 30000 });
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    if (result.sessionExpired) return;
-
-    if (result.resp_correcta) {
-      if (!esEdicion) resetForm();
-      setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_gasto;
-      const mensajeExito = esEdicion
-        ? 'Movimiento actualizado correctamente'
-        : 'Registro correcto del movimiento';
-
-      setBodynotificacion((prevState) => ({
-        ...prevState,
-        titulo: 'REGISTRO GASTOS',
-        mensaje: mensajeExito,
-        is_error: false,
-        valor_estado: nuevo,
-      }));
-      setEstadonotificacion(true);
-    } else {
-      setReady(true);
+      setEnviando(true);
       
-      // Extraer mensaje de error de todas las formas posibles
-      let msj = 'Error en la solicitud';
+      const texto_titulo=esEdicion ? 'Actualizando Gasto..' : 'Registrando Gasto..'
+      setTituloespera(texto_titulo)
+      //const endpoint = `operaciones/RegistroMovimientoGastoUser/`;
+      const endpoint = esEdicion ? `operaciones/EditarMovimientoGastoUser/${IdMovGasto}/` :`operaciones/RegistroMovimientoGastoUser/`
+      const metodo = esEdicion ? 'PUT' : 'POST';
+      const result = await apiRequest(endpoint, metodo, formData);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));  
       
-      if (result.data?.message) {
-        msj = result.data.message;
-      } else if (result.data?.detail) {
-        msj = result.data.detail;
-      } else if (result.data?.error) {
-        msj = typeof result.data.error === 'string' 
-          ? result.data.error 
-          : JSON.stringify(result.data.error);
-      } else if (typeof result.data === 'string') {
-        msj = result.data;
-      } else if (result.data?.raw) {
-        msj = typeof result.data.raw === 'string'
-          ? result.data.raw.slice(0, 300)
-          : JSON.stringify(result.data.raw);
-      } else if (result.data && typeof result.data === 'object') {
-        // Errores de campo de Django REST Framework
-        const errores = Object.entries(result.data)
-          .filter(([k]) => !['message', 'detail', 'error', 'non_field_errors'].includes(k))
-          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-          .join('\n');
-        if (errores) msj = errores;
+      
+      if (result.sessionExpired) {
+        return; // Salimos de la función
       }
       
-      // Si hay non_field_errors de DRF
-      if (result.data?.non_field_errors) {
-        msj = Array.isArray(result.data.non_field_errors) 
-          ? result.data.non_field_errors.join(', ')
-          : result.data.non_field_errors;
+      if (result.resp_correcta) {
+        if (!esEdicion) resetForm();
+        setReady(true);
+        const nuevo = !estadocomponente.bandera_registro_gasto;
+        const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
+        
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
+        
+      } else {
+        setReady(true);
+        const msj = result.data?.message || 'Error en la solicitud';
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
       }
-
-      // Agregar info de status si está disponible
-      if (result.resp) {
-        msj += `\nStatus: ${result.resp}`;
-      }
-
-      setBodynotificacion((prevState) => ({
-        ...prevState,
-        titulo: 'REGISTRO GASTOS',
-        mensaje: msj,
-        is_error: true,
-        valor_estado: '',
-      }));
-      setEstadonotificacion(true);
-    }
-    } catch (apiError) {
+      
+    } catch (e) {
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO GASTOS',
+          mensaje: 'Ocurrió un error al guardar.',
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+      
+    } finally {
+      setEnviando(false);
       setReady(true);
-      console.error('RegistroMovimientoGasto: error en apiRequest', apiError);
-      // TEMPORAL: Mostrar error en Alert
-      Alert.alert('Error Debug', `Error al enviar: ${apiError.message}`);
-      setBodynotificacion((prevState) => ({
-        ...prevState,
-        titulo: 'REGISTRO GASTOS',
-        mensaje: `Error al enviar petición: ${apiError.message}`,
-        is_error: true,
-        valor_estado: '',
-      }));
-      setEstadonotificacion(true);
     }
-    
-  } catch (e) {
-    setReady(true);
-    
-    // Mensaje de error descriptivo
-    let mensajeError = e.message || 'Ocurrió un error al guardar.';
-    
-    if (mensajeError.includes('Network request failed')) {
-      mensajeError = 'Error de red: No se pudo conectar al servidor.\n' +
-        'Verifica tu conexión a internet.';
-    }
-    
-    setBodynotificacion((prevState) => ({
-      ...prevState,
-      titulo: 'REGISTRO GASTOS',
-      mensaje: mensajeError,
-      is_error: true,
-      valor_estado: '',
-    }));
-    setEstadonotificacion(true);
-  } finally {
-    setEnviando(false);
-    setReady(true);
-  }
-};
-
+  };
   const onOk=()=>{
     setEstadonotificacion(false)
   }
@@ -1703,14 +1446,23 @@ const guardar = async () => {
                   <>
                     
 
-                    <View style={camaraStyles.contenedor_img}>
-
-                      <Image source={{ uri: imageUri }} style={camaraStyles.image_camara} />
-                       <TouchableOpacity style={camaraStyles.btnEliminar} onPress={() => setImageUri(null)}>
-                          <Text style={camaraStyles.btnEliminarTexto}>✕</Text>
-                      </TouchableOpacity>
-                     
-                    </View>
+                              <View style={camaraStyles.contenedor_img}>
+                                {imageLoading && (
+                                  <View style={camaraStyles.loadingOverlay}>
+                                    <ActivityIndicator size="large" color={estilos.font_importe_color} />
+                                  </View>
+                                )}
+                                <Image
+                                  source={{ uri: imageUri }}
+                                  style={camaraStyles.image_camara}
+                                  onLoadStart={() => setImageLoading(true)}
+                                  onLoadEnd={() => setImageLoading(false)}
+                                  onError={() => setImageLoading(false)}
+                                />
+                                <TouchableOpacity style={camaraStyles.btnEliminar} onPress={() => { setImageUri(null); setImageLoading(false); }}>
+                                  <Text style={camaraStyles.btnEliminarTexto}>✕</Text>
+                                </TouchableOpacity>
+                              </View>
                      
                   </>
                 )}

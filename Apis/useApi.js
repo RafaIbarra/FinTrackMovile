@@ -57,27 +57,10 @@ export const useApi = (contextActions) => {
           timeoutPromise,
         ]);
 
-        const responseText = await response.text();
-        let data;
-        try {
-          data = responseText ? JSON.parse(responseText) : {};
-        } catch (parseError) {
-          data = responseText;
-          if (data.trim().startsWith('<')) {
-            console.warn('useApi: respuesta no JSON del servidor', {
-              endpoint,
-              status: response.status,
-              url: response.url,
-              text: data.slice(0, 400),
-            });
-            data = {
-              error: 'Respuesta no JSON del servidor',
-              raw: data,
-            };
-          }
-        }
-
+        const data = await response.json();
         const resp_correcta = [200, 201].includes(response.status);
+
+        // Si el código es 401 o 403, cerramos sesión automáticamente
         if (response.status === 401 || response.status === 403) {
           
           actualizarEstadocomponente('tituloloading', 'Cerrando sesion..');
@@ -105,7 +88,7 @@ export const useApi = (contextActions) => {
         };
       }
     },
-    [setActivarsesion, reiniciarvalores, actualizarEstadocomponente]
+    [setActivarsesion, reiniciarvalores]
   );
 
   return apiRequest;

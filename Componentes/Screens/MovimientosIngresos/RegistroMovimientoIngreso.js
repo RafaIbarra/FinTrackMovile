@@ -4,6 +4,7 @@ import {
   TextInput, Modal, FlatList, Platform, KeyboardAvoidingView,
   ActivityIndicator, Alert, Image
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
@@ -63,7 +64,7 @@ const SelectorModal = ({ visible, onClose, data, onSelect, selected, title, esti
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'flex-end' }}
         >
-          <View
+          <SafeAreaView
             style={[
               modalStyles.sheet,
               { backgroundColor: estilos.pantalla_color_fondo, maxHeight: '85%' },
@@ -165,7 +166,7 @@ const SelectorModal = ({ visible, onClose, data, onSelect, selected, title, esti
                 </Text>
               }
             />
-          </View>
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -208,7 +209,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={modalStyles.overlay}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <View
+          <SafeAreaView
             style={[
               modalStyles.sheet,
               { backgroundColor: estilos.pantalla_color_fondo, paddingBottom: 24, maxHeight: '85%' },
@@ -301,7 +302,7 @@ const CalendarioModal = ({ visible, onClose, onSelect, estilos }) => {
                 Confirmar fecha
               </Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </View>
       </View>
     </Modal>
@@ -382,6 +383,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
 
   //── CAMARA ────────────────────────────────────────────────────────────────
   const [imageUri, setImageUri] = useState(null);
+  const [imageLoading, setImageLoading] = useState(false);
 
   // --- Tomar foto con la cámara ---
   const tomarFoto = async () => {
@@ -400,6 +402,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
 
     const uri = result.assets[0].uri;
     setImageUri(uri);
+    setImageLoading(true);
 
     // Guardar en galería (opcional)
     const { granted: mediaGranted } = await MediaLibrary.requestPermissionsAsync();
@@ -424,6 +427,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
     if (result.canceled) return;
 
     setImageUri(result.assets[0].uri);
+    setImageLoading(true);
   };
 
   // ── Helpers para formateo de montos ───────────────────────────────────────
@@ -466,6 +470,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
         setDataempresaregistrada(mov.Empresa);
         setFechamovimiento(mov.FechaIngreso);
         setImageUri(mov.UrlImg);
+        setImageLoading(true);
         setReady(true)
       } else {
         setReady(true)
@@ -632,96 +637,92 @@ export default function RegistroMovimientoIngreso({ navigation }) {
     setEstadonotificacion(false)
   }
 
- const guardar = async () => {
-  const error = validar();
-  if (error) { Alert.alert('Atención', error); return; }
-  setReady(false);
-  const esEdicion = IdMovIngreso > 0;
+  const guardar = async () => {
+    const error = validar();
+    if (error) { Alert.alert('Atención', error); return; }
+    setReady(false);
+    const esEdicion = IdMovIngreso > 0;
 
-  const formData = new FormData();
-  formData.append('codingreso', ingresoSeleccionado.id);
-  formData.append('montoingreso', montoIngreso);
-  formData.append('fecha', fechaSeleccionada);
-  formData.append('empresa', empresaSeleccionada.id);
-  formData.append('observacion', '');
-  if (esEdicion) formData.append('IdMovIngreso', IdMovIngreso);
+    const formData = new FormData();
+    formData.append('codingreso', ingresoSeleccionado.id);
+    formData.append('montoingreso', montoIngreso);
+    formData.append('fecha', fechaSeleccionada);
+    formData.append('empresa', empresaSeleccionada.id);
+    formData.append('observacion', '');
+    if (esEdicion) formData.append('IdMovIngreso', IdMovIngreso);
 
-  if (imageUri) {
-    const extension = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
-    const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
-    const mimeType = mimeMap[extension] || 'image/jpeg';
-    const fileName = `foto_${Date.now()}.${extension}`;
-
-    formData.append('imagen', {
-      uri: imageUri,
-      type: mimeType,
-      name: fileName,
-    });
-  } else {
-    formData.append('imagen', '');
-  }
-
-  try {
-    setEnviando(true);
-
-    const texto_titulo = esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..';
-    setTituloespera(texto_titulo);
-
-    const endpoint = esEdicion
-      ? `operaciones/EditarMovimientoIngresoUser/${IdMovIngreso}/`
-      : `operaciones/RegistroMovimientoIngresoUser/`;
-    const metodo = esEdicion ? 'PUT' : 'POST';
-    const result = await apiRequest(endpoint, metodo, formData);
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    actualizarEstadocomponente('tituloloading', '');
-    actualizarEstadocomponente('loading', false);
-
-    if (result.sessionExpired) {
-      return;
-    }
-
-    if (result.resp_correcta) {
-      if (!esEdicion) resetForm();
-      setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_ingreso;
-      const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
-      setBodynotificacion(prevState => ({
-        ...prevState,
-        titulo: 'REGISTRO INGRESO',
-        mensaje: mensajeExito,
-        is_error: false,
-        valor_estado: nuevo,
-      }));
-      setEstadonotificacion(true);
+    if (imageUri) {
+      formData.append('imagen', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'foto.jpg',
+      });
     } else {
-      const msj = result.data?.message || 'Error en la solicitud';
-      setReady(true);
-      setBodynotificacion(prevState => ({
-        ...prevState,
-        titulo: 'REGISTRO INGRESO',
-        mensaje: msj,
-        is_error: true,
-        valor_estado: '',
-      }));
-      setEstadonotificacion(true);
+      formData.append('imagen', '');
     }
-  } catch (e) {
-    const msj = e?.message || String(e) || 'Error en la solicitud'; // ← Fix: declarar msj desde el error capturado
-    setReady(true);
-    setBodynotificacion(prevState => ({
-      ...prevState,
-      titulo: 'REGISTRO INGRESO',
-      mensaje: msj,
-      is_error: true,
-      valor_estado: '',
-    }));
-    setEstadonotificacion(true);
-  } finally {
-    setEnviando(false);
-    setReady(true);
-  }
-};
+
+    try {
+      setEnviando(true);
+      
+      const texto_titulo=esEdicion ? 'Actualizando Ingreso..' : 'Registrando Ingreso..'
+      setTituloespera(texto_titulo)
+
+      const endpoint = esEdicion 
+        ? `operaciones/EditarMovimientoIngresoUser/${IdMovIngreso}/` 
+        : `operaciones/RegistroMovimientoIngresoUser/`;
+      const metodo = esEdicion ? 'PUT' : 'POST';
+      const result = await apiRequest(endpoint, metodo, formData);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      actualizarEstadocomponente('tituloloading', '');
+      actualizarEstadocomponente('loading', false);
+
+      if (result.sessionExpired) {
+        return;
+      }
+
+      if (result.resp_correcta) {
+        if (!esEdicion) resetForm();
+        setReady(true);
+        const nuevo = !estadocomponente.bandera_registro_ingreso;
+        const mensajeExito = esEdicion ? 'Movimiento actualizado correctamente' : 'Registro correcto del movimiento';
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: mensajeExito,
+          is_error: false,
+          valor_estado:nuevo
+        }));
+        setEstadonotificacion(true)
+      } else {
+        
+        const msj = result.data?.message || 'Error en la solicitud';
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+      }
+    } catch (e) {
+        setReady(true);
+        setBodynotificacion(prevState => ({
+          ...prevState,
+          titulo:'REGISTRO INGRESO',
+          mensaje: msj,
+          is_error: true,
+          valor_estado:''
+        }));
+        setEstadonotificacion(true)
+    } finally {
+      setEnviando(false);
+      setReady(true);
+    }
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────
   
   if (!ready) return <Esperando titulo={tituloespera}/>;
@@ -869,7 +870,18 @@ export default function RegistroMovimientoIngreso({ navigation }) {
             {imageUri && (
               <>
                 <View style={camaraStyles.contenedor_img}>
-                  <Image source={{ uri: imageUri }} style={camaraStyles.image_camara} />
+                  {imageLoading && (
+                    <View style={camaraStyles.loadingOverlay}>
+                      <ActivityIndicator size="large" color={estilos.font_importe_color} />
+                    </View>
+                  )}
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={camaraStyles.image_camara}
+                    onLoadStart={() => setImageLoading(true)}
+                    onLoadEnd={() => setImageLoading(false)}
+                    onError={() => setImageLoading(false)}
+                  />
                   <TouchableOpacity style={camaraStyles.btnEliminar} onPress={() => setImageUri(null)}>
                     <Text style={camaraStyles.btnEliminarTexto}>✕</Text>
                   </TouchableOpacity>
@@ -1143,6 +1155,17 @@ const camaraStyles = StyleSheet.create({
     borderStyle: 'dashed',
     padding: 10,
     borderRadius: 12,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    zIndex: 10,
   },
   image_camara: {
     width: '100%',

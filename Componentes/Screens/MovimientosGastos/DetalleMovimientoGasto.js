@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useContext } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image,StatusBar 
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, ActivityIndicator, StatusBar 
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useTheme } from "@react-navigation/native";
@@ -28,6 +28,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
   const [detallegastos, setDetallegastos] = useState([]);
   const [detallemedios, setDetallemedios] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [CompsCabecera,setCompsCabecera]=useState([])
 
   const [showconfirmacion,setShowconfirmacion]=useState(false)
@@ -250,7 +251,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
             {backgroundColor:colors.screen_componente_estilos.color_fondo_botones,
             borderColor:colors.screen_componente_estilos.color_borde_botones
             }]
-            } onPress={() => setModalVisible(true)}>
+            } onPress={() => { setModalVisible(true); setImageLoading(true); }}>
               <Text style={[styles.comprobanteBtnText, 
                 { fontFamily: fonts.balsamiqregular.fontFamily,
                 color:colors.screen_componente_estilos.color_texto_importante 
@@ -266,16 +267,24 @@ export default function DetalleMovimientoGasto({ navigation }) {
         {tieneComprobante && (
           <Modal visible={modalVisible} transparent animationType="slide">
             <View style={styles.modalOverlay}>
-              <View style={[styles.modalSheet,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
+              <SafeAreaView style={[styles.modalSheet,{backgroundColor:colors.screen_componente_estilos.color_fondo_cards}]}>
                 <View style={[styles.modalHandle,{backgroundColor:colors.screen_componente_estilos.color_fondo}]} />
                 <Text style={[styles.modalTitle, { fontFamily: fonts.balsamiqbold.fontFamily,color:colors.screen_componente_estilos.color_texto }]}>
                   Comprobante
                 </Text>
-                <ScrollView style={{ flex: 1 }}>
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+                  {imageLoading && (
+                    <View style={styles.loadingOverlay}>
+                      <ActivityIndicator size="large" color={colors.screen_componente_estilos.color_texto_importante} />
+                    </View>
+                  )}
                   <Image
                     source={{ uri: datositem.UrlImg }}
                     style={styles.comprobanteImg}
                     resizeMode="contain"
+                    onLoadStart={() => setImageLoading(true)}
+                    onLoadEnd={() => setImageLoading(false)}
+                    onError={() => setImageLoading(false)}
                   />
                 </ScrollView>
                 <TouchableOpacity style={[styles.cerrarBtn,
@@ -288,7 +297,7 @@ export default function DetalleMovimientoGasto({ navigation }) {
                     Cerrar
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </SafeAreaView>
             </View>
           </Modal>
         )}
@@ -426,6 +435,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
+    paddingBottom: 30,
     height: '88%',
   },
   modalHandle: {
@@ -449,6 +459,7 @@ const styles = StyleSheet.create({
   },
   cerrarBtn: {
     marginTop: 16,
+    marginBottom: 10,
     borderRadius: 12,
      borderWidth: 0.5,
     padding: 14,
@@ -458,5 +469,16 @@ const styles = StyleSheet.create({
   cerrarBtnText: {
     //color: '#fff',
     fontSize: 14,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    zIndex: 10,
   },
 });
