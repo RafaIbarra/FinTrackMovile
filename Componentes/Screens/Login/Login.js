@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, StyleSheet, Text, Alert, ImageBackground } from 'react-native';
-import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
+import { TextInput, Button, Surface, Portal, Dialog, PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 import { useNavigation } from "@react-navigation/native";
@@ -29,13 +29,37 @@ export default function Login() {
   const showDialog = () => setVisibledialogo(true);
   const hideDialog = () => setVisibledialogo(false);
 
+  // ─── TEMA PERSONALIZADO PARA PAPER ─────────────────────────────────────────
+  const paperTheme = {
+    ...MD3LightTheme,
+    colors: {
+      ...MD3LightTheme.colors,
+      primary: colors.navigation_estilos?.color_fondo || '#000',
+      onSurface: colors.screen_componente_estilos?.color_texto || '#000',
+      onSurfaceVariant: colors.screen_componente_estilos?.color_texto_subtitulo || colors.screen_componente_estilos?.color_texto || '#666',
+      outline: colors.navigation_estilos?.color_fondo || '#000',
+      surface: colors.screen_componente_estilos?.color_fondo_cards || '#fff',
+      surfaceVariant: colors.screen_componente_estilos?.color_fondo || '#fff',
+      background: colors.screen_componente_estilos?.color_fondo || '#fff',
+      error: 'red',
+    },
+    fonts: {
+      ...MD3LightTheme.fonts,
+      bodyLarge: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+      bodyMedium: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+      bodySmall: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+      labelLarge: { fontFamily: fonts?.balsamiqbold?.fontFamily || 'System' },
+      titleMedium: { fontFamily: fonts?.balsamiqbold?.fontFamily || 'System' },
+    },
+  };
+
   const handleError = (errorObject) => {
     if (typeof errorObject === 'object' && errorObject !== null) {
       return Object.entries(errorObject)
         .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
         .join('\n');
     }
-    return String(errorObject);
+    return String(errorObject || 'Error desconocido');
   };
 
   const ingresar = async () => {
@@ -45,8 +69,6 @@ export default function Login() {
     const resp = datos['status'];
 
     if (resp === 200) {
-      // console.log(datos['data']['sesion'])
-      // console.log(datos['data']['token'])
       const userdata = {
         token: datos['data']['token'],
         sesion: datos['data']['sesion'],
@@ -77,7 +99,8 @@ export default function Login() {
       reiniciarvalores();
     } else {
       showDialog(true);
-      setMensajeerror(handleError(datos['data']['message']));
+      const errorMsg = handleError(datos['data']?.['message'] || datos['data'] || 'Error en la solicitud');
+      setMensajeerror(errorMsg);
     }
     actualizarEstadocomponente('tituloloading', '');
     actualizarEstadocomponente('loading', false);
@@ -87,9 +110,9 @@ export default function Login() {
     setContrasena(text);
   };
 
-  const registrarse=()=>{
-
-  }
+  const registrarse = () => {
+    // Implementar lógica de registro
+  };
 
   const cargardatos = async () => {
     setReady(false);
@@ -98,85 +121,75 @@ export default function Login() {
 
     const datosstarage = await ComprobarStorage();
     const credenciales = datosstarage['datosesion'];
-    if (credenciales){
+    if (credenciales) {
       const endpoint = 'sessions/ComprobarSession/';
       const result = await Generarpeticion(endpoint, 'GET', {});
       const respuesta = result['resp'];
       if (respuesta === 200) {
-          setSesiondata(result['data']); //SE TOMA LOS DATOS DE LA SESION 
-          const datestorage = await Handelstorage('obtenerdate'); // SE TOMA LOS DATOS DE LA FECHA
-          // SE ALMACENA LOS DATOS
-          setSesiondatadate(datestorage);  
-          setPeriodo(datestorage['dataperiodo']);
-          await new Promise((resolve) => setTimeout(resolve, 1500));
+        setSesiondata(result['data']);
+        
+        const datestorage = await Handelstorage('obtenerdate');
+        setSesiondatadate(datestorage);  
+        setPeriodo(datestorage['dataperiodo']);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-          setActivarsesion(true); // SE ACTIVA SESION
-          actualizarEstadocomponente('tituloloading', '');
-          actualizarEstadocomponente('loading', false);
-        } else {
-
-          await Handelstorage('borrar'); // SE ELIMINA LOS DATOS DE STORAGE
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          setActivarsesion(false); // SE INACTIVA LA SE SECION
-          actualizarEstadocomponente('tituloloading', '');
-          actualizarEstadocomponente('loading', false);
-        }
-
-    }else{
+        setActivarsesion(true);
+        actualizarEstadocomponente('tituloloading', '');
+        actualizarEstadocomponente('loading', false);
+      } else {
+        await Handelstorage('borrar');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setActivarsesion(false);
+        actualizarEstadocomponente('tituloloading', '');
+        actualizarEstadocomponente('loading', false);
+      }
+    } else {
       actualizarEstadocomponente('tituloloading', '');
       actualizarEstadocomponente('loading', false);
-      setActivarsesion(false); // SE INACTIVA LA SE SECION
-
+      setActivarsesion(false);
     }
-    
-    
-    
   };
 
   useEffect(() => {
     cargardatos();
   }, []);
 
-  const texto_normal = fonts.balsamiqregular.fontFamily;
-  const texto_negrita = fonts.balsamiqbold.fontFamily;
-
-  const inputTheme = {
-    fonts: {
-      bodyLarge: { fontFamily: texto_normal },
-    }
-  };
+  const texto_normal = fonts?.balsamiqregular?.fontFamily || 'System';
+  const texto_negrita = fonts?.balsamiqbold?.fontFamily || 'System';
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={paperTheme}>
       <View
         style={[
           styles.container,
-          { backgroundColor: colors.screen_componente_estilos.color_fondo },
+          { backgroundColor: colors.screen_componente_estilos?.color_fondo || '#fff' },
         ]}
       >
         <Portal>
           <Dialog visible={visibledialogo} onDismiss={hideDialog}>
             <Dialog.Icon icon="alert-circle" size={50} color="red" />
-            <Dialog.Title>ERROR</Dialog.Title>
+            <Dialog.Title>
+              <Text>ERROR</Text>
+            </Dialog.Title>
             <Dialog.Content>
               <Text variant="bodyMedium">{mensajeerror}</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={hideDialog}>OK</Button>
+              <Button onPress={hideDialog}>
+                <Text>OK</Text>
+              </Button>
             </Dialog.Actions>
           </Dialog>
         </Portal>
 
-        {/* Contenedor centrador */}
         <View style={styles.centerContainer}>
-          {/* Encabezado separado */}
           <View style={styles.headerContainer}>
             <Text
               style={[
                 styles.titulo,
                 {
                   fontFamily: texto_negrita,
-                  color: colors.navigation_estilos.color_fondo,
+                  color: colors.navigation_estilos?.color_fondo || '#000',
                 },
               ]}
             >
@@ -187,7 +200,7 @@ export default function Login() {
                 styles.subtitulo,
                 {
                   fontFamily: texto_normal,
-                  color: colors.screen_componente_estilos.color_texto,
+                  color: colors.screen_componente_estilos?.color_texto || '#666',
                 },
               ]}
             >
@@ -195,11 +208,10 @@ export default function Login() {
             </Text>
           </View>
 
-          {/* Surface que ahora se ajusta al contenido */}
           <Surface
             style={[
               styles.card,
-              { backgroundColor: colors.screen_componente_estilos.color_fondo_cards },
+              { backgroundColor: colors.screen_componente_estilos?.color_fondo_cards || '#fff' },
             ]}
             elevation={2}
           >
@@ -214,7 +226,7 @@ export default function Login() {
                     styles.cardTitulo,
                     {
                       fontFamily: texto_normal,
-                      color: colors.screen_componente_estilos.color_texto,
+                      color: colors.screen_componente_estilos?.color_texto || '#000',
                     },
                   ]}
                 >
@@ -226,12 +238,12 @@ export default function Login() {
                   value={usuario}
                   onChangeText={setUsuario}
                   mode="outlined"
-                  style={[styles.input,{backgroundColor:colors.screen_componente_estilos.color_fondo}]}
+                  style={[styles.input, { backgroundColor: colors.screen_componente_estilos?.color_fondo || '#fff' }]}
                   outlineStyle={{ borderRadius: 15 }}
-                  contentStyle={{ fontFamily: texto_normal,color:colors.screen_componente_estilos.color_texto }}
-                  theme={inputTheme}
-                  outlineColor={colors.navigation_estilos.color_fondo}
-                  activeOutlineColor={colors.navigation_estilos.color_fondo}
+                  contentStyle={{ fontFamily: texto_normal, color: colors.screen_componente_estilos?.color_texto || '#000' }}
+                  outlineColor={colors.navigation_estilos?.color_fondo || '#000'}
+                  activeOutlineColor={colors.navigation_estilos?.color_fondo || '#000'}
+                  textColor={colors.screen_componente_estilos?.color_texto || '#000'}
                   left={<TextInput.Icon icon="account" />}
                 />
 
@@ -241,12 +253,12 @@ export default function Login() {
                   onChangeText={handleContrasenaChange}
                   mode="outlined"
                   secureTextEntry={!verContrasena}
-                  style={[styles.input,{backgroundColor:colors.screen_componente_estilos.color_fondo}]}
+                  style={[styles.input, { backgroundColor: colors.screen_componente_estilos?.color_fondo || '#fff' }]}
                   outlineStyle={{ borderRadius: 15 }}
-                  contentStyle={{ fontFamily: texto_normal,color:colors.screen_componente_estilos.color_texto }}
-                  theme={inputTheme}
-                  outlineColor={colors.navigation_estilos.color_fondo}
-                  activeOutlineColor={colors.navigation_estilos.color_fondo}
+                  contentStyle={{ fontFamily: texto_normal, color: colors.screen_componente_estilos?.color_texto || '#000' }}
+                  outlineColor={colors.navigation_estilos?.color_fondo || '#000'}
+                  activeOutlineColor={colors.navigation_estilos?.color_fondo || '#000'}
+                  textColor={colors.screen_componente_estilos?.color_texto || '#000'}
                   left={<TextInput.Icon icon="lock" />}
                   right={
                     <TextInput.Icon
@@ -261,7 +273,7 @@ export default function Login() {
                     styles.olvidaste,
                     {
                       fontFamily: texto_normal,
-                      color: colors.navigation_estilos.color_fondo,
+                      color: colors.navigation_estilos?.color_fondo || '#000',
                     },
                   ]}
                 >
@@ -273,13 +285,13 @@ export default function Login() {
                   style={{
                     borderRadius: 12,
                     marginBottom: 12,
-                    backgroundColor: colors.screen_componente_estilos.color_fondo_botones,
+                    backgroundColor: colors.screen_componente_estilos?.color_fondo_botones || '#000',
                     borderWidth: 0.5,
-                    borderColor: colors.navigation_estilos.color_fondo
+                    borderColor: colors.navigation_estilos?.color_fondo || '#000'
                   }}
                   contentStyle={styles.botonContenido}
-                  buttonColor={colors.screen_componente_estilos.color_fondo_botones}
-                  textColor={colors.screen_componente_estilos.color_texto}
+                  buttonColor={colors.screen_componente_estilos?.color_fondo_botones || '#000'}
+                  textColor={colors.screen_componente_estilos?.color_texto || '#fff'}
                   labelStyle={{
                     fontFamily: texto_negrita,
                     fontSize: 16,
@@ -287,19 +299,19 @@ export default function Login() {
                   }}
                   onPress={() => ingresar()}
                 >
-                  Ingresar
+                  <Text>Ingresar</Text>
                 </Button>
 
                 <Button
                   mode="text"
-                  textColor={colors.navigation_estilos.color_fondo}
+                  textColor={colors.navigation_estilos?.color_fondo || '#000'}
                   labelStyle={{
                     fontSize: 14,
                     fontFamily: texto_negrita,
                   }}
                   onPress={() => { navigate('RegistroUsuario'); }}
                 >
-                  ¿No tenés cuenta? Registrate
+                  <Text>¿No tenés cuenta? Registrate</Text>
                 </Button>
               </View>
             </ImageBackground>
@@ -332,14 +344,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
-    width: '100%',            // Toma el ancho del padre, pero la altura la da el contenido
+    width: '100%',
     borderRadius: 20,
     overflow: 'hidden',
-    // No se usa flex ni altura fija
   },
   imageBackground: {
     width: '100%',
-    // No se define height para que sea determinado por el contenido
   },
   imageStyle: {
     opacity: 0.3,

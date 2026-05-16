@@ -93,8 +93,135 @@ const parsearMonto = (valorFormateado) => {
   return isNaN(num) ? 0 : num;
 };
 
-const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, estilos }) => {
+// const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, estilos }) => {
+//   const [query, setQuery] = useState('');
+//   const [montos, setMontos] = useState({});
+//   const [montosDisplay, setMontosDisplay] = useState({});
+
+//   useEffect(() => {
+//     if (visible) {
+//       const initialMontos = {};
+//       const initialDisplay = {};
+//       gastosData.forEach(g => {
+//         const existing = selectedGastos.find(sg => sg.id === g.id);
+//         const val = existing ? parseFloat(existing.monto) || 0 : 0;
+//         initialMontos[g.id] = val;
+//         initialDisplay[g.id] = val > 0 ? formatearMiles(val) : '';
+//       });
+//       setMontos(initialMontos);
+//       setMontosDisplay(initialDisplay);
+//     }
+//   }, [visible, gastosData, selectedGastos]);
+
+//   const filtered = gastosData.filter((item) =>
+//     item.nombre.toLowerCase().includes(query.toLowerCase())
+//   );
+
+//   const actualizarMonto = (id, valor) => {
+//     const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
+//     const num = soloNums ? parseFloat(soloNums) : 0;
+//     setMontos(prev => ({ ...prev, [id]: num }));
+//     setMontosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
+//   };
+
+//   const totalModal = Object.values(montos).reduce((a, b) => a + (b || 0), 0);
+
+//   const confirmar = () => {
+//     const seleccionados = gastosData
+//       .filter(g => montos[g.id] > 0)
+//       .map(g => ({ id: g.id, nombre: g.nombre, monto: montos[g.id] }));
+//     onConfirm(seleccionados);
+//     onClose();
+//   };
+
+//   return (
+//     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+//       <View style={modalStyles.overlay}>
+//         <KeyboardAvoidingView
+//           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+//           style={{ flex: 1, justifyContent: 'flex-end' }}
+//         >
+//           <SafeAreaView
+//             style={[
+//               modalStyles.sheet,
+//               { backgroundColor: estilos.pantalla_color_fondo, height: '90%' },
+//             ]}
+//           >
+//             <View style={modalStyles.header}>
+//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 16, flex: 1 }}>
+//                 Seleccionar gastos
+//               </Text>
+//               <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+//                 <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             <View style={[modalStyles.searchBox, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
+//               <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
+//                 <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
+//               </View>
+//               <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
+//                 <TextInput
+//                   value={query}
+//                   onChangeText={setQuery}
+//                   placeholder="Buscar..."
+//                   placeholderTextColor={estilos.font_sub_color}
+//                   style={{ flex: 1, fontFamily: estilos.font_normal, color: estilos.font_color, fontSize: 14, paddingVertical: 4, paddingHorizontal: 8 }}
+//                   underlineColorAndroid="transparent"
+//                 />
+//               </View>
+//               {query.length > 0 && (
+//                 <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
+//                   <TouchableOpacity onPress={() => setQuery('')}>
+//                     <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
+//                   </TouchableOpacity>
+//                 </View>
+//               )}
+//             </View>
+
+//             <FlatList
+//               data={filtered}
+//               keyExtractor={(item) => String(item.id)}
+//               keyboardShouldPersistTaps="handled"
+//               style={{ maxHeight: 500 }}
+//               renderItem={({ item }) => (
+//                 <View style={[modalStyles.gastoRow, { borderBottomColor: estilos.cards_color_border, backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent' }]}>
+//                   <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, flex: 1, fontSize: 14 }}>{item.nombre}</Text>
+//                   <View style={[modalStyles.montoInputWrap, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
+//                     <TextInput
+//                       value={montosDisplay[item.id] ?? ''}
+//                       onChangeText={(v) => actualizarMonto(item.id, v)}
+//                       keyboardType="numeric"
+//                       placeholder="0"
+//                       placeholderTextColor={estilos.font_sub_color}
+//                       style={{ fontFamily: estilos.font_normal, color: estilos.font_importe_color, fontSize: 14, minWidth: 90, textAlign: 'right', paddingVertical: 2 }}
+//                     />
+//                   </View>
+//                 </View>
+//               )}
+//               ListEmptyComponent={<Text style={{ textAlign: 'center', color: estilos.font_sub_color, fontFamily: estilos.font_normal, marginTop: 24, fontSize: 13 }}>Sin resultados</Text>}
+//             />
+
+//             <View style={[distStyles.totalRow, { borderTopColor: estilos.cards_color_border, marginTop: 8 }]}>
+//               <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>Total seleccionado</Text>
+//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>{totalModal.toLocaleString('es-PY')}</Text>
+//             </View>
+
+//             <TouchableOpacity style={[modalStyles.confirmBtn, { backgroundColor: estilos.boton_color_fondo, borderColor: estilos.boton_color_borde, marginTop: 12 }]} onPress={confirmar}>
+//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 14 }}>Confirmar selección</Text>
+//             </TouchableOpacity>
+//           </SafeAreaView>
+//         </KeyboardAvoidingView>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+// ─── Modal genérico para empresas (sin cambios) ─────────────────────────────
+
+const GastosModal = ({ visible, onClose, gastosData, categoriasData, selectedGastos, onConfirm, estilos }) => {
   const [query, setQuery] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('todos');
   const [montos, setMontos] = useState({});
   const [montosDisplay, setMontosDisplay] = useState({});
 
@@ -110,12 +237,27 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
       });
       setMontos(initialMontos);
       setMontosDisplay(initialDisplay);
+      setCategoriaFiltro('todos');
+      setQuery('');
     }
   }, [visible, gastosData, selectedGastos]);
 
-  const filtered = gastosData.filter((item) =>
-    item.nombre.toLowerCase().includes(query.toLowerCase())
-  );
+  // Filtrar por categoría y búsqueda
+  const filtered = gastosData.filter((item) => {
+    
+    const matchCategoria = categoriaFiltro === 'todos' || item.cod_categoria === parseInt(categoriaFiltro);
+    const matchQuery = item.nombre.toLowerCase().includes(query.toLowerCase());
+    return matchCategoria && matchQuery;
+  });
+
+  // Preparar etiquetas: "Todos" + las dos primeras categorías
+  const etiquetas = [{ id: 'todos', nombre: 'Todos' }];
+  if (categoriasData && categoriasData.length > 0) {
+    etiquetas.push(...categoriasData.slice(0, 3).map(c => ({ 
+      id: String(c.id), 
+      nombre: c.nombre 
+    })));
+  }
 
   const actualizarMonto = (id, valor) => {
     const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
@@ -156,6 +298,39 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
               </TouchableOpacity>
             </View>
 
+            {/* ── ETIQUETAS DE CATEGORÍA ── */}
+            <View style={filtroStyles.etiquetasContainer}>
+              {etiquetas.map((etq) => {
+                const activa = categoriaFiltro === etq.id;
+                return (
+                  <TouchableOpacity
+                    key={etq.id}
+                    onPress={() => setCategoriaFiltro(etq.id)}
+                    activeOpacity={0.75}
+                    style={[
+                      filtroStyles.etiqueta,
+                      {
+                        backgroundColor: activa ? estilos.boton_color_fondo : estilos.cards_color_fondo,
+                        borderColor: activa ? estilos.boton_color_borde : estilos.cards_color_border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: activa ? estilos.font_negrita : estilos.font_normal,
+                        color: activa ? estilos.font_importe_color : estilos.font_sub_color,
+                        fontSize: 12,
+                      }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {etq.nombre}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
             <View style={[modalStyles.searchBox, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
               <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
                 <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
@@ -186,7 +361,12 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
               style={{ maxHeight: 500 }}
               renderItem={({ item }) => (
                 <View style={[modalStyles.gastoRow, { borderBottomColor: estilos.cards_color_border, backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent' }]}>
-                  <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, flex: 1, fontSize: 14 }}>{item.nombre}</Text>
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, fontSize: 14 }}>{item.nombre}</Text>
+                    <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 11, marginTop: 2 }}>
+                      {item.categoria}
+                    </Text>
+                  </View>
                   <View style={[modalStyles.montoInputWrap, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
                     <TextInput
                       value={montosDisplay[item.id] ?? ''}
@@ -216,8 +396,6 @@ const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, 
     </Modal>
   );
 };
-
-// ─── Modal genérico para empresas (sin cambios) ─────────────────────────────
 const EmpresaModal = ({ visible, onClose, data, onSelect, selected, title, estilos }) => {
   const [query, setQuery] = useState('');
   const filtered = data.filter((item) =>
@@ -691,6 +869,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   const [datagastos, setDatagastos] = useState([]);
   const [datamedios, setDatamedios] = useState([]);
   const [dataempresas, setDataempresas] = useState([]);
+  const [datacategorias, setDatacategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   // ── Selecciones del usuario ───────────────────────────────────────────────
@@ -716,6 +895,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
   //── CAMARA ───────────────────────────────────────────────────────────────
   const [imageUri, setImageUri] = useState(null);
   const [imageLoading, setImageLoading] = useState(false);
+  
   // --- Tomar foto con la cámara ---
   const tomarFoto = async () => {
       const { granted } = await ImagePicker.requestCameraPermissionsAsync();
@@ -735,6 +915,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
       const uri = result.assets[0].uri;
       setImageUri(uri);
       setImageLoading(true);
+      
   
       // Guardar en galería (opcional)
       const { granted: mediaGranted } = await MediaLibrary.requestPermissionsAsync();
@@ -760,6 +941,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
       setImageUri(result.assets[0].uri);
       setImageLoading(true);
+      
     };
 
 
@@ -853,6 +1035,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
             nombre: g.NombreGasto,
             categoria: g.NombreCategoria,
             tipo: g.NombreTipoGasto,
+            cod_categoria:g.Categoria
           }));
           const medios = (result.data.MediosPagos || []).map((m) => ({
             id: m.Id,
@@ -863,6 +1046,11 @@ export default function RegistroMovimientoGasto({ navigation }) {
             nombre: e.NombreEmpresa,
             urlImg: e.UrlImg,
           }));
+          const categorias = (result.data.Categorias || []).map((c) => ({
+            id: c.Id,
+            nombre: c.NombreCategoria,
+          }));
+          setDatacategorias(categorias);
           setDatagastos(gastos);
           setDatamedios(medios);
           setDataempresas(empresas);
@@ -1429,7 +1617,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
         <SectionCard estilos={estilos} titulo="Comprobante" paso="5">
           
           <View style={camaraStyles.container_camara}>
-          
+               
                 {/* Botones */}
                 <View style={camaraStyles.buttons_camara}>
                   <TouchableOpacity style={[camaraStyles.btn_camara,{backgroundColor:estilos.pantalla_color_fondo,borderWidth:0.5,borderColor:estilos.boton_color_borde}]} onPress={tomarFoto}>
@@ -1440,7 +1628,7 @@ export default function RegistroMovimientoGasto({ navigation }) {
                     <Text style={camaraStyles.btnText_camara}>🖼️ Galería</Text>
                   </TouchableOpacity>
                 </View>
-          
+                
                 {/* Preview de la imagen */}
                 {imageUri && (
                   <>
@@ -1500,15 +1688,23 @@ export default function RegistroMovimientoGasto({ navigation }) {
       </ScrollView>
 
       {/* ── MODALES ───────────────────────────────────────────────────────── */}
-      <GastosModal
+      {/* <GastosModal
         visible={modalGastos}
         onClose={() => setModalGastos(false)}
         gastosData={datagastos}
         selectedGastos={gastosSeleccionados}
         onConfirm={confirmarGastos}
         estilos={estilos}
+      /> */}
+      <GastosModal
+        visible={modalGastos}
+        onClose={() => setModalGastos(false)}
+        gastosData={datagastos}
+        categoriasData={datacategorias} // ← NUEVA PROP
+        selectedGastos={gastosSeleccionados}
+        onConfirm={confirmarGastos}
+        estilos={estilos}
       />
-
       <EmpresaModal
         visible={modalEmpresas}
         onClose={() => setModalEmpresas(false)}
@@ -1863,3 +2059,19 @@ btnEliminarTexto: {
     textAlign: 'center',
   },
 })
+
+const filtroStyles = StyleSheet.create({
+  etiquetasContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 6,
+  },
+  etiqueta: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    maxWidth: 110, // Limita el ancho para forzar el truncamiento
+  },
+});

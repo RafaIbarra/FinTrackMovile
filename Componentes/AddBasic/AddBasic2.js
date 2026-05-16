@@ -157,7 +157,7 @@ function AddBasic({ navigation }) {
   };
 
   const navegarA = (stackname,screen, param) => {
-  console.log(screen)
+  
   cerrar();
   setTimeout(() => {
 

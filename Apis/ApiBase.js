@@ -1,14 +1,14 @@
  
-// const ip='192.168.1.100'
-// const puerto='8000'
-// export const API_BASE=`http://${ip}:${puerto}/api`
-// export const API_BASE_IMG=`http://${ip}:${puerto}`
+const ip='192.168.1.100'
+const puerto='8000'
+export const API_BASE=`http://${ip}:${puerto}/api`
+export const API_BASE_IMG=`http://${ip}:${puerto}`
 
 
 //const API_BASE='https://wom.rafaelibarra.xyz/api'
 
 
-export const API_BASE='https://fintrack.rafaelibarra.xyz/api'
-export const API_BASE_IMG=`https://fintrack.rafaelibarra.xyz`
+// export const API_BASE='https://fintrack.rafaelibarra.xyz/api'
+// export const API_BASE_IMG=`https://fintrack.rafaelibarra.xyz`
 
 export default API_BASE
