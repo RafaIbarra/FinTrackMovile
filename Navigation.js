@@ -74,6 +74,10 @@ import Alerta from './Componentes/Procesando/Alerta';
 import { tema_colores_activo } from './Utils/Temas';
 
 
+import RecorridoCategoria from './Componentes/Screens/Recorrido/RecorridoCategoria';
+import RecorridoConceptoGasto from './Componentes/Screens/Recorrido/RecorridoConceptoGasto';
+import RecorridoConceptoIngreso from './Componentes/Screens/Recorrido/RecorridoConceptoIngreso';
+
 //////////////iconos///////////////////////////////
 import { Ionicons } from "@expo/vector-icons";
 import { Feather } from '@expo/vector-icons';
@@ -578,28 +582,31 @@ function NavigationLogin(){
 function Navigation({notificationData,setNotificationData}) {
     
     const { activarsesion, setActivarsesion } = useContext(AuthContext);
+    const { recorrido,setRecorrido } = useContext(AuthContext);
     const { estadocomponente } = useContext(AuthContext);
     return (
   
-      <NavigationContainer theme={MyTheme }>
-        {/* <Cargando /> */}
-        {activarsesion ? (
-              <>
-                {estadocomponente.loading && <Cargando />}
-                {estadocomponente.componente_plus_basic && <AddBasic />}
-                {/* {estadocomponente.alerta_estado && <Alerta />} */}
-                <DrawerInicio />
-              </>
-          ) : (
-            <>
-              {estadocomponente.loading && <Cargando />}
-              <NavigationLogin />
-            </>
-          )}
-      
-  
-
-      </NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
+            {activarsesion ? (
+                <>
+                    {estadocomponente.loading && <Cargando />}
+                    {estadocomponente.componente_plus_basic && <AddBasic />}
+                    
+                    {/* Si recorrido es true, muestra el stack de onboarding */}
+                    {/* Si es false, muestra el drawer principal */}
+                    {recorrido ? (
+                        <StackRecorrido />
+                    ) : (
+                        <DrawerInicio />
+                    )}
+                </>
+            ) : (
+                <>
+                    {estadocomponente.loading && <Cargando />}
+                    <NavigationLogin />
+                </>
+            )}
+        </NavigationContainer>
     );
 
     
@@ -894,6 +901,18 @@ function StackIngresosGroup() {
   );
 }
 
+
+const Stackrecorrido = createNativeStackNavigator();
+
+function StackRecorrido() {
+  return (
+    <Stackrecorrido.Navigator screenOptions={{ headerShown: false }}>
+      <Stackrecorrido.Screen name="RecorridoCategoria" component={RecorridoCategoria} />
+      <Stackrecorrido.Screen name="RecorridoConceptoGasto" component={RecorridoConceptoGasto} />
+      <Stackrecorrido.Screen name="RecorridoConceptoIngreso" component={RecorridoConceptoIngreso} />
+    </Stackrecorrido.Navigator>
+  );
+}
   
  const styles = StyleSheet.create({
       iconContainer: {

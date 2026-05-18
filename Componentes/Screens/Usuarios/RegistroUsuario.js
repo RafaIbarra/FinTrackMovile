@@ -38,6 +38,8 @@ export default function RegistroUsuario() {
   const { reiniciarvalores } = useContext(AuthContext);
   const { periodo, setPeriodo } = useContext(AuthContext);
   const { actualizarEstadocomponente } = useContext(AuthContext);
+  const { recorrido,setRecorrido } = useContext(AuthContext);
+  const { datarecorrido,setDatarecorrido } = useContext(AuthContext);
 
   const [visibledialogo, setVisibledialogo] = useState(false);
   const showDialog = () => setVisibledialogo(true);
@@ -88,6 +90,7 @@ export default function RegistroUsuario() {
           sesion: datos['data']['sesion'],
           refresh: datos['data']['refresh'],
           user_name: datos['data']['user_name'],
+          recorrido: datos['data']['recorrido']
         };
 
         await Handelstorage('agregar', userdata, '');
@@ -102,6 +105,8 @@ export default function RegistroUsuario() {
         setPeriodo(datestorage['dataperiodo']);
         actualizarEstadocomponente('DiaActual', datos['data'].dia_actual);
         setActivarsesion(true);
+        setRecorrido( datos['data']['recorrido'])
+        setDatarecorrido( datos['data']['datarecorrido'])
 
         if (anno_storage === 0) {
           await new Promise((resolve) => setTimeout(resolve, 1500));

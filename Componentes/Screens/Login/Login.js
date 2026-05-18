@@ -21,6 +21,9 @@ export default function Login() {
   const { versionsys, setVersionsys } = useContext(AuthContext);
   const { sesiondata, setSesiondata } = useContext(AuthContext);
   const { sesiondatadate, setSesiondatadate } = useContext(AuthContext);
+  const { recorrido,setRecorrido } = useContext(AuthContext);
+  const { datarecorrido,setDatarecorrido } = useContext(AuthContext);
+  
   const { reiniciarvalores } = useContext(AuthContext);
   const { periodo, setPeriodo } = useContext(AuthContext);
   const { actualizarEstadocomponente } = useContext(AuthContext);
@@ -74,6 +77,7 @@ export default function Login() {
         sesion: datos['data']['sesion'],
         refresh: datos['data']['refresh'],
         user_name: datos['data']['user_name'],
+        recorrido: datos['data']['recorrido']
       };
 
       await Handelstorage('agregar', userdata, '');
@@ -88,6 +92,8 @@ export default function Login() {
       setPeriodo(datestorage['dataperiodo']);
       actualizarEstadocomponente('DiaActual', datos['data'].dia_actual);
       setActivarsesion(true);
+      setRecorrido( datos['data']['recorrido'])
+      setDatarecorrido( datos['data']['datarecorrido'])
 
       if (anno_storage === 0) {
         await new Promise((resolve) => setTimeout(resolve, 1500));

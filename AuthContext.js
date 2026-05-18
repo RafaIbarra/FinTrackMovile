@@ -8,6 +8,8 @@ export const AuthProvider = ({ children }) => {
   const [sesiondata, setSesiondata] = useState();
   const [sesiondatadate, setSesiondatadate] = useState();
   const [periodo, setPeriodo] = useState(false);
+  const [recorrido,setRecorrido]=useState(false)
+  const [datarecorrido,setDatarecorrido]=useState([])
 
   const [estadocomponente, setEstadocomponente] = useState({
     datositem: [],
@@ -82,6 +84,8 @@ export const AuthProvider = ({ children }) => {
   // 🔑 useMemo evita que el objeto value se recree en cada render
   const contextValue = useMemo(() => ({
     activarsesion, setActivarsesion,
+    recorrido,setRecorrido,
+    datarecorrido,setDatarecorrido,
     versionsys, setVersionsys,
     sesiondata, setSesiondata,
     estadocomponente, actualizarEstadocomponente,
@@ -92,6 +96,7 @@ export const AuthProvider = ({ children }) => {
     asignar_opciones_alerta,
   }), [
     activarsesion,
+    recorrido,
     versionsys,
     sesiondata,
     estadocomponente,
