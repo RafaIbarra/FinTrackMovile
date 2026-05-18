@@ -70,7 +70,7 @@ export default function RecorridoCategoria() {
   const guardarYContinuar = async () => {
     if (!nombreCategoria.trim()) {
         setBtnactivo(true)
-      setBodynotificacion({
+        setBodynotificacion({
         titulo: 'CATEGORÍA',
         mensaje: 'El nombre de la categoría es requerido.',
         is_error: true,
@@ -91,6 +91,8 @@ export default function RecorridoCategoria() {
     formData.append('nombre', nombreCategoria.trim());
 
     try {
+
+      
       const endpoint = `ref/OperacionesCategoriasGastosUser/`;
       const result = await apiRequest(endpoint, 'POST', formData);
 
@@ -168,6 +170,9 @@ export default function RecorridoCategoria() {
         {/* ═══ INDICADOR DE PASO ═══ */}
         <View style={styles.pasoContainer}>
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
+
+          <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
+          <View style={[styles.pasoDot, { backgroundColor: estilos.cards_color_border }]} />
           <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
           <View style={[styles.pasoDot, { backgroundColor: estilos.cards_color_border }]} />
           <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
@@ -175,7 +180,7 @@ export default function RecorridoCategoria() {
         </View>
 
         <Text style={[styles.tituloPaso, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-          Paso 1 de 3
+          Paso 1 de 4
         </Text>
         <Text style={[styles.subtitulo, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
           Creá tu primera categoría para organizar tus movimientos

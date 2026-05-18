@@ -77,6 +77,7 @@ import { tema_colores_activo } from './Utils/Temas';
 import RecorridoCategoria from './Componentes/Screens/Recorrido/RecorridoCategoria';
 import RecorridoConceptoGasto from './Componentes/Screens/Recorrido/RecorridoConceptoGasto';
 import RecorridoConceptoIngreso from './Componentes/Screens/Recorrido/RecorridoConceptoIngreso';
+import RecorridoMedioPago from './Componentes/Screens/Recorrido/RecorridoMedioPago';
 
 //////////////iconos///////////////////////////////
 import { Ionicons } from "@expo/vector-icons";
@@ -909,6 +910,7 @@ function StackRecorrido() {
     <Stackrecorrido.Navigator screenOptions={{ headerShown: false }}>
       <Stackrecorrido.Screen name="RecorridoCategoria" component={RecorridoCategoria} />
       <Stackrecorrido.Screen name="RecorridoConceptoGasto" component={RecorridoConceptoGasto} />
+      <Stackrecorrido.Screen name="RecorridoMedioPago" component={RecorridoMedioPago} />
       <Stackrecorrido.Screen name="RecorridoConceptoIngreso" component={RecorridoConceptoIngreso} />
     </Stackrecorrido.Navigator>
   );

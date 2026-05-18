@@ -8,7 +8,7 @@ import {
   Platform,
   ScrollView,
   Keyboard,
-  TouchableWithoutFeedback,
+  Pressable,
 } from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
@@ -149,6 +149,13 @@ export default function RegistroUsuario() {
     dense: true,
   };
 
+  // Wrapper condicional: en web usamos View (no necesita dismiss de teclado)
+  // En nativo mantenemos Pressable para cerrar teclado al tocar fuera
+  const Wrapper = Platform.OS === 'web' ? View : Pressable;
+  const wrapperProps = Platform.OS === 'web' 
+    ? { style: { flex: 1 } } 
+    : { onPress: Keyboard.dismiss, style: { flex: 1 } };
+
   return (
     <PaperProvider>
       <KeyboardAvoidingView
@@ -156,10 +163,10 @@ export default function RegistroUsuario() {
         style={[styles.container, { backgroundColor: colors.screen_componente_estilos.color_fondo }]}
         keyboardVerticalOffset={0}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <Wrapper {...wrapperProps}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps={Platform.OS === 'web' ? 'always' : 'handled'}
             showsVerticalScrollIndicator={false}
           >
             <Portal>
@@ -309,7 +316,7 @@ export default function RegistroUsuario() {
               </Surface>
             </View>
           </ScrollView>
-        </TouchableWithoutFeedback>
+        </Wrapper>
       </KeyboardAvoidingView>
     </PaperProvider>
   );

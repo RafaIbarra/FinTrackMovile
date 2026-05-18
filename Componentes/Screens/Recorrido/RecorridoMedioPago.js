@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext,useEffect } from 'react';
 import {
   View, StyleSheet, Text, TouchableOpacity, ScrollView,
   TextInput, KeyboardAvoidingView, Platform, ActivityIndicator,
@@ -14,91 +14,9 @@ import Notificacion from '../../Notificacion/Notificacion';
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE RADIO BUTTON NATIVO
+// 
 // ═══════════════════════════════════════════════════════════════════════════════
-const RadioButtonGroup = ({ options, selectedValue, onChange, estilos }) => {
-  return (
-    <View style={radioStyles.container}>
-      {options.map((option) => {
-        const isSelected = selectedValue === option.value;
-        return (
-          <TouchableOpacity
-            key={option.value}
-            style={radioStyles.optionRow}
-            onPress={() => onChange(option.value)}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                radioStyles.outerCircle,
-                {
-                  borderColor: isSelected
-                    ? estilos.font_importe_color
-                    : estilos.cards_color_border,
-                },
-              ]}
-            >
-              {isSelected && (
-                <View
-                  style={[
-                    radioStyles.innerCircle,
-                    { backgroundColor: estilos.font_importe_color },
-                  ]}
-                />
-              )}
-            </View>
-            <Text
-              style={[
-                radioStyles.label,
-                {
-                  fontFamily: estilos.font_normal,
-                  color: isSelected ? estilos.font_color : estilos.font_sub_color,
-                },
-              ]}
-            >
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-};
-
-const radioStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    gap: 24,
-    marginTop: 4,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  outerCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  innerCircle: {
-    width: 11,
-    height: 11,
-    borderRadius: 5.5,
-  },
-  label: {
-    fontSize: 15,
-  },
-});
-
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE PRINCIPAL - RECORRIDO CONCEPTO DE INGRESO
-// ═══════════════════════════════════════════════════════════════════════════════
-export default function RecorridoConceptoIngreso() {
+export default function RecorridoMedioPago() {
   const { colors, fonts } = useTheme();
   const navigation = useNavigation();
 
@@ -115,16 +33,18 @@ export default function RecorridoConceptoIngreso() {
     boton_color_borde: colors.screen_componente_estilos.color_borde_botones,
   };
 
-  const { setActivarsesion, reiniciarvalores, actualizarEstadocomponente } = useContext(AuthContext);
+  const { setActivarsesion, reiniciarvalores } = useContext(AuthContext);
   const { recorrido,setRecorrido } = useContext(AuthContext);
+  const { datarecorrido } = useContext(AuthContext);
+  // Estado global del recorrido
+  const { actualizarEstadocomponente } = useContext(AuthContext);
+
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
   const [ready, setReady] = useState(true);
   const [enviando, setEnviando] = useState(false);
-
-  const [nombreIngreso, setNombreIngreso] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [tipoIngreso, setTipoIngreso] = useState(1);
+  const [nombremedio, setNombremedio] = useState('');
+  const [bntactivo,setBtnactivo]=useState(false)
 
   const [estadonotificacion, setEstadonotificacion] = useState(false);
   const [bodynotificacion, setBodynotificacion] = useState({
@@ -138,27 +58,24 @@ export default function RecorridoConceptoIngreso() {
     navnivel3: '',
   });
 
-  const opcionesTipo = [
-    { label: 'Fijo', value: 1 },
-    { label: 'Ocasional', value: 2 },
-  ];
-
-  // ── Volver atrás ──────────────────────────────────────────────────────────
-  const volverAtras = () => {
-    navigation.goBack();
-  };
-
-  // ── Finalizar recorrido ─────────────────────────────────────────────────
-  const finalizarRecorrido = () => {
+  // ── Omitir recorrido ──────────────────────────────────────────────────────
+  const omitirRecorrido = () => {
     setRecorrido(false);
   };
 
-  // ── Guardar y finalizar ─────────────────────────────────────────────────
-  const guardarYFinalizar = async () => {
-    if (!nombreIngreso.trim()) {
-      setBodynotificacion({
-        titulo: 'CONCEPTO DE INGRESO',
-        mensaje: 'El nombre del ingreso es requerido.',
+  // ── Guardar y continuar ─────────────────────────────────────────────────
+  const continuar =()=>{
+     navigation.navigate('RecorridoConceptoIngreso');
+  }
+  const volverAtras = () => {
+    navigation.goBack();
+  };
+  const guardarYContinuar = async () => {
+    if (!nombremedio.trim()) {
+        setBtnactivo(true)
+        setBodynotificacion({
+        titulo: 'MEDIO PAGO',
+        mensaje: 'El nombre del medio de pago es requerido.',
         is_error: true,
         estado_actualizar: '',
         valor_estado: '',
@@ -174,24 +91,23 @@ export default function RecorridoConceptoIngreso() {
     setReady(false);
 
     const formData = new FormData();
-    formData.append('nombre', nombreIngreso);
-    formData.append('observacion', descripcion);
-    formData.append('tipo_ingreso', tipoIngreso);
+    formData.append('nombre', nombremedio.trim());
 
     try {
-      // Ajusta este endpoint según tu API de ingresos
-      const endpoint = `ref/OperacionesIngresoUser/`;
+
+      
+      const endpoint = `ref/OperacionesMediosPagosUser/`;
       const result = await apiRequest(endpoint, 'POST', formData);
 
       if (result.sessionExpired) return;
 
       if (result.resp_correcta) {
-        
-        finalizarRecorrido();
+        // Navegar al siguiente paso del recorrido
+        navigation.navigate('RecorridoConceptoIngreso');
       } else {
-        const msj = result.data?.message || 'Error al registrar el ingreso';
+        const msj = result.data?.message || 'Error al registrar el medio de pago';
         setBodynotificacion({
-          titulo: 'CONCEPTO DE INGRESO',
+          titulo: 'MEDIO PAGO',
           mensaje: msj,
           is_error: true,
           estado_actualizar: '',
@@ -204,7 +120,7 @@ export default function RecorridoConceptoIngreso() {
       }
     } catch (e) {
       setBodynotificacion({
-        titulo: 'CONCEPTO DE INGRESO',
+        titulo: 'MEDIO PAGO',
         mensaje: 'Ocurrió un error al guardar.',
         is_error: true,
         estado_actualizar: '',
@@ -223,9 +139,19 @@ export default function RecorridoConceptoIngreso() {
   const onOk = () => {
     setEstadonotificacion(false);
   };
-
+  useEffect(() => {
+    
+    if (!datarecorrido.medios){    
+        setBtnactivo(true)
+        setTimeout(() => {
+        navigation.navigate('RecorridoConceptoIngreso');
+        }, 100);
+        
+    }
+    }, []);
+  
   // ── Render ────────────────────────────────────────────────────────────────
-  if (!ready) return <Esperando titulo="Guardando ingreso..." />;
+  if (!ready) return <Esperando titulo="Guardando categoría..." />;
 
   return (
     <KeyboardAvoidingView
@@ -247,23 +173,20 @@ export default function RecorridoConceptoIngreso() {
         {/* ═══ INDICADOR DE PASO ═══ */}
         <View style={styles.pasoContainer}>
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
-          <View style={[styles.pasoLine, { backgroundColor: estilos.font_importe_color }]} />
 
+          <View style={[styles.pasoLine, { backgroundColor: estilos.font_importe_color }]} />
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
           <View style={[styles.pasoLine, { backgroundColor: estilos.font_importe_color }]} />
-
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
-          <View style={[styles.pasoLine, { backgroundColor: estilos.font_importe_color }]} />
-
-          <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
-          
+          <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
+          <View style={[styles.pasoDot, { backgroundColor: estilos.cards_color_border }]} />
         </View>
 
         <Text style={[styles.tituloPaso, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-          Paso 4 de 4
+          Paso 3 de 4
         </Text>
         <Text style={[styles.subtitulo, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
-          Creá tu primer concepto de ingreso
+          Creá tu primer Medio de Pago
         </Text>
 
         {/* ═══ CARD PRINCIPAL ═══ */}
@@ -274,10 +197,9 @@ export default function RecorridoConceptoIngreso() {
             borderColor: estilos.cards_color_border,
           }
         ]}>
-          {/* Campo: Nombre */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { fontFamily: estilos.font_negrita, color: estilos.font_sub_color }]}>
-              NOMBRE INGRESO
+              NOMBRE MEDIO PAGO
             </Text>
             <TextInput
               style={[
@@ -287,76 +209,38 @@ export default function RecorridoConceptoIngreso() {
                   color: estilos.font_color,
                   backgroundColor: estilos.pantalla_color_fondo,
                   borderColor: estilos.cards_color_border,
+                  opacity: bntactivo ? 0.6 : 1,
                 }
               ]}
-              placeholder="Ej: Salario, Freelance, Alquiler..."
+              placeholder="Ej: Efectivo, Qr Ueno..."
               placeholderTextColor={estilos.font_sub_color}
-              value={nombreIngreso}
-              onChangeText={setNombreIngreso}
+              value={nombremedio}
+              onChangeText={setNombremedio}
               autoCapitalize="words"
+              editable={datarecorrido.medios}
               maxLength={50}
-            />
-          </View>
-
-          {/* Campo: Tipo de Ingreso (radio) */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontFamily: estilos.font_negrita, color: estilos.font_sub_color }]}>
-              TIPO DE INGRESO
-            </Text>
-            <RadioButtonGroup
-              options={opcionesTipo}
-              selectedValue={tipoIngreso}
-              onChange={setTipoIngreso}
-              estilos={estilos}
-            />
-          </View>
-
-          {/* Campo: Descripción */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { fontFamily: estilos.font_negrita, color: estilos.font_sub_color }]}>
-              DESCRIPCIÓN
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                styles.inputMultiline,
-                {
-                  fontFamily: estilos.font_normal,
-                  color: estilos.font_color,
-                  backgroundColor: estilos.pantalla_color_fondo,
-                  borderColor: estilos.cards_color_border,
-                }
-              ]}
-              placeholder="Observaciones opcionales..."
-              placeholderTextColor={estilos.font_sub_color}
-              value={descripcion}
-              onChangeText={setDescripcion}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-              maxLength={200}
             />
           </View>
         </View>
 
-        {/* ═══ BOTÓN GUARDAR Y FINALIZAR ═══ */}
+        {/* ═══ BOTÓN GUARDAR Y CONTINUAR ═══ */}
         <TouchableOpacity
           style={[
             styles.guardarBtn,
             {
               backgroundColor: estilos.boton_color_fondo,
               borderColor: estilos.boton_color_borde,
-              opacity: enviando ? 0.6 : 1,
+              opacity: bntactivo ? 0.6 : 1,
             },
           ]}
-          onPress={guardarYFinalizar}
-          disabled={enviando}
+          onPress={guardarYContinuar}
+          disabled={bntactivo}
         >
           {enviando ? (
             <ActivityIndicator color={estilos.font_importe_color} />
           ) : (
             <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>
-              Finalizar y entrar a la app
+              Continuar
             </Text>
           )}
         </TouchableOpacity>
@@ -364,30 +248,68 @@ export default function RecorridoConceptoIngreso() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* ═══ BARRA INFERIOR: VOLVER ATRÁS | OMITIR ═══ */}
-      <View style={[styles.footerBar, { backgroundColor: estilos.cards_color_fondo, borderTopColor: estilos.cards_color_border }]}>
-        <TouchableOpacity
-          style={styles.footerBtn}
-          onPress={volverAtras}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.footerBtnText, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
-            ← Volver
-          </Text>
-        </TouchableOpacity>
-
-        <View style={[styles.footerDivider, { backgroundColor: estilos.cards_color_border }]} />
-
-        <TouchableOpacity
-          style={styles.footerBtn}
-          onPress={finalizarRecorrido}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.footerBtnText, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
-            Omitir
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* ═══ BARRA INFERIOR: OMITIR ═══ */}
+      <View style={[
+              styles.footerBar, 
+              { backgroundColor: estilos.cards_color_fondo, borderTopColor: estilos.cards_color_border }
+              ]}>
+              {/* ── BOTÓN VOLVER ── */}
+              <TouchableOpacity
+                  style={styles.footerBtn}
+                  onPress={volverAtras}
+                  activeOpacity={0.7}
+              >
+                  <Text style={[
+                  styles.footerBtnText, 
+                  { fontFamily: estilos.font_normal, color: estilos.font_sub_color }
+                  ]}>
+                  ← Volver
+                  </Text>
+              </TouchableOpacity>
+      
+              {/* ── DIVISOR 1 ── */}
+              <View style={[
+                  styles.footerDivider, 
+                  { backgroundColor: estilos.cards_color_border }
+              ]} />
+      
+              {/* ── BOTÓN OMITIR ── */}
+              <TouchableOpacity
+                  style={styles.footerBtn}
+                  onPress={omitirRecorrido}
+                  activeOpacity={0.7}
+              >
+                  <Text style={[
+                  styles.footerBtnText, 
+                  { fontFamily: estilos.font_normal, color: estilos.font_sub_color }
+                  ]}>
+                  Omitir recorrido
+                  </Text>
+              </TouchableOpacity>
+      
+              {/* ── DIVISOR 2 + BOTÓN CONTINUAR (condicional) ── */}
+              {!datarecorrido.medios && (
+                  <>
+                  <View style={[
+                      styles.footerDivider, 
+                      { backgroundColor: estilos.cards_color_border }
+                  ]} />
+                  
+                  <TouchableOpacity
+                      style={styles.footerBtn}
+                      onPress={continuar}
+                      activeOpacity={0.7}
+                  >
+                      <Text style={[
+                      styles.footerBtnText, 
+                      { fontFamily: estilos.font_normal, color: estilos.font_importe_color }
+                      ]}>
+                      Continuar →
+                      </Text>
+                  </TouchableOpacity>
+                  </>
+              )}
+              </View>
     </KeyboardAvoidingView>
   );
 }
@@ -436,10 +358,18 @@ const styles = StyleSheet.create({
   inputGroup: {
     marginBottom: 18,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   label: {
     fontSize: 11,
     letterSpacing: 1,
-    marginBottom: 8,
+  },
+  labelSeleccion: {
+    fontSize: 11,
   },
   input: {
     borderWidth: 0.5,
@@ -469,16 +399,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 4,
-    paddingHorizontal: 16,
+    paddingHorizontal: 0, // El padding horizontal lo maneja cada botón
   },
   footerBtn: {
-    flex: 1,
+    flex: 1,           // Se distribuye equitativamente el espacio
     paddingVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   footerDivider: {
-    width: 0.5,
-    height: 24,
+     width: 0.5,
+  height: 24,
+  alignSelf: 'center',
   },
   footerBtnText: {
     fontSize: 14,

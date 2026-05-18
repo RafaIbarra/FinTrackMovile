@@ -12,9 +12,13 @@ function Esperando({ titulo }) {
                 {titulo}
             </Text>
 
-            <View style={[styles.curvedContainer,{backgroundColor:colors.background}]}>
+            <View style={
+                [styles.curvedContainer
+                // ,{backgroundColor:colors.background}
+                ]
+                }>
                 <LottieView
-                    source={require('../../assets/maintenance.json')}
+                    source={require('../../assets/usdc-crypto-coin.json')}
                     
                     style={styles.video}
                     autoPlay={true}

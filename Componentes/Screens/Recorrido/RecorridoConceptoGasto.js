@@ -253,7 +253,7 @@ export default function RecorridoConceptoGasto() {
       if (!datarecorrido.conceptos){    
         setBtnactivo(true)
         setTimeout(() => {
-        navigation.navigate('RecorridoConceptoIngreso');
+        navigation.navigate('RecorridoMedioPago');
         }, 100);
         
     }
@@ -271,10 +271,11 @@ export default function RecorridoConceptoGasto() {
     navigation.goBack();
   };
   const continuar =()=>{
-     navigation.navigate('RecorridoConceptoIngreso');
+     navigation.navigate('RecorridoMedioPago');
   }
   // ── Guardar y continuar ─────────────────────────────────────────────────
   const guardarYContinuar = async () => {
+    
     if (!nombreGasto.trim()) {
       setBodynotificacion({
         titulo: 'CONCEPTO DE GASTO',
@@ -322,7 +323,7 @@ export default function RecorridoConceptoGasto() {
 
       if (result.resp_correcta) {
         // Navegar al siguiente paso del recorrido
-        navigation.navigate('RecorridoConceptoIngreso');
+        navigation.navigate('RecorridoMedioPago');
       } else {
         const msj = result.data?.message || 'Error al registrar el gasto';
         setBodynotificacion({
@@ -353,6 +354,10 @@ export default function RecorridoConceptoGasto() {
       setEnviando(false);
       setReady(true);
     }
+  
+  
+  
+  
   };
 
   const onOk = () => {
@@ -383,13 +388,18 @@ export default function RecorridoConceptoGasto() {
         <View style={styles.pasoContainer}>
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
           <View style={[styles.pasoLine, { backgroundColor: estilos.font_importe_color }]} />
+
           <View style={[styles.pasoDot, { backgroundColor: estilos.font_importe_color }]} />
           <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
+
+          <View style={[styles.pasoDot, { backgroundColor: estilos.cards_color_border }]} />
+          <View style={[styles.pasoLine, { backgroundColor: estilos.cards_color_border }]} />
+
           <View style={[styles.pasoDot, { backgroundColor: estilos.cards_color_border }]} />
         </View>
 
         <Text style={[styles.tituloPaso, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-          Paso 2 de 3
+          Paso 2 de 4
         </Text>
         <Text style={[styles.subtitulo, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
           Creá tu primer concepto de gasto
@@ -419,7 +429,7 @@ export default function RecorridoConceptoGasto() {
                   opacity: bntactivo ? 0.6 : 1,
                 }
               ]}
-              placeholder="Ej: Cigarrillos, Alquiler, Supermercado..."
+              placeholder="Ej:Alquiler, Supermercado..."
               placeholderTextColor={estilos.font_sub_color}
               value={nombreGasto}
               onChangeText={setNombreGasto}

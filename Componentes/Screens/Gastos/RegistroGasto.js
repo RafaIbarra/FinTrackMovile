@@ -496,7 +496,7 @@ export default function RegistroGasto({ navigation }) {
                   borderColor: estilos.cards_color_border,
                 }
               ]}
-              placeholder="Ej: Cigarrillos"
+              placeholder="Ej: Supermercado, Ande.."
               placeholderTextColor={estilos.font_sub_color}
               value={nombregasto}
               onChangeText={setNombregasto}
