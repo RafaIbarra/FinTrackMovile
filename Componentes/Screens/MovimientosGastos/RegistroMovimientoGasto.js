@@ -93,129 +93,8 @@ const parsearMonto = (valorFormateado) => {
   return isNaN(num) ? 0 : num;
 };
 
-// const GastosModal = ({ visible, onClose, gastosData, selectedGastos, onConfirm, estilos }) => {
-//   const [query, setQuery] = useState('');
-//   const [montos, setMontos] = useState({});
-//   const [montosDisplay, setMontosDisplay] = useState({});
 
-//   useEffect(() => {
-//     if (visible) {
-//       const initialMontos = {};
-//       const initialDisplay = {};
-//       gastosData.forEach(g => {
-//         const existing = selectedGastos.find(sg => sg.id === g.id);
-//         const val = existing ? parseFloat(existing.monto) || 0 : 0;
-//         initialMontos[g.id] = val;
-//         initialDisplay[g.id] = val > 0 ? formatearMiles(val) : '';
-//       });
-//       setMontos(initialMontos);
-//       setMontosDisplay(initialDisplay);
-//     }
-//   }, [visible, gastosData, selectedGastos]);
 
-//   const filtered = gastosData.filter((item) =>
-//     item.nombre.toLowerCase().includes(query.toLowerCase())
-//   );
-
-//   const actualizarMonto = (id, valor) => {
-//     const soloNums = valor.replace(/\./g, '').replace(/,/g, '').replace(/[^0-9]/g, '');
-//     const num = soloNums ? parseFloat(soloNums) : 0;
-//     setMontos(prev => ({ ...prev, [id]: num }));
-//     setMontosDisplay(prev => ({ ...prev, [id]: soloNums ? formatearMiles(soloNums) : '' }));
-//   };
-
-//   const totalModal = Object.values(montos).reduce((a, b) => a + (b || 0), 0);
-
-//   const confirmar = () => {
-//     const seleccionados = gastosData
-//       .filter(g => montos[g.id] > 0)
-//       .map(g => ({ id: g.id, nombre: g.nombre, monto: montos[g.id] }));
-//     onConfirm(seleccionados);
-//     onClose();
-//   };
-
-//   return (
-//     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-//       <View style={modalStyles.overlay}>
-//         <KeyboardAvoidingView
-//           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-//           style={{ flex: 1, justifyContent: 'flex-end' }}
-//         >
-//           <SafeAreaView
-//             style={[
-//               modalStyles.sheet,
-//               { backgroundColor: estilos.pantalla_color_fondo, height: '90%' },
-//             ]}
-//           >
-//             <View style={modalStyles.header}>
-//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 16, flex: 1 }}>
-//                 Seleccionar gastos
-//               </Text>
-//               <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-//                 <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
-//               </TouchableOpacity>
-//             </View>
-
-//             <View style={[modalStyles.searchBox, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
-//               <View style={{ paddingLeft: 0, paddingRight: 8, paddingVertical: 4, justifyContent: 'center' }}>
-//                 <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>🔍</Text>
-//               </View>
-//               <View style={{ flex: 1, paddingVertical: 2, height: '100%' }}>
-//                 <TextInput
-//                   value={query}
-//                   onChangeText={setQuery}
-//                   placeholder="Buscar..."
-//                   placeholderTextColor={estilos.font_sub_color}
-//                   style={{ flex: 1, fontFamily: estilos.font_normal, color: estilos.font_color, fontSize: 14, paddingVertical: 4, paddingHorizontal: 8 }}
-//                   underlineColorAndroid="transparent"
-//                 />
-//               </View>
-//               {query.length > 0 && (
-//                 <View style={{ paddingLeft: 8, paddingRight: 0, paddingVertical: 4, justifyContent: 'center' }}>
-//                   <TouchableOpacity onPress={() => setQuery('')}>
-//                     <Text style={{ color: estilos.font_sub_color, fontSize: 18 }}>✕</Text>
-//                   </TouchableOpacity>
-//                 </View>
-//               )}
-//             </View>
-
-//             <FlatList
-//               data={filtered}
-//               keyExtractor={(item) => String(item.id)}
-//               keyboardShouldPersistTaps="handled"
-//               style={{ maxHeight: 500 }}
-//               renderItem={({ item }) => (
-//                 <View style={[modalStyles.gastoRow, { borderBottomColor: estilos.cards_color_border, backgroundColor: montos[item.id] > 0 ? estilos.boton_color_fondo + '20' : 'transparent' }]}>
-//                   <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_color, flex: 1, fontSize: 14 }}>{item.nombre}</Text>
-//                   <View style={[modalStyles.montoInputWrap, { backgroundColor: estilos.cards_color_fondo, borderColor: estilos.cards_color_border }]}>
-//                     <TextInput
-//                       value={montosDisplay[item.id] ?? ''}
-//                       onChangeText={(v) => actualizarMonto(item.id, v)}
-//                       keyboardType="numeric"
-//                       placeholder="0"
-//                       placeholderTextColor={estilos.font_sub_color}
-//                       style={{ fontFamily: estilos.font_normal, color: estilos.font_importe_color, fontSize: 14, minWidth: 90, textAlign: 'right', paddingVertical: 2 }}
-//                     />
-//                   </View>
-//                 </View>
-//               )}
-//               ListEmptyComponent={<Text style={{ textAlign: 'center', color: estilos.font_sub_color, fontFamily: estilos.font_normal, marginTop: 24, fontSize: 13 }}>Sin resultados</Text>}
-//             />
-
-//             <View style={[distStyles.totalRow, { borderTopColor: estilos.cards_color_border, marginTop: 8 }]}>
-//               <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>Total seleccionado</Text>
-//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 15 }}>{totalModal.toLocaleString('es-PY')}</Text>
-//             </View>
-
-//             <TouchableOpacity style={[modalStyles.confirmBtn, { backgroundColor: estilos.boton_color_fondo, borderColor: estilos.boton_color_borde, marginTop: 12 }]} onPress={confirmar}>
-//               <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color, fontSize: 14 }}>Confirmar selección</Text>
-//             </TouchableOpacity>
-//           </SafeAreaView>
-//         </KeyboardAvoidingView>
-//       </View>
-//     </Modal>
-//   );
-// };
 
 // ─── Modal genérico para empresas (sin cambios) ─────────────────────────────
 
@@ -408,110 +287,112 @@ const EmpresaModal = ({ visible, onClose, data, onSelect, selected, title, estil
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'flex-end' }}
-        >
-          <View
-            style={[
+        > 
+          <SafeAreaView
+          style={[
               modalStyles.sheet,
               { backgroundColor: estilos.pantalla_color_fondo, maxHeight: '85%' },
             ]}
           >
-            <View style={modalStyles.header}>
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-              >
-                {title}
-              </Text>
-              <TouchableOpacity onPress={onClose}>
-                <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View
-              style={[
-                modalStyles.searchBox,
-                {
-                  backgroundColor: estilos.cards_color_fondo,
-                  borderColor: estilos.cards_color_border,
-                },
-              ]}
-            >
-              <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Buscar..."
-                placeholderTextColor={estilos.font_sub_color}
-                style={{
-                  flex: 1,
-                  fontFamily: estilos.font_normal,
-                  color: estilos.font_color,
-                  fontSize: 14,
-                  paddingVertical: 0,
-                }}
-                autoFocus
-              />
-              {query.length > 0 && (
-                <TouchableOpacity onPress={() => setQuery('')}>
-                  <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <FlatList
-              data={filtered}
-              keyExtractor={(item) => String(item.id)}
-              keyboardShouldPersistTaps="handled"
-              style={{ maxHeight: 380 }}
-              renderItem={({ item }) => {
-                const sel = selected?.id === item.id;
-                return (
-                  <TouchableOpacity
-                    onPress={() => {
-                      onSelect(item);
-                      onClose();
-                    }}
-                    style={[
-                      modalStyles.listItem,
-                      {
-                        backgroundColor: sel ? estilos.boton_color_fondo : 'transparent',
-                        borderBottomColor: estilos.cards_color_border,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: sel ? estilos.font_negrita : estilos.font_normal,
-                        color: sel ? estilos.font_importe_color : estilos.font_color,
-                        fontSize: 14,
-                        flex: 1,
-                      }}
-                    >
-                      {item.nombre}
-                    </Text>
-                    {sel && <Text style={{ color: estilos.font_importe_color, fontSize: 14 }}>✓</Text>}
-                  </TouchableOpacity>
-                );
-              }}
-              ListEmptyComponent={
+            
+              <View style={modalStyles.header}>
                 <Text
                   style={{
-                    textAlign: 'center',
-                    color: estilos.font_sub_color,
-                    fontFamily: estilos.font_normal,
-                    marginTop: 24,
-                    fontSize: 13,
+                    fontFamily: estilos.font_negrita,
+                    color: estilos.font_importe_color,
+                    fontSize: 16,
+                    flex: 1,
                   }}
                 >
-                  Sin resultados
+                  {title}
                 </Text>
-              }
-            />
-          </View>
+                <TouchableOpacity onPress={onClose}>
+                  <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={[
+                  modalStyles.searchBox,
+                  {
+                    backgroundColor: estilos.cards_color_fondo,
+                    borderColor: estilos.cards_color_border,
+                  },
+                ]}
+              >
+                <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="Buscar..."
+                  placeholderTextColor={estilos.font_sub_color}
+                  style={{
+                    flex: 1,
+                    fontFamily: estilos.font_normal,
+                    color: estilos.font_color,
+                    fontSize: 14,
+                    paddingVertical: 0,
+                  }}
+                  autoFocus
+                />
+                {query.length > 0 && (
+                  <TouchableOpacity onPress={() => setQuery('')}>
+                    <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <FlatList
+                data={filtered}
+                keyExtractor={(item) => String(item.id)}
+                keyboardShouldPersistTaps="handled"
+                style={{ maxHeight: 380 }}
+                renderItem={({ item }) => {
+                  const sel = selected?.id === item.id;
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        onSelect(item);
+                        onClose();
+                      }}
+                      style={[
+                        modalStyles.listItem,
+                        {
+                          backgroundColor: sel ? estilos.boton_color_fondo : 'transparent',
+                          borderBottomColor: estilos.cards_color_border,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: sel ? estilos.font_negrita : estilos.font_normal,
+                          color: sel ? estilos.font_importe_color : estilos.font_color,
+                          fontSize: 14,
+                          flex: 1,
+                        }}
+                      >
+                        {item.nombre}
+                      </Text>
+                      {sel && <Text style={{ color: estilos.font_importe_color, fontSize: 14 }}>✓</Text>}
+                    </TouchableOpacity>
+                  );
+                }}
+                ListEmptyComponent={
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      color: estilos.font_sub_color,
+                      fontFamily: estilos.font_normal,
+                      marginTop: 24,
+                      fontSize: 13,
+                    }}
+                  >
+                    Sin resultados
+                  </Text>
+                }
+              />
+            
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -565,115 +446,119 @@ const DistribuirModal = ({ visible, onClose, medios, distribucion, onUpdate, tot
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'flex-end' }}
-        >
-          <View
+        > 
+          <SafeAreaView
+          
             style={[
               modalStyles.sheet,
-              { backgroundColor: estilos.pantalla_color_fondo, maxHeight: '85%' },
+              { backgroundColor: estilos.pantalla_color_fondo },
             ]}
+          
           >
-            <View style={modalStyles.header}>
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-              >
-                Distribuir medios de pago
-              </Text>
-              <TouchableOpacity onPress={onClose}>
-                <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
+            
+              <View style={modalStyles.header}>
+                <Text
+                  style={{
+                    fontFamily: estilos.font_negrita,
+                    color: estilos.font_importe_color,
+                    fontSize: 16,
+                    flex: 1,
+                  }}
+                >
+                  Distribuir medios de pago
+                </Text>
+                <TouchableOpacity onPress={onClose}>
+                  <Text style={{ color: estilos.font_sub_color, fontSize: 20 }}>✕</Text>
+                </TouchableOpacity>
+              </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled">
-              {medios.map((medio) => (
-                <View key={medio.id} style={distStyles.row}>
-                  <Text
-                    style={{
-                      fontFamily: estilos.font_normal,
-                      color: estilos.font_color,
-                      flex: 1,
-                      fontSize: 14,
-                    }}
-                  >
-                    {medio.nombre}
-                  </Text>
-                  <View
-                    style={[
-                      distStyles.inputWrap,
-                      {
-                        backgroundColor: estilos.cards_color_fondo,
-                        borderColor: estilos.cards_color_border,
-                      },
-                    ]}
-                  >
-                    <TextInput
-                      value={localDisplay[medio.id] ?? ''}
-                      onChangeText={(v) => actualizarMedioDistrib(medio.id, v)}
-                      keyboardType="numeric"
-                      placeholder="0"
-                      placeholderTextColor={estilos.font_sub_color}
+              <ScrollView keyboardShouldPersistTaps="handled">
+                {medios.map((medio) => (
+                  <View key={medio.id} style={distStyles.row}>
+                    <Text
                       style={{
                         fontFamily: estilos.font_normal,
                         color: estilos.font_color,
+                        flex: 1,
                         fontSize: 14,
-                        minWidth: 90,
-                        textAlign: 'right',
-                        paddingVertical: 2,
                       }}
-                    />
+                    >
+                      {medio.nombre}
+                    </Text>
+                    <View
+                      style={[
+                        distStyles.inputWrap,
+                        {
+                          backgroundColor: estilos.cards_color_fondo,
+                          borderColor: estilos.cards_color_border,
+                        },
+                      ]}
+                    >
+                      <TextInput
+                        value={localDisplay[medio.id] ?? ''}
+                        onChangeText={(v) => actualizarMedioDistrib(medio.id, v)}
+                        keyboardType="numeric"
+                        placeholder="0"
+                        placeholderTextColor={estilos.font_sub_color}
+                        style={{
+                          fontFamily: estilos.font_normal,
+                          color: estilos.font_color,
+                          fontSize: 14,
+                          minWidth: 90,
+                          textAlign: 'right',
+                          paddingVertical: 2,
+                        }}
+                      />
+                    </View>
                   </View>
-                </View>
-              ))}
-            </ScrollView>
+                ))}
+              </ScrollView>
 
-            <View
-              style={[
-                distStyles.totalRow,
-                { borderTopColor: estilos.cards_color_border },
-              ]}
-            >
-              <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>
-                Total distribuido
-              </Text>
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color:
-                    totalDistribuido === totalGastos
-                      ? '#4caf50'
-                      : estilos.font_importe_color,
-                  fontSize: 15,
-                }}
+              <View
+                style={[
+                  distStyles.totalRow,
+                  { borderTopColor: estilos.cards_color_border },
+                ]}
               >
-                {totalDistribuido.toLocaleString('es-PY')}
-              </Text>
-            </View>
+                <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 13 }}>
+                  Total distribuido
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: estilos.font_negrita,
+                    color:
+                      totalDistribuido === totalGastos
+                        ? '#4caf50'
+                        : estilos.font_importe_color,
+                    fontSize: 15,
+                  }}
+                >
+                  {totalDistribuido.toLocaleString('es-PY')}
+                </Text>
+              </View>
 
-            <TouchableOpacity
-              style={[
-                modalStyles.confirmBtn,
-                {
-                  backgroundColor: estilos.boton_color_fondo,
-                  borderColor: estilos.boton_color_borde,
-                },
-              ]}
-              onPress={guardar}
-            >
-              <Text
-                style={{
-                  fontFamily: estilos.font_negrita,
-                  color: estilos.font_importe_color,
-                  fontSize: 14,
-                }}
+              <TouchableOpacity
+                style={[
+                  modalStyles.confirmBtn,
+                  {
+                    backgroundColor: estilos.boton_color_fondo,
+                    borderColor: estilos.boton_color_borde,
+                  },
+                ]}
+                onPress={guardar}
               >
-                Confirmar distribución
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={{
+                    fontFamily: estilos.font_negrita,
+                    color: estilos.font_importe_color,
+                    fontSize: 14,
+                  }}
+                >
+                  Confirmar distribución
+                </Text>
+              </TouchableOpacity>
+            
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </View>
     </Modal>

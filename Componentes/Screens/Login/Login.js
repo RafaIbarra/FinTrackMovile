@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Text, Alert, ImageBackground } from 'react-native';
+import React, { useState, useEffect, useContext,useRef } from 'react';
+import { View, StyleSheet, Text, Alert, ImageBackground,Animated  } from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
@@ -8,6 +8,8 @@ import Iniciarsesion from '../../../Apis/ApiInicioSesion';
 import Handelstorage from '../../../Storage/HandelStorage';
 import ComprobarStorage from '../../../Storage/VerificarStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 export default function Login() {
   const { colors, fonts } = useTheme();
@@ -163,6 +165,24 @@ export default function Login() {
   const texto_normal = fonts?.balsamiqregular?.fontFamily || 'System';
   const texto_negrita = fonts?.balsamiqbold?.fontFamily || 'System';
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(-30)).current;
+  useEffect(() => {
+  Animated.parallel([
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }),
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      friction: 8,
+      tension: 40,
+      useNativeDriver: true,
+    }),
+  ]).start();
+}, []);
+
   return (
     <PaperProvider theme={paperTheme}>
       <View
@@ -189,30 +209,76 @@ export default function Login() {
         </Portal>
 
         <View style={styles.centerContainer}>
-          <View style={styles.headerContainer}>
-            <Text
+         
+          {/* <LinearGradient
+            colors={['#808486', '#203a43', '#2c5364']} // o los colores de tu tema
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerContainer}
+          >
+            <Text style={[
+              styles.titulo,
+              {
+                fontFamily: texto_negrita,
+                color: '#fff',
+                letterSpacing: 3,
+                textShadowColor: 'rgba(0,0,0,0.2)',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+              }
+            ]}>
+              FINTRACK
+            </Text>
+            <View style={{
+              width: 50,
+              height: 2,
+              backgroundColor: '#ffffff50',
+              borderRadius: 1,
+              marginTop: 6,
+            }} />
+          </LinearGradient> */}
+
+            <Animated.View
               style={[
-                styles.titulo,
+                styles.headerContainer,
                 {
-                  fontFamily: texto_negrita,
-                  color: colors.navigation_estilos?.color_fondo || '#000',
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
                 },
               ]}
             >
-              FinTrack
-            </Text>
-            <Text
-              style={[
-                styles.subtitulo,
-                {
-                  fontFamily: texto_normal,
-                  color: colors.screen_componente_estilos?.color_texto || '#666',
-                },
-              ]}
-            >
-              Controlá tus finanzas
-            </Text>
-          </View>
+              <LinearGradient
+                colors={['#808486', '#203a43', '#2c5364']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradient}
+              >
+                <Text
+                  style={[
+                    styles.titulo,
+                    {
+                      fontFamily: texto_negrita,
+                      color: '#fff',
+                      letterSpacing: 3,
+                      textShadowColor: 'rgba(0,0,0,0.2)',
+                      textShadowOffset: { width: 0, height: 2 },
+                      textShadowRadius: 6,
+                    },
+                  ]}
+                >
+                  FINTRACK
+                </Text>
+                <View
+                  style={{
+                    width: 50,
+                    height: 2,
+                    backgroundColor: '#ffffff50',
+                    borderRadius: 1,
+                    marginTop: 6,
+                  }}
+                />
+              </LinearGradient>
+            </Animated.View>
 
           <Surface
             style={[
@@ -341,9 +407,16 @@ const styles = StyleSheet.create({
   headerContainer: {
     alignItems: 'center',
     marginBottom: 32,
+    // borderWidth:2,
+    // borderColor:'red',
+    paddingLeft:85,
+    paddingRight:85,
+    borderRadius:20,
+    paddingTop:10,
+    paddingBottom:10
   },
   titulo: {
-    fontSize: 42,
+    fontSize: 28,
     marginBottom: 4,
   },
   subtitulo: {
@@ -382,4 +455,20 @@ const styles = StyleSheet.create({
   botonContenido: {
     paddingVertical: 6,
   },
+
+
+  headerContainer: {
+  alignItems: 'center',
+  marginBottom: 32,
+  borderRadius: 20,
+  overflow: 'hidden',
+},
+gradient: {
+  width: '100%',
+  alignItems: 'center',
+  paddingLeft: 85,
+  paddingRight: 85,
+  paddingTop: 14,
+  paddingBottom: 14,
+},
 });

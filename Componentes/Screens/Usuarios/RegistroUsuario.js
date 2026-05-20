@@ -10,7 +10,7 @@ import {
   Keyboard,
   Pressable,
 } from 'react-native';
-import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
+import { TextInput, Button, Surface, Portal, Dialog, PaperProvider,MD3LightTheme } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 import { useNavigation } from "@react-navigation/native";
@@ -44,6 +44,29 @@ export default function RegistroUsuario() {
   const [visibledialogo, setVisibledialogo] = useState(false);
   const showDialog = () => setVisibledialogo(true);
   const hideDialog = () => setVisibledialogo(false);
+
+  const paperTheme = {
+      ...MD3LightTheme,
+      colors: {
+        ...MD3LightTheme.colors,
+        primary: colors.navigation_estilos?.color_fondo || '#000',
+        onSurface: colors.screen_componente_estilos?.color_texto || '#000',
+        onSurfaceVariant: colors.screen_componente_estilos?.color_texto_subtitulo || colors.screen_componente_estilos?.color_texto || '#666',
+        outline: colors.navigation_estilos?.color_fondo || '#000',
+        surface: colors.screen_componente_estilos?.color_fondo_cards || '#fff',
+        surfaceVariant: colors.screen_componente_estilos?.color_fondo || '#fff',
+        background: colors.screen_componente_estilos?.color_fondo || '#fff',
+        error: 'red',
+      },
+      fonts: {
+        ...MD3LightTheme.fonts,
+        bodyLarge: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+        bodyMedium: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+        bodySmall: { fontFamily: fonts?.balsamiqregular?.fontFamily || 'System' },
+        labelLarge: { fontFamily: fonts?.balsamiqbold?.fontFamily || 'System' },
+        titleMedium: { fontFamily: fonts?.balsamiqbold?.fontFamily || 'System' },
+      },
+    };
 
   const handleError = (errorObject) => {
     if (typeof errorObject === 'object' && errorObject !== null) {
@@ -157,7 +180,7 @@ export default function RegistroUsuario() {
     : { onPress: Keyboard.dismiss, style: { flex: 1 } };
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={paperTheme}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.container, { backgroundColor: colors.screen_componente_estilos.color_fondo }]}

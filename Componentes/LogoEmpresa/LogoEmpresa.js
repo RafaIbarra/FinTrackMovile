@@ -8,7 +8,8 @@ const LogoEmpresa = ({ imagePath }) => {
   const [loading, setLoading] = useState(true); // Inicia en true directamente
   const { colors } = useTheme();
   
-  const imageUrl = imagePath ? `${API_BASE_IMG}/Media/${imagePath}` : null;
+  // const imageUrl = imagePath ? `${API_BASE_IMG}/Media/${imagePath}` : null;
+  const imageUrl = imagePath 
   
   if (!imageUrl) {
     return (
