@@ -677,6 +677,34 @@ const CentralTabButtonBasic = ({ onPress, colors   }) => {
     </TouchableOpacity>
   );
 };
+
+
+const RootStack = createNativeStackNavigator();
+function RootNavigator() {
+  return (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      {/* El TabNavigator es UNA pantalla del root */}
+      <RootStack.Screen name="TabBasicosGroup" component={TabBasicosGroup} />
+
+      {/* === GASTOS: Detalle y Registro como hermanos del Tab === */}
+      <RootStack.Screen name="DetalleGasto" component={DetalleGasto} />
+      <RootStack.Screen name="RegistroGasto" component={RegistroGasto} />
+
+      {/* === CATEGORÍAS === */}
+      <RootStack.Screen name="DetalleCategoriaGasto" component={DetalleCategoriaGasto} />
+      <RootStack.Screen name="RegistroCategoria" component={RegistroCategoria} />
+
+      {/* === MEDIOS DE PAGO === */}
+      <RootStack.Screen name="DetalleMedioPago" component={DetalleMedioPago} />
+      <RootStack.Screen name="RegistroMedioPago" component={RegistroMedioPago} />
+
+      {/* === INGRESOS === */}
+      <RootStack.Screen name="DetalleIngreso" component={DetalleIngreso} />
+      <RootStack.Screen name="RegistroIngreso" component={RegistroIngreso} />
+    </RootStack.Navigator>
+  );
+}
+
 const TabBasicos = createBottomTabNavigator();
 function TabBasicosGroup({ navigation }) {
   
