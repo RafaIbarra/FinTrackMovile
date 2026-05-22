@@ -31,6 +31,12 @@ export const AuthProvider = ({ children }) => {
     alerta_mensaje: '',
     ComponenteActivoBottonTab: '',
     componente_plus_basic: false,
+
+
+    recarga_conceptos_gastos:true,
+    recarga_conceptos_categorias:true,
+    recarga_conceptos_medios:true,
+    recarga_conceptos_ingresos:true,
   });
 
   // 🔑 useCallback evita que las funciones se recreen en cada render

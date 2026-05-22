@@ -42,13 +42,13 @@ export default function DetalleIngreso({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                          titulo:'',
-                                                          is_error:false,
-                                                          estado_actualizar:'bandera_registro_concepto_ingreso',
-                                                          valor_estado:'',
-                                                          navnivel1:'TabBasicosGroup',
-                                                          navnivel2:'StackIngresosGroup',
-                                                          navnivel3:'ConceptosIngresos',
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_ingresos',
+                                                        valor_estado:'',
+                                                        navnivel1:'TabBasicosGroup',
+                                                        navnivel2:'StackIngresosGroup',
+                                                        navnivel3:'ListadoIngresos',
                                                         })
 
   const {
@@ -116,7 +116,7 @@ export default function DetalleIngreso({ navigation }) {
 
     if (result.resp_correcta) {
       setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_concepto_ingreso;
+      const nuevo = true;
       const mensajeExito = "Ingreso Eliminado";
       setBodynotificacion(prevState => ({
           ...prevState,

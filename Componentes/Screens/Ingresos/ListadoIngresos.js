@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo,useRef,useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
+
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
@@ -25,13 +26,13 @@ export default function ListadoIngresos({ navigation }) {
   const [titulo,setTitulo]=useState('CARGANDO INGRESOS')
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                          titulo:'',
-                                                          is_error:false,
-                                                          estado_actualizar:'bandera_registro_concepto_ingreso',
-                                                          valor_estado:'',
-                                                          navnivel1:'TabBasicosGroup',
-                                                          navnivel2:'StackIngresosGroup',
-                                                          navnivel3:'ConceptosIngresos',
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_ingresos',
+                                                        valor_estado:'',
+                                                        navnivel1:'TabBasicosGroup',
+                                                        navnivel2:'StackIngresosGroup',
+                                                        navnivel3:'ListadoIngresos',
                                                         })
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -86,16 +87,25 @@ export default function ListadoIngresos({ navigation }) {
         setEstadonotificacion(true)
     }
     
-    
+    actualizarEstadocomponente('recarga_conceptos_ingresos',false)
   };
   const onOk=()=>{
     setEstadonotificacion(false)
   }
-  useEffect(() => {
-    
-    cargardatos();
-    
-  }, [estadocomponente.bandera_registro_concepto_ingreso]);
+  useFocusEffect(
+    useCallback(() => {
+      
+      if (estadocomponente.recarga_conceptos_ingresos) {
+        console.log("Ingresos carga!")
+        cargardatos();
+      } else {
+        setReady(true);
+        console.log("ingresos NO carga!")
+        
+      }
+    }, [estadocomponente.recarga_conceptos_ingresos])
+  );
+
 
   
 

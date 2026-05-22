@@ -209,8 +209,8 @@ function DrawerInicio({navigation}) {
           }}
       />
 
-      <DrawerNav.Screen name="TabBasicosGroup" 
-        component={TabBasicosGroup}
+      <DrawerNav.Screen name="RootNavigator" 
+        component={RootNavigator}
         options={{
           drawerLabel: ({ color, size,focused }) => {
             
@@ -720,163 +720,116 @@ function TabBasicosGroup({ navigation }) {
     text_color_inactive:colors.screen_componente_estilos.color_texto_subtitulo,
 
   }
-  return (
+ return (
     <TabBasicos.Navigator
-      initialRouteName="StackCategoriasGroup"
+      initialRouteName="ListadosGastos"
       screenOptions={{
         tabBarStyle: {
-          backgroundColor:colors.card,
-          height: 57, 
+          backgroundColor: colors.card,
+          height: 57,
           paddingBottom: 0,
-          borderTopLeftRadius:30,
-          borderTopRightRadius:30,
-          
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
         },
-       
       }}
-      
     >
       <TabBasicos.Screen
-        name="StackCategoriasGroup"
-        component={StackCategoriasGroup}
-         options={{ 
-           tabBarIcon: ({focused, color, size }) => {
-              let nombrreico,color_icono
-              nombrreico = "category"
-              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
-              return  ( 
-                    <View style={[styles.iconContainer]}>
-                          <MaterialIcons name={nombrreico} size={estilos.icon_size} color={color_icono}  />
-                      </View>
-                      )
-            },
-          tabBarLabel: ({focused})=>{
-              let titulolabel,tipo_fuente,text_color
-
-              titulolabel =  "Categorias"
-              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
-              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
-              return <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}</Text>
-            },
-          headerShown: false 
-        }}
-      />
-      <TabBasicos.Screen
-        name="StackGastosGroup"
-        component={StackGastosGroup}
-        options={{ 
-           tabBarIcon: ({focused, color, size }) => {
-              let nombrreico,color_icono
-              nombrreico = "cash-minus"
-              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
-              return  ( 
-                    <View style={[styles.iconContainer]}>
-                          <MaterialCommunityIcons name={nombrreico} size={30} color={color_icono}  />
-                      </View>
-                      )
-            },
-          tabBarLabel: ({focused})=>{
-              let titulolabel,tipo_fuente,text_color
-
-              titulolabel =  "Gastos"
-              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
-              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
-              return (
-                
-
-                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
-                  </Text>
-                
-                )
-            },
-          headerShown: false 
+        name="ListadoCategoriasGastos"
+        component={ListadoCategoriasGastos}
+        options={{
+          tabBarIcon: ({ focused }) => {
+            const color = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+            return (
+              <View style={styles.iconContainer}>
+                <MaterialIcons name="category" size={estilos.icon_size} color={color} />
+              </View>
+            );
+          },
+          tabBarLabel: ({ focused }) => {
+            const fuente = focused ? estilos.family_active : estilos.family_inactive;
+            const color = focused ? estilos.text_color_active : estilos.text_color_inactive;
+            return <Text style={{ fontFamily: fuente, fontSize: estilos.label_size, color }}>Categorias</Text>;
+          },
+          headerShown: false,
         }}
       />
 
       <TabBasicos.Screen
-              name="Agregar"
-              component={CentralTabButtonBasic}
-              options={{
-                headerShown: false,
-                tabBarLabel: '',
-                tabBarButton: (props) => (
-                  <CentralTabButtonBasic
-                  onPress={props.onPress}
-                  colors={colors}
-                  
-                  
-                  />
-                ),
-              }}
-      />
-
-
-      <TabBasicos.Screen
-        name="StackMediosPagosGroup"
-        component={StackMediosPagosGroup}
-        options={{ 
-           tabBarIcon: ({focused, color, size }) => {
-              let nombrreico,color_icono
-              nombrreico = "wallet-outline"
-              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
-              return  ( 
-                    <View style={[styles.iconContainer]}>
-                          <MaterialCommunityIcons name={nombrreico} size={25} color={color_icono}  />
-                      </View>
-                      )
-            },
-          tabBarLabel: ({focused})=>{
-              let titulolabel,tipo_fuente,text_color
-
-              titulolabel =  "Medios P."
-              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
-              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
-              return (
-                
-
-                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
-                  </Text>
-                
-                )
-            },
-          headerShown: false 
+        name="ListadosGastos"
+        component={ListadosGastos}
+        options={{
+          tabBarIcon: ({ focused }) => {
+            const color = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+            return (
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name="cash-minus" size={30} color={color} />
+              </View>
+            );
+          },
+          tabBarLabel: ({ focused }) => {
+            const fuente = focused ? estilos.family_active : estilos.family_inactive;
+            const color = focused ? estilos.text_color_active : estilos.text_color_inactive;
+            return <Text style={{ fontFamily: fuente, fontSize: estilos.label_size, color }}>Gastos</Text>;
+          },
+          headerShown: false,
         }}
       />
+
       <TabBasicos.Screen
-        name="StackIngresosGroup"
-        component={StackIngresosGroup}
-        options={{ 
-           tabBarIcon: ({focused, color, size }) => {
-              let nombrreico,color_icono
-              nombrreico = "cash-plus"
-              color_icono = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
-              return  ( 
-                    <View style={[styles.iconContainer]}>
-                          <MaterialCommunityIcons name={nombrreico} size={30} color={color_icono}  />
-                      </View>
-                      )
-            },
-          tabBarLabel: ({focused})=>{
-              let titulolabel,tipo_fuente,text_color
-
-              titulolabel =  "Ingresos"
-              tipo_fuente = focused ?fonts.balsamiqregular.fontFamily: estilos.family_inactive;
-              text_color= focused ? estilos.text_color_active : estilos.text_color_inactive;
-              return (
-                
-
-                  <Text style={{ fontFamily:tipo_fuente,fontSize:estilos.label_size,color:text_color}}>{titulolabel}
-                  </Text>
-                
-                )
-            },
-          headerShown: false 
+        name="Agregar"
+        component={CentralTabButtonBasic}
+        options={{
+          headerShown: false,
+          tabBarLabel: '',
+          tabBarButton: (props) => (
+            <CentralTabButtonBasic onPress={props.onPress} colors={colors} />
+          ),
         }}
       />
-      
+
+      <TabBasicos.Screen
+        name="ListadoMediosPagos"
+        component={ListadoMediosPagos}
+        options={{
+          tabBarIcon: ({ focused }) => {
+            const color = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+            return (
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name="wallet-outline" size={25} color={color} />
+              </View>
+            );
+          },
+          tabBarLabel: ({ focused }) => {
+            const fuente = focused ? estilos.family_active : estilos.family_inactive;
+            const color = focused ? estilos.text_color_active : estilos.text_color_inactive;
+            return <Text style={{ fontFamily: fuente, fontSize: estilos.label_size, color }}>Medios P.</Text>;
+          },
+          headerShown: false,
+        }}
+      />
+
+      <TabBasicos.Screen
+        name="ListadoIngresos"
+        component={ListadoIngresos}
+        options={{
+          tabBarIcon: ({ focused }) => {
+            const color = focused ? estilos.icon_color_active : estilos.icon_color_inactive;
+            return (
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name="cash-plus" size={30} color={color} />
+              </View>
+            );
+          },
+          tabBarLabel: ({ focused }) => {
+            const fuente = focused ? estilos.family_active : estilos.family_inactive;
+            const color = focused ? estilos.text_color_active : estilos.text_color_inactive;
+            return <Text style={{ fontFamily: fuente, fontSize: estilos.label_size, color }}>Ingresos</Text>;
+          },
+          headerShown: false,
+        }}
+      />
     </TabBasicos.Navigator>
   );
-
  
 }
 

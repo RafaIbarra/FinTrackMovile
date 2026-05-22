@@ -45,10 +45,10 @@ export default function DetalleGasto({ navigation }) {
       mensaje: '',
       titulo: '',
       is_error: false,
-      estado_actualizar: 'bandera_registro_concepto_gasto',
+      estado_actualizar: 'recarga_conceptos_gastos',
       valor_estado: '',
-      navnivel1: 'TabBasicosGroup',
-      navnivel2: 'StackGastosGroup',
+      navnivel1: 'RootNavigator',
+      navnivel2: 'TabBasicosGroup',
       navnivel3: 'ListadosGastos',
     });
 
@@ -117,7 +117,7 @@ export default function DetalleGasto({ navigation }) {
 
     if (result.resp_correcta) {
       setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_concepto_gasto;
+      const nuevo = true;
       const mensajeExito = "Ingreso Eliminado";
       setBodynotificacion(prevState => ({
           ...prevState,

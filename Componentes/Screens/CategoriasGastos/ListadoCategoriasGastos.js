@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo,useRef } from "react";
+import React, { useState, useEffect, useContext, useMemo,useRef,useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
@@ -27,14 +27,14 @@ export default function ListadoCategoriasGastos({ navigation }) {
   const [titulo,setTitulo]=useState('CARGANDO CATEGORIAS')
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                            titulo:'',
-                                                            is_error:false,
-                                                            estado_actualizar:'bandera_registro_categoria',
-                                                            valor_estado:'',
-                                                            navnivel1:'TabBasicosGroup',
-                                                            navnivel2:'StackCategoriasGroup',
-                                                            navnivel3:'ListadoCategoriasGastos',
-                                                          })
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_categorias',
+                                                        valor_estado:'',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
+                                                        navnivel3:'ListadoCategoriasGastos',
+                                                        })
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -90,18 +90,40 @@ export default function ListadoCategoriasGastos({ navigation }) {
         }));
         setEstadonotificacion(true)
     }
-
+    actualizarEstadocomponente('recarga_conceptos_categorias',false)
   };
+
+
+
   const onOk=()=>{
     setEstadonotificacion(false)
   }
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if(estadocomponente.recarga_conceptos_categorias){
+
+  //     cargardatos();
+  //   }else{
+  //     console.log("NO hara la recarga")
+  //     setReady(true)
+  //   }
     
-    cargardatos();
     
-    
-  }, [estadocomponente.bandera_registro_categoria]);
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      
+      if (estadocomponente.recarga_conceptos_categorias) {
+        console.log("categorias carga!")
+        cargardatos();
+      } else {
+        setReady(true);
+        console.log("categorias NO carga!")
+        
+      }
+    }, [estadocomponente.recarga_conceptos_categorias])
+  );
 
   
 
@@ -215,7 +237,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
                       borderRightColor: estilos.cards_color_border,
                       borderBottomColor:estilos.cards_color_border
                       }]}
-                      onPress={() => { navigate('DetalleCategoriaGasto', { item }); }}
+                      onPress={() => { navigation.navigate('DetalleCategoriaGasto', { item }); }}
                       activeOpacity={0.85}
                   >
                       

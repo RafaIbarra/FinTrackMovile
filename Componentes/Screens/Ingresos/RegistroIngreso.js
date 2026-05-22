@@ -137,11 +137,11 @@ export default function RegistroIngreso({ navigation }) {
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                         titulo:'',
                                                         is_error:false,
-                                                        estado_actualizar:'bandera_registro_concepto_ingreso',
+                                                        estado_actualizar:'recarga_conceptos_ingresos',
                                                         valor_estado:'',
                                                         navnivel1:'TabBasicosGroup',
                                                         navnivel2:'StackIngresosGroup',
-                                                        navnivel3:'ConceptosIngresos',
+                                                        navnivel3:'ListadoIngresos',
                                                       })
   
   
@@ -265,7 +265,7 @@ export default function RegistroIngreso({ navigation }) {
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
         setReady(true);
-        const nuevo = !estadocomponente.bandera_registro_concepto_ingreso;
+        const nuevo = true;
         const mensajeExito = esEdicion ? 'Ingreso actualizado correctamente' : 'Registro del Ingreso';
         setBodynotificacion(prevState => ({
           ...prevState,

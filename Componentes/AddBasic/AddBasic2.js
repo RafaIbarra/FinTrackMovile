@@ -65,7 +65,7 @@ const BOTONES = [
 ];
 
 
-function AddBasic({ navigation }) {
+function AddBasic({  }) {
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
@@ -129,10 +129,13 @@ function AddBasic({ navigation }) {
     cerrar();
     setTimeout(() => {
       const IdCategoria = 0;
-      navigate('StackBasicoskGroup', {
-        screen: 'RegistroCategoria',
-        params: { IdCategoria },
-      });
+
+      // navigate('StackBasicoskGroup', {
+      //   screen: 'RegistroCategoria',
+      //   params: { IdCategoria },
+      // });
+
+
     }, 200);
   };
 
@@ -160,18 +163,17 @@ function AddBasic({ navigation }) {
   
   cerrar();
   setTimeout(() => {
+    console.log('debe ir a: ',screen)
+    navigate(screen, { [param]: 0  });
 
-    navigate('TabBasicosGroup', {
-    screen: stackname,           // nombre del tab
-    params: {
-      screen: screen,  // pantalla dentro del stack del tab
-       params: { [param]: 0 }
-    }
-  });
-    // navigate('TabBasicosGroup', {
-    //   screen: screen,
-    //   params: { [param]: 0 },
-    // });
+  //   navigate('TabBasicosGroup', {
+  //   screen: stackname,           // nombre del tab
+  //   params: {
+  //     screen: screen,  // pantalla dentro del stack del tab
+  //      params: { [param]: 0 }
+  //   }
+  // });
+    
 
 
 

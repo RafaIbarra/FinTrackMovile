@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo,useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
@@ -28,14 +28,14 @@ export default function ListadosGastos({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                            titulo:'',
-                                                            is_error:false,
-                                                            estado_actualizar:'bandera_registro_concepto_gasto',
-                                                            valor_estado:'',
-                                                            navnivel1:'TabBasicosGroup',
-                                                            navnivel2:'StackGastosGroup',
-                                                            navnivel3:'ListadosGastos',
-                                                          })
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_gastos',
+                                                        valor_estado:'',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
+                                                        navnivel3:'ListadosGastos',
+                                                        })
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -90,17 +90,25 @@ export default function ListadosGastos({ navigation }) {
         setEstadonotificacion(true)
       
     }
-    
+    actualizarEstadocomponente('recarga_conceptos_gastos',false)
     
   };
   const onOk=()=>{
     setEstadonotificacion(false)
   }
-  useEffect(() => {
-    
-    cargardatos();
-    
-  }, [estadocomponente.bandera_registro_concepto_gasto]);
+  useFocusEffect(
+      useCallback(() => {
+        
+        if (estadocomponente.recarga_conceptos_gastos) {
+          console.log("gastos carga!")
+          cargardatos();
+        } else {
+          setReady(true);
+          console.log("gastos NO carga!")
+          
+        }
+      }, [estadocomponente.recarga_conceptos_gastos])
+    );
 
   
 
@@ -138,7 +146,7 @@ export default function ListadosGastos({ navigation }) {
       <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
         <View style={styles.resumenBarra}>
           <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Medio Pago</Text>
+            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Concepto Gasto</Text>
             <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#7B5EA7' }]}>
               Gs. {Number(dataresumen?.TotalGeneral).toLocaleString('es-ES')}
             </Text>
@@ -212,7 +220,8 @@ export default function ListadosGastos({ navigation }) {
                     borderRightColor: estilos.cards_color_border,
                     borderBottomColor:estilos.cards_color_border
                     }]}
-                    onPress={() => { navigate('DetalleGasto', { item }); }}
+                    // onPress={() => { navigate('DetalleGasto', { item }); }}
+                    onPress={() => { navigation.navigate('DetalleGasto', { item }); }}
                     activeOpacity={0.85}
                 >
                     

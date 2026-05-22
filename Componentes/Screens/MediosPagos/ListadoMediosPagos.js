@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo,useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
@@ -27,14 +27,14 @@ export default function ListadoMediosPagos({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                            titulo:'',
-                                                            is_error:false,
-                                                            estado_actualizar:'bandera_registro_medio_pago',
-                                                            valor_estado:'',
-                                                            navnivel1:'TabBasicosGroup',
-                                                            navnivel2:'StackMediosPagosGroup',
-                                                            navnivel3:'ListadoMediosPagos',
-                                                          })
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_medios',
+                                                        valor_estado:'',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
+                                                        navnivel3:'ListadoMediosPagos',
+                                                        })
 
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
@@ -89,17 +89,25 @@ export default function ListadoMediosPagos({ navigation }) {
         setEstadonotificacion(true)
       
     }
-    
+    actualizarEstadocomponente('recarga_conceptos_medios',false)
     
   };
   const onOk=()=>{
     setEstadonotificacion(false)
   }
-  useEffect(() => {
-    
-    cargardatos();
-    
-  }, [estadocomponente.bandera_registro_medio_pago]);
+  useFocusEffect(
+      useCallback(() => {
+        
+        if (estadocomponente.recarga_conceptos_medios) {
+          console.log("Medios carga!")
+          cargardatos();
+        } else {
+          setReady(true);
+          console.log("Medios NO carga!")
+          
+        }
+      }, [estadocomponente.recarga_conceptos_medios])
+    );
 
   
 

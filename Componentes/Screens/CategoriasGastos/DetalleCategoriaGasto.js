@@ -39,14 +39,14 @@ export default function DetalleCategoriaGasto({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                              titulo:'',
-                                                              is_error:false,
-                                                              estado_actualizar:'bandera_registro_categoria',
-                                                              valor_estado:'',
-                                                              navnivel1:'TabBasicosGroup',
-                                                              navnivel2:'StackCategoriasGroup',
-                                                              navnivel3:'ListadoCategoriasGastos',
-                                                            })
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_categorias',
+                                                        valor_estado:'',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
+                                                        navnivel3:'ListadoCategoriasGastos',
+                                                        })
 
   const {
     estadocomponente,
@@ -107,7 +107,7 @@ export default function DetalleCategoriaGasto({ navigation }) {
 
     if (result.resp_correcta) {
       setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_categoria;
+      const nuevo = true;
       const mensajeExito = "Categoria Eliminada";
       setBodynotificacion(prevState => ({
           ...prevState,

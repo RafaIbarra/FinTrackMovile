@@ -56,10 +56,10 @@ export default function RegistroMedioPago({ navigation }) {
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                         titulo:'',
                                                         is_error:false,
-                                                        estado_actualizar:'bandera_registro_medio_pago',
+                                                        estado_actualizar:'recarga_conceptos_medios',
                                                         valor_estado:'',
-                                                        navnivel1:'TabBasicosGroup',
-                                                        navnivel2:'StackMediosPagosGroup',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
                                                         navnivel3:'ListadoMediosPagos',
                                                       })
   
@@ -179,7 +179,7 @@ export default function RegistroMedioPago({ navigation }) {
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
         setReady(true);
-        const nuevo = !estadocomponente.bandera_registro_medio_pago;
+        const nuevo = true;
         const mensajeExito = esEdicion ? 'Medio actualizada correctamente' : 'Registro del Medio de Pago';
         setBodynotificacion(prevState => ({
           ...prevState,

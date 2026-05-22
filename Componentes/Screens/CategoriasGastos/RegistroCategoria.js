@@ -47,10 +47,10 @@ export default function RegistroCategoria({ navigation }) {
   const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                                 titulo:'',
                                                                 is_error:false,
-                                                                estado_actualizar:'bandera_registro_categoria',
+                                                                estado_actualizar:'recarga_conceptos_categorias',
                                                                 valor_estado:'',
-                                                                navnivel1:'TabBasicosGroup',
-                                                                navnivel2:'StackCategoriasGroup',
+                                                                navnivel1:'RootNavigator',
+                                                                navnivel2:'TabBasicosGroup',
                                                                 navnivel3:'ListadoCategoriasGastos',
                                                               })
 
@@ -181,7 +181,7 @@ export default function RegistroCategoria({ navigation }) {
       if (result.resp_correcta) {
         if (!esEdicion) resetForm();
         setReady(true);
-        const nuevo = !estadocomponente.bandera_registro_categoria;
+        const nuevo = true;
         const mensajeExito = esEdicion ? 'Categoria actualizada correctamente' : 'Registro de la categoria';
         setBodynotificacion(prevState => ({
           ...prevState,

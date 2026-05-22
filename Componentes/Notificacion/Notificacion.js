@@ -97,7 +97,10 @@ export default function Notificacion({ navigation,bodynotificacion,onOk }) {
                 // console.log('bodynotificacion?.navnivel1',bodynotificacion?.navnivel1)
                 // console.log('bodynotificacion?.navnivel2',bodynotificacion?.navnivel2)
                 // console.log('bodynotificacion?.navnivel3',bodynotificacion?.navnivel3)
-                navigate(bodynotificacion?.navnivel1, {screen: bodynotificacion?.navnivel2,params: {screen: bodynotificacion?.navnivel3,}})
+                // navigate(bodynotificacion?.navnivel1, {screen: bodynotificacion?.navnivel2,params: {screen: bodynotificacion?.navnivel3,}})
+                //  navigate(bodynotificacion?.navnivel2, {screen: bodynotificacion?.navnivel3})
+                // navigation.goBack();
+                navigation.popToTop()
                 
             }
             onOk()

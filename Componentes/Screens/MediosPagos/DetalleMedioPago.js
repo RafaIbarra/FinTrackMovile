@@ -41,14 +41,14 @@ export default function DetalleMedioPago({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                              titulo:'',
-                                                              is_error:false,
-                                                              estado_actualizar:'bandera_registro_medio_pago',
-                                                              valor_estado:'',
-                                                              navnivel1:'TabBasicosGroup',
-                                                              navnivel2:'StackMediosPagosGroup',
-                                                              navnivel3:'ListadoMediosPagos',
-                                                            })
+                                                        titulo:'',
+                                                        is_error:false,
+                                                        estado_actualizar:'recarga_conceptos_medios',
+                                                        valor_estado:'',
+                                                        navnivel1:'RootNavigator',
+                                                        navnivel2:'TabBasicosGroup',
+                                                        navnivel3:'ListadoMediosPagos',
+                                                        })
 
   const {
     estadocomponente,
@@ -112,7 +112,7 @@ export default function DetalleMedioPago({ navigation }) {
 
     if (result.resp_correcta) {
       setReady(true);
-      const nuevo = !estadocomponente.bandera_registro_medio_pago;
+      const nuevo = true;
       const mensajeExito = "Medio Eliminado";
       setBodynotificacion(prevState => ({
           ...prevState,
