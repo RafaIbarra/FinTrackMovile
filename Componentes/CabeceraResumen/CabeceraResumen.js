@@ -25,16 +25,18 @@ export default function CabeceraResumen({
   };
 
   return (
+    
     <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo }]} elevation={3}>
+       
       <View style={styles.resumenBarra}>
-        <View style={styles.resumenItem}>
+        {/* <View style={styles.resumenItem}>
           <Text style={[styles.resumenLabel, { fontFamily: estilos.font_normal }]}>
             {titulo_total}
           </Text>
           <Text style={[styles.resumenMonto, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
             Gs. {Number(totalGeneral).toLocaleString('es-ES')}
           </Text>
-        </View>
+        </View> */}
 
         <View style={styles.resumenSeparador} />
 
@@ -48,7 +50,7 @@ export default function CabeceraResumen({
         </View>
       </View>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={[
           styles.botonAgregar,
           {
@@ -62,7 +64,7 @@ export default function CabeceraResumen({
         <Text style={{ fontFamily: estilos.font_negrita, color: colors.navigation_estilos.color_texto, fontSize: 22 }}>
           +
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </Surface>
   );
 }

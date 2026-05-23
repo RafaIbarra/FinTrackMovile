@@ -8,7 +8,7 @@ import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
 import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
-
+import CabeceraListados from "../../CabeceraListados/CabeceraListados";
 export default function ListadoCategoriasGastos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
@@ -25,6 +25,7 @@ export default function ListadoCategoriasGastos({ navigation }) {
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
   const [titulo,setTitulo]=useState('CARGANDO CATEGORIAS')
+  const [busquedaVisible,setBusquedaVisible]=useState(false)
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
                                                         titulo:'',
@@ -98,18 +99,15 @@ export default function ListadoCategoriasGastos({ navigation }) {
   const onOk=()=>{
     setEstadonotificacion(false)
   }
+  const activar_busqueda=()=>{
+    setBusquedaVisible(true)
+  }
+  const desactivar_busqueda=()=>{
+    buscarCategoria('')
+    setBusquedaVisible(false)
+  }
 
-  // useEffect(() => {
-  //   if(estadocomponente.recarga_conceptos_categorias){
-
-  //     cargardatos();
-  //   }else{
-  //     console.log("NO hara la recarga")
-  //     setReady(true)
-  //   }
-    
-    
-  // }, []);
+  
 
   useFocusEffect(
     useCallback(() => {
@@ -158,57 +156,58 @@ export default function ListadoCategoriasGastos({ navigation }) {
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
+      <CabeceraListados
+          titulo="Categorias Gastos"
+          data_resumen={{
+            titulo_total: 'Total Categoria',
+            totalGeneral: dataresumen?.TotalGeneral,
+            titulo_cantidad: 'Cant Registros',
+            cantidadRegistros: dataresumen?.CantidadCategorias
+          }}
+          destinoNavegacion="RegistroCategoria"
+          parametroNavegacion={{ IdCategoria: 0 }}
+          busquedaActiva={busquedaVisible}
+          activar_busqueda={activar_busqueda}
+          desactivar_busqueda={desactivar_busqueda}  
+      />
 
-      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
-        <View style={styles.resumenBarra}>
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Categoria</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#7B5EA7' }]}>
-              Gs. {Number(dataresumen?.TotalGeneral).toLocaleString('es-ES')}
-            </Text>
-          </View>
-          <View style={styles.resumenSeparador} />
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-              {Number(dataresumen?.CantidadCategorias).toLocaleString('es-ES')}
-            </Text>
-          </View>
-        </View>
-      </Surface>
+      
 
       {/* ═══ BUSCADOR ═══ */}
-      <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: estilos.cards_color_fondo,
-            borderColor: estilos.cards_color_border,
-          },
-        ]}
-      >
-        <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-        <TextInput
-          value={query}
-          onChangeText={buscarCategoria}
-          placeholder="Por categoria, concepto gasto..."
-          underlineColorAndroid="transparent"
-          placeholderTextColor={estilos.font_sub_color}
-          style={{
-            fontFamily: estilos.font_normal,
-            color: estilos.font_color,
-            flex: 1,
-            paddingVertical: 2,
-            height: '70%',
-            paddingLeft: 5,
-          }}
-        />
-        {hayBusqueda && (
-          <TouchableOpacity onPress={() => buscarCategoria('')} style={{ padding: 4 }}>
-            <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {busquedaVisible && (
+
+        <View
+          style={[
+            styles.searchBox,
+            {
+              backgroundColor: estilos.cards_color_fondo,
+              borderColor: estilos.cards_color_border,
+            },
+          ]}
+        >
+          <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+          <TextInput
+            value={query}
+            onChangeText={buscarCategoria}
+            placeholder="Por categoria, concepto gasto..."
+            underlineColorAndroid="transparent"
+            placeholderTextColor={estilos.font_sub_color}
+            style={{
+              fontFamily: estilos.font_normal,
+              color: estilos.font_color,
+              flex: 1,
+              paddingVertical: 2,
+              height: '70%',
+              paddingLeft: 5,
+            }}
+          />
+          {hayBusqueda && (
+            <TouchableOpacity onPress={() => buscarCategoria('')} style={{ padding: 4 }}>
+              <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
       {hayBusqueda && (

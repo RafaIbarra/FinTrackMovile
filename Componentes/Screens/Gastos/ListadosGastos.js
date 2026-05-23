@@ -6,6 +6,7 @@ import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
+import CabeceraListados from "../../CabeceraListados/CabeceraListados";
 import Empty from "../../Empty/Empty"
 import { useApi } from "../../../Apis/useApi";
 
@@ -22,7 +23,7 @@ export default function ListadosGastos({ navigation }) {
   
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
-  
+  const [busquedaVisible,setBusquedaVisible]=useState(false)
   const [query, setQuery] = useState('');
   const [titulo,setTitulo]=useState('CARGANDO GASTOS')
   const [ready, setReady] = useState(false);
@@ -96,6 +97,15 @@ export default function ListadosGastos({ navigation }) {
   const onOk=()=>{
     setEstadonotificacion(false)
   }
+
+  const activar_busqueda=()=>{
+    setBusquedaVisible(true)
+  }
+  const desactivar_busqueda=()=>{
+    buscarConcepto('')
+    setBusquedaVisible(false)
+  }
+
   useFocusEffect(
       useCallback(() => {
         
@@ -108,7 +118,7 @@ export default function ListadosGastos({ navigation }) {
           
         }
       }, [estadocomponente.recarga_conceptos_gastos])
-    );
+  );
 
   
 
@@ -141,9 +151,25 @@ export default function ListadosGastos({ navigation }) {
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo}}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
+      <CabeceraListados
+          titulo="Conceptos Gastos"
+          data_resumen={{
+            titulo_total: 'Total Gastos',
+            totalGeneral: dataresumen?.TotalGeneral,
+            titulo_cantidad: 'Cant Registros',
+            cantidadRegistros: dataresumen?.CantidadGastos
+          }}
+          destinoNavegacion="RegistroGasto"
+          parametroNavegacion={{ IdGasto: 0 }}
+          busquedaActiva={busquedaVisible}
+          activar_busqueda={activar_busqueda}
+          desactivar_busqueda={desactivar_busqueda}  
+      />
+
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
-      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
+
+      {/* <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
         <View style={styles.resumenBarra}>
           <View style={styles.resumenItem}>
             <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Concepto Gasto</Text>
@@ -159,40 +185,44 @@ export default function ListadosGastos({ navigation }) {
             </Text>
           </View>
         </View>
-      </Surface>
+      </Surface> */}
 
       {/* ═══ BUSCADOR ═══ */}
-      <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: estilos.cards_color_fondo,
-            borderColor: estilos.cards_color_border,
-          },
-        ]}
-      >
-        <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-        <TextInput
-          value={query}
-          onChangeText={buscarConcepto}
-          placeholder="Por concepto o categoria..."
-          underlineColorAndroid="transparent"
-          placeholderTextColor={estilos.font_sub_color}
-          style={{
-            fontFamily: estilos.font_normal,
-            color: estilos.font_color,
-            flex: 1,
-            paddingVertical: 2,
-            height: '70%',
-            paddingLeft: 5,
-          }}
-        />
-        {hayBusqueda && (
-          <TouchableOpacity onPress={() => buscarConcepto('')} style={{ padding: 4 }}>
-            <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {
+        busquedaVisible && (
+        <View
+          style={[
+            styles.searchBox,
+            {
+              backgroundColor: estilos.cards_color_fondo,
+              borderColor: estilos.cards_color_border,
+            },
+          ]}
+        >
+          <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+          <TextInput
+            value={query}
+            onChangeText={buscarConcepto}
+            placeholder="Por concepto o categoria..."
+            underlineColorAndroid="transparent"
+            placeholderTextColor={estilos.font_sub_color}
+            style={{
+              fontFamily: estilos.font_normal,
+              color: estilos.font_color,
+              flex: 1,
+              paddingVertical: 2,
+              height: '70%',
+              paddingLeft: 5,
+            }}
+          />
+          {hayBusqueda && (
+            <TouchableOpacity onPress={() => buscarConcepto('')} style={{ padding: 4 }}>
+              <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        )
+      }
 
       {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
       {hayBusqueda && (

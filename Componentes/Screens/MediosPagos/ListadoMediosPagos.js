@@ -7,7 +7,7 @@ import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
 import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
-import CabeceraResumen from "../../CabeceraResumen/CabeceraResumen";
+import CabeceraListados from "../../CabeceraListados/CabeceraListados";
 
 export default function ListadoMediosPagos({ navigation }) {
   const { colors, fonts } = useTheme();
@@ -23,6 +23,7 @@ export default function ListadoMediosPagos({ navigation }) {
   const [query, setQuery] = useState('');
   const [titulo, setTitulo] = useState('CARGANDO MEDIOS PAGOS');
 
+  const [busquedaVisible,setBusquedaVisible]=useState(false)
   const [ready, setReady] = useState(false);
   const [estadonotificacion, setEstadonotificacion] = useState(false);
   const [bodynotificacion, setBodynotificacion] = useState({
@@ -91,7 +92,13 @@ export default function ListadoMediosPagos({ navigation }) {
   const onOk = () => {
     setEstadonotificacion(false);
   };
-
+  const activar_busqueda=()=>{
+    setBusquedaVisible(true)
+  }
+  const desactivar_busqueda=()=>{
+    buscarMedios('')
+    setBusquedaVisible(false)
+  }
   useFocusEffect(
     useCallback(() => {
       if (estadocomponente.recarga_conceptos_medios) {
@@ -130,16 +137,26 @@ export default function ListadoMediosPagos({ navigation }) {
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo, position: 'relative' }}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
-      <CabeceraResumen
-        titulo_total="Total Medio Pago"
-        totalGeneral={dataresumen?.TotalGeneral}
-        titulo_cantidad="Cant Registros"
-        cantidadRegistros={dataresumen?.CantidadMediosPagos}
+      
+      <CabeceraListados
+        titulo="Medios de Pagos"
+        data_resumen={{
+          titulo_total: 'Total Medio Pago',
+          totalGeneral: dataresumen?.TotalGeneral,
+          titulo_cantidad: 'Cant Registros',
+          cantidadRegistros: dataresumen?.CantidadMediosPagos
+        }}
         destinoNavegacion="RegistroMedioPago"
         parametroNavegacion={{ IdMedio: 0 }}
+        busquedaActiva={busquedaVisible}
+        activar_busqueda={activar_busqueda}
+        desactivar_busqueda={desactivar_busqueda}
+        
       />
 
       {/* ═══ BUSCADOR ═══ */}
+      {busquedaVisible && (
+
       <View
         style={[
           styles.searchBox,
@@ -171,6 +188,7 @@ export default function ListadoMediosPagos({ navigation }) {
           </TouchableOpacity>
         )}
       </View>
+      )}
 
       {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
       {hayBusqueda && (

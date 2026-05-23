@@ -7,6 +7,7 @@ import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
+import CabeceraListados from "../../CabeceraListados/CabeceraListados";
 import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
 
@@ -19,7 +20,7 @@ export default function ListadoIngresos({ navigation }) {
   const [dataingresos, setDataingresos] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
   const [dataingresosresult, setDataingresosresult] = useState([]);
-
+  const [busquedaVisible,setBusquedaVisible]=useState(false)
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState('');
@@ -92,6 +93,14 @@ export default function ListadoIngresos({ navigation }) {
   const onOk=()=>{
     setEstadonotificacion(false)
   }
+  const activar_busqueda=()=>{
+    setBusquedaVisible(true)
+  }
+  const desactivar_busqueda=()=>{
+    buscarIngresos('')
+    setBusquedaVisible(false)
+  }
+
   useFocusEffect(
     useCallback(() => {
       
@@ -136,10 +145,24 @@ export default function ListadoIngresos({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
-
+      <CabeceraListados
+              titulo="Conceptos Ingresos"
+              data_resumen={{
+                titulo_total: 'Total Ingresos',
+                totalGeneral: dataresumen?.TotalGeneral,
+                titulo_cantidad: 'Cant Registros',
+                cantidadRegistros: dataresumen?.CantidadIngresos
+              }}
+              destinoNavegacion="RegistroIngreso"
+              parametroNavegacion={{ IdIngreso: 0 }}
+              busquedaActiva={busquedaVisible}
+              activar_busqueda={activar_busqueda}
+              desactivar_busqueda={desactivar_busqueda}
+              
+            />
       {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
 
-      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
+      {/* <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
         <View style={styles.resumenBarra}>
           <View style={styles.resumenItem}>
             <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Ingresos</Text>
@@ -155,40 +178,45 @@ export default function ListadoIngresos({ navigation }) {
             </Text>
           </View>
         </View>
-      </Surface>
+      </Surface> */}
 
       {/* ═══ BUSCADOR ═══ */}
-      <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: estilos.cards_color_fondo,
-            borderColor: estilos.cards_color_border,
-          },
-        ]}
-      >
-        <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-        <TextInput
-          value={query}
-          onChangeText={buscarIngresos}
-          placeholder="Por nombre ingreso..."
-          underlineColorAndroid="transparent"
-          placeholderTextColor={estilos.font_sub_color}
-          style={{
-            fontFamily: estilos.font_normal,
-            color: estilos.font_color,
-            flex: 1,
-            paddingVertical: 2,
-            height: '70%',
-            paddingLeft: 5,
-          }}
-        />
-        {hayBusqueda && (
-          <TouchableOpacity onPress={() => buscarIngresos('')} style={{ padding: 4 }}>
-            <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {
+        busquedaVisible && (
+        <View
+          style={[
+            styles.searchBox,
+            {
+              backgroundColor: estilos.cards_color_fondo,
+              borderColor: estilos.cards_color_border,
+            },
+          ]}
+        >
+          <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+          <TextInput
+            value={query}
+            onChangeText={buscarIngresos}
+            placeholder="Por nombre ingreso..."
+            underlineColorAndroid="transparent"
+            placeholderTextColor={estilos.font_sub_color}
+            style={{
+              fontFamily: estilos.font_normal,
+              color: estilos.font_color,
+              flex: 1,
+              paddingVertical: 2,
+              height: '70%',
+              paddingLeft: 5,
+            }}
+          />
+          {hayBusqueda && (
+            <TouchableOpacity onPress={() => buscarIngresos('')} style={{ padding: 4 }}>
+              <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        )
+      }
 
       {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
       {hayBusqueda && (
