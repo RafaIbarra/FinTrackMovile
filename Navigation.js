@@ -775,7 +775,7 @@ function TabBasicosGroup({ navigation }) {
         }}
       />
 
-      <TabBasicos.Screen
+      {/* <TabBasicos.Screen
         name="Agregar"
         component={CentralTabButtonBasic}
         options={{
@@ -785,7 +785,7 @@ function TabBasicosGroup({ navigation }) {
             <CentralTabButtonBasic onPress={props.onPress} colors={colors} />
           ),
         }}
-      />
+      /> */}
 
       <TabBasicos.Screen
         name="ListadoMediosPagos"

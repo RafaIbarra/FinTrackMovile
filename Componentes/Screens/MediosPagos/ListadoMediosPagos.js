@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useContext, useMemo,useCallback } from "react";
+import React, { useState, useContext, useMemo, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
-import { Surface } from 'react-native-paper';
-import { useNavigation,useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
 import Empty from "../../Empty/Empty";
 import { useApi } from "../../../Apis/useApi";
+import CabeceraResumen from "../../CabeceraResumen/CabeceraResumen";
 
 export default function ListadoMediosPagos({ navigation }) {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
-  
 
   const [datamedios, setDatamedios] = useState([]);
   const [dataresumen, setDataresumen] = useState([]);
@@ -22,20 +21,20 @@ export default function ListadoMediosPagos({ navigation }) {
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const [query, setQuery] = useState('');
-  const [titulo,setTitulo]=useState('CARGANDO MEDIOS PAGOS')
+  const [titulo, setTitulo] = useState('CARGANDO MEDIOS PAGOS');
 
   const [ready, setReady] = useState(false);
-  const[estadonotificacion,setEstadonotificacion]=useState(false)
-  const[bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                        titulo:'',
-                                                        is_error:false,
-                                                        estado_actualizar:'recarga_conceptos_medios',
-                                                        valor_estado:'',
-                                                        navnivel1:'RootNavigator',
-                                                        navnivel2:'TabBasicosGroup',
-                                                        navnivel3:'ListadoMediosPagos',
-                                                        })
-
+  const [estadonotificacion, setEstadonotificacion] = useState(false);
+  const [bodynotificacion, setBodynotificacion] = useState({
+    mensaje: '',
+    titulo: '',
+    is_error: false,
+    estado_actualizar: 'recarga_conceptos_medios',
+    valor_estado: '',
+    navnivel1: 'RootNavigator',
+    navnivel2: 'TabBasicosGroup',
+    navnivel3: 'ListadoMediosPagos',
+  });
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 
@@ -53,12 +52,10 @@ export default function ListadoMediosPagos({ navigation }) {
   };
 
   const cargardatos = async () => {
-    
-    setReady(false)
+    setReady(false);
     const endpoint = `ref/ListadoMedioPagosUser/0/`;
 
     const result = await apiRequest(endpoint, 'GET', {});
-    
 
     if (result.sessionExpired) {
       return;
@@ -73,43 +70,39 @@ export default function ListadoMediosPagos({ navigation }) {
       }
       
       setDatamedios(registros);
-      setDataresumen(result.data.resumen)
-      setDatamediosresult(registros)
+      setDataresumen(result.data.resumen);
+      setDatamediosresult(registros);
       setReady(true);
     } else {
       const msj = result.data?.message || 'Error en la solicitud';
       setReady(true);
       setBodynotificacion(prevState => ({
-          ...prevState,
-          titulo:'LISTADO MEDIOS PAGOS',
-          mensaje: msj,
-          is_error: true,
-          valor_estado:''
-        }));
-        setEstadonotificacion(true)
-      
+        ...prevState,
+        titulo: 'LISTADO MEDIOS PAGOS',
+        mensaje: msj,
+        is_error: true,
+        valor_estado: ''
+      }));
+      setEstadonotificacion(true);
     }
-    actualizarEstadocomponente('recarga_conceptos_medios',false)
-    
+    actualizarEstadocomponente('recarga_conceptos_medios', false);
   };
-  const onOk=()=>{
-    setEstadonotificacion(false)
-  }
-  useFocusEffect(
-      useCallback(() => {
-        
-        if (estadocomponente.recarga_conceptos_medios) {
-          console.log("Medios carga!")
-          cargardatos();
-        } else {
-          setReady(true);
-          console.log("Medios NO carga!")
-          
-        }
-      }, [estadocomponente.recarga_conceptos_medios])
-    );
 
-  
+  const onOk = () => {
+    setEstadonotificacion(false);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (estadocomponente.recarga_conceptos_medios) {
+        console.log("Medios carga!");
+        cargardatos();
+      } else {
+        setReady(true);
+        console.log("Medios NO carga!");
+      }
+    }, [estadocomponente.recarga_conceptos_medios])
+  );
 
   const buscarMedios = (texto) => {
     setQuery(texto);
@@ -120,44 +113,31 @@ export default function ListadoMediosPagos({ navigation }) {
     const termino = texto.toLowerCase().trim();
     const filtrados = datamedios.filter((item) => {
       const matchMedio = item.NombreMedioPago?.toLowerCase().includes(termino);
-      
-        
-      return matchMedio
+      return matchMedio;
     });
     setDatamediosresult(filtrados);
   };
-  // ── Totales dinámicos de la búsqueda activa ──
+
   const totalFiltrado = useMemo(() => {
     return datamediosresult.reduce((sum, item) => sum + (Number(item.TotalGastoCategoria) || 0), 0);
   }, [datamediosresult]);
 
   const hayBusqueda = query.trim().length > 0;
 
-  if (!ready) return <Esperando titulo={titulo}/>;
+  if (!ready) return <Esperando titulo={titulo} />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo }}>
+    <View style={{ flex: 1, backgroundColor: estilos.pantalla_color_fondo, position: 'relative' }}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
-      {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
-
-      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
-        <View style={styles.resumenBarra}>
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Medio Pago</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#7B5EA7' }]}>
-              Gs. {Number(dataresumen?.TotalGeneral).toLocaleString('es-ES')}
-            </Text>
-          </View>
-          <View style={styles.resumenSeparador} />
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-              {Number(dataresumen?.CantidadMediosPagos).toLocaleString('es-ES')}
-            </Text>
-          </View>
-        </View>
-      </Surface>
+      <CabeceraResumen
+        titulo_total="Total Medio Pago"
+        totalGeneral={dataresumen?.TotalGeneral}
+        titulo_cantidad="Cant Registros"
+        cantidadRegistros={dataresumen?.CantidadMediosPagos}
+        destinoNavegacion="RegistroMedioPago"
+        parametroNavegacion={{ IdMedio: 0 }}
+      />
 
       {/* ═══ BUSCADOR ═══ */}
       <View
@@ -196,7 +176,7 @@ export default function ListadoMediosPagos({ navigation }) {
       {hayBusqueda && (
         <View style={styles.resultadoBusqueda}>
           <Text style={{ fontFamily: estilos.font_normal, color: estilos.font_sub_color, fontSize: 12 }}>
-            {datamediosresult.length} resultado{datamediosresult.length !== 1 ? 's' : ''} · Total filtrado:{' '}
+            {datamediosresult.length} resultado{datamediosresult.length !== 1 ? 's' : ''} · Total filtrado:{''}
             <Text style={{ fontFamily: estilos.font_negrita, color: estilos.font_importe_color }}>
               Gs. {totalFiltrado.toLocaleString('es-ES')}
             </Text>
@@ -205,95 +185,57 @@ export default function ListadoMediosPagos({ navigation }) {
       )}
 
       {/* ═══ LISTA ═══ */}
-      {datamediosresult.length>0? (
-
+      {datamediosresult.length > 0 ? (
         <FlatList
           data={datamediosresult}
           contentContainerStyle={styles.flatlistContenido}
           style={{ flex: 1 }}
           renderItem={({ item }) => {
-              return (
-                  <TouchableOpacity
-                      style={[styles.contenedordatos,{
-                      backgroundColor: estilos.cards_color_fondo,
-                      borderRightColor: estilos.cards_color_border,
-                      borderBottomColor:estilos.cards_color_border
-                      }]}
-                      onPress={() => { navigate('DetalleMedioPago', { item }); }}
-                      activeOpacity={0.85}
-                  >
-                      
-                      <View style={styles.columnaInfo}>
-                          <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                              {item.NombreMedioPago}
-                          </Text>
-  
-                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                              {item.FechaRegistro}
-                          </Text>
-  
-                          <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                              ID: {item.Id}
-                          </Text>
-  
-                      </View>
-  
-                      <View style={styles.columnaTotal}>
-                          <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color}]}>
-                              Gs. {Number(item.TotalPagoMedio).toLocaleString('es-ES')}
-                          </Text>
-                          <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color:estilos.font_sub_color}]}>
-                              Cant: {item.CantidadPagoMedio}
-                          </Text>
-                       </View>
-                  </TouchableOpacity>
-              );
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.contenedordatos,
+                  {
+                    backgroundColor: estilos.cards_color_fondo,
+                    borderRightColor: estilos.cards_color_border,
+                    borderBottomColor: estilos.cards_color_border
+                  }
+                ]}
+                onPress={() => { navigate('DetalleMedioPago', { item }); }}
+                activeOpacity={0.85}
+              >
+                <View style={styles.columnaInfo}>
+                  <Text style={[styles.nombreMedio, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
+                    {item.NombreMedioPago}
+                  </Text>
+                  <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                    {item.FechaRegistro}
+                  </Text>
+                  <Text style={[styles.idRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                    ID: {item.Id}
+                  </Text>
+                </View>
+                <View style={styles.columnaTotal}>
+                  <Text style={[styles.totalMovimiento, { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }]}>
+                    Gs. {Number(item.TotalPagoMedio).toLocaleString('es-ES')}
+                  </Text>
+                  <Text style={[styles.fechaRegistro, { fontFamily: estilos.font_normal, color: estilos.font_sub_color }]}>
+                    Cant: {item.CantidadPagoMedio}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
           }}
           keyExtractor={item => item.key}
         />
-      ):(
-       <Empty />
-      )
-      }
+      ) : (
+        <Empty />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // ═══ RESUMEN COMPACTO ═══
-  card: {
-        marginBottom: 15,
-    },
-  resumenBarra: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginHorizontal: 12,
-    marginTop: 10,
-    marginBottom: 8,
-    paddingVertical: 10,
-    backgroundColor: '#EEE9FD', // tinte muy suave del color gasto
-    borderRadius: 10,
-  },
-  resumenItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  resumenSeparador: {
-    width: 1,
-    height: 24,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-  },
-  resumenLabelBarra: {
-    fontSize: 11,
-    color: '#888',
-    marginBottom: 2,
-  },
-  resumenMontoBarra: {
-    fontSize: 15,
-  },
-
-  // ═══ BUSCADOR ═══
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -305,15 +247,11 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginRight: 12,
   },
-
-  // ═══ RESULTADO BÚSQUEDA ═══
   resultadoBusqueda: {
     marginHorizontal: 16,
     marginBottom: 6,
     paddingHorizontal: 4,
   },
-
-  // ═══ LISTA ═══
   contenedordatos: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -331,22 +269,17 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingTop: 4,
   },
-  columnaLogo: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
   columnaInfo: {
     flex: 2,
     justifyContent: 'center',
     paddingHorizontal: 10,
-    gap:3
+    gap: 3
   },
   columnaTotal: {
     flex: 1.5,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    gap:3
+    gap: 3
   },
   nombreMedio: {
     fontSize: 12,
