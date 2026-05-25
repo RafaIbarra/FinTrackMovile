@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext,useRef } from 'react';
-import { View, StyleSheet, Text, Alert, ImageBackground,Animated  } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { View, StyleSheet, Text, Alert, ImageBackground, Animated } from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
@@ -8,12 +8,15 @@ import Iniciarsesion from '../../../Apis/ApiInicioSesion';
 import Handelstorage from '../../../Storage/HandelStorage';
 import ComprobarStorage from '../../../Storage/VerificarStorage';
 import Generarpeticion from '../../../Apis/ApiPeticiones';
+import { obtenerTemaStorage } from '../../../Storage/TemaStorage';
+import { temaUser as useAppTheme } from '../../../ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { createIconSetFromFontello } from '@expo/vector-icons';
 
 export default function Login() {
   const { colors, fonts } = useTheme();
   const { navigate } = useNavigation();
+  const { setTheme } = useAppTheme();
   const [ready, setReady] = useState(false);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -23,9 +26,8 @@ export default function Login() {
   const { versionsys, setVersionsys } = useContext(AuthContext);
   const { sesiondata, setSesiondata } = useContext(AuthContext);
   const { sesiondatadate, setSesiondatadate } = useContext(AuthContext);
-  const { recorrido,setRecorrido } = useContext(AuthContext);
-  const { datarecorrido,setDatarecorrido } = useContext(AuthContext);
-  
+  const { recorrido, setRecorrido } = useContext(AuthContext);
+  const { datarecorrido, setDatarecorrido } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const { periodo, setPeriodo } = useContext(AuthContext);
   const { actualizarEstadocomponente } = useContext(AuthContext);
@@ -89,13 +91,20 @@ export default function Login() {
 
       setSesiondata(datos['data']['datauser']);
       setSesiondatadate(datestorage);
+
+      // ─── SINCRONIZACIÓN DE TEMA ─────────────────────────────────
+      
+      const temaBackend = datos['data']?.datauser[0]?.tema;
+      const temaStorage = await obtenerTemaStorage();
+      
+      if (temaBackend && temaBackend !== temaStorage) {
+        await setTheme(temaBackend);
+      }
+      // ────────────────────────────────────────────────────────────
+
       const anno_storage = datestorage['dataanno'];
 
-      setPeriodo(datestorage['dataperiodo']);
-      actualizarEstadocomponente('DiaActual', datos['data'].dia_actual);
-      setActivarsesion(true);
-      setRecorrido( datos['data']['recorrido'])
-      setDatarecorrido( datos['data']['datarecorrido'])
+     
 
       if (anno_storage === 0) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -103,8 +112,13 @@ export default function Login() {
         setPeriodo(datestorage2['dataperiodo']);
         setSesiondatadate(datestorage2);
       }
-
-      reiniciarvalores();
+      reiniciarvalores()
+      setPeriodo(datestorage['dataperiodo']);
+      actualizarEstadocomponente('DiaActual', datos['data'].dia_actual);
+      setActivarsesion(true);
+      setRecorrido(datos['data']['recorrido']);
+      setDatarecorrido(datos['data']['datarecorrido']);
+      
     } else {
       showDialog(true);
       const errorMsg = handleError(datos['data']?.['message'] || datos['data'] || 'Error en la solicitud');
@@ -118,9 +132,7 @@ export default function Login() {
     setContrasena(text);
   };
 
-  const registrarse = () => {
-    // Implementar lógica de registro
-  };
+  
 
   const cargardatos = async () => {
     setReady(false);
@@ -135,16 +147,26 @@ export default function Login() {
       const respuesta = result['resp'];
       if (respuesta === 200) {
         setSesiondata(result['data']);
-        
+
+        // ─── SINCRONIZACIÓN DE TEMA (login automático) ─────────────
+        const temaBackend = result['data']?.tema;
+        const temaStorage = await obtenerTemaStorage();
+
+        if (temaBackend && temaBackend !== temaStorage) {
+          await setTheme(temaBackend);
+        }
+        // ────────────────────────────────────────────────────────────
+
         const datestorage = await Handelstorage('obtenerdate');
-        setSesiondatadate(datestorage);  
+        setSesiondatadate(datestorage);
         setPeriodo(datestorage['dataperiodo']);
         await new Promise((resolve) => setTimeout(resolve, 1500));
-
+        reiniciarvalores()
         setActivarsesion(true);
         actualizarEstadocomponente('tituloloading', '');
         actualizarEstadocomponente('loading', false);
       } else {
+        reiniciarvalores()
         await Handelstorage('borrar');
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setActivarsesion(false);
@@ -168,20 +190,20 @@ export default function Login() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-30)).current;
   useEffect(() => {
-  Animated.parallel([
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }),
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      friction: 8,
-      tension: 40,
-      useNativeDriver: true,
-    }),
-  ]).start();
-}, []);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   return (
     <PaperProvider theme={paperTheme}>
@@ -209,76 +231,47 @@ export default function Login() {
         </Portal>
 
         <View style={styles.centerContainer}>
-         
-          {/* <LinearGradient
-            colors={['#808486', '#203a43', '#2c5364']} // o los colores de tu tema
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerContainer}
-          >
-            <Text style={[
-              styles.titulo,
+          <Animated.View
+            style={[
+              styles.headerContainer,
               {
-                fontFamily: texto_negrita,
-                color: '#fff',
-                letterSpacing: 3,
-                textShadowColor: 'rgba(0,0,0,0.2)',
-                textShadowOffset: { width: 0, height: 2 },
-                textShadowRadius: 6,
-              }
-            ]}>
-              FINTRACK
-            </Text>
-            <View style={{
-              width: 50,
-              height: 2,
-              backgroundColor: '#ffffff50',
-              borderRadius: 1,
-              marginTop: 6,
-            }} />
-          </LinearGradient> */}
-
-            <Animated.View
-              style={[
-                styles.headerContainer,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={['#808486', '#203a43', '#2c5364']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradient}
             >
-              <LinearGradient
-                colors={['#808486', '#203a43', '#2c5364']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradient}
+              <Text
+                style={[
+                  styles.titulo,
+                  {
+                    fontFamily: texto_negrita,
+                    color: '#fff',
+                    letterSpacing: 3,
+                    textShadowColor: 'rgba(0,0,0,0.2)',
+                    textShadowOffset: { width: 0, height: 2 },
+                    textShadowRadius: 6,
+                  },
+                ]}
               >
-                <Text
-                  style={[
-                    styles.titulo,
-                    {
-                      fontFamily: texto_negrita,
-                      color: '#fff',
-                      letterSpacing: 3,
-                      textShadowColor: 'rgba(0,0,0,0.2)',
-                      textShadowOffset: { width: 0, height: 2 },
-                      textShadowRadius: 6,
-                    },
-                  ]}
-                >
-                  FINTRACK
-                </Text>
-                <View
-                  style={{
-                    width: 50,
-                    height: 2,
-                    backgroundColor: '#ffffff50',
-                    borderRadius: 1,
-                    marginTop: 6,
-                  }}
-                />
-              </LinearGradient>
-            </Animated.View>
+                FINTRACK
+              </Text>
+              <View
+                style={{
+                  width: 50,
+                  height: 2,
+                  backgroundColor: '#ffffff50',
+                  borderRadius: 1,
+                  marginTop: 6,
+                }}
+              />
+            </LinearGradient>
+          </Animated.View>
 
           <Surface
             style={[
@@ -404,17 +397,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
-    // borderWidth:2,
-    // borderColor:'red',
-    paddingLeft:85,
-    paddingRight:85,
-    borderRadius:20,
-    paddingTop:10,
-    paddingBottom:10
-  },
   titulo: {
     fontSize: 28,
     marginBottom: 4,
@@ -455,20 +437,18 @@ const styles = StyleSheet.create({
   botonContenido: {
     paddingVertical: 6,
   },
-
-
   headerContainer: {
-  alignItems: 'center',
-  marginBottom: 32,
-  borderRadius: 20,
-  overflow: 'hidden',
-},
-gradient: {
-  width: '100%',
-  alignItems: 'center',
-  paddingLeft: 85,
-  paddingRight: 85,
-  paddingTop: 14,
-  paddingBottom: 14,
-},
+    alignItems: 'center',
+    marginBottom: 32,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  gradient: {
+    width: '100%',
+    alignItems: 'center',
+    paddingLeft: 85,
+    paddingRight: 85,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
 });

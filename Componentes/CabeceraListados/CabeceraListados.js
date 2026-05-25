@@ -4,7 +4,7 @@ import { Surface } from 'react-native-paper';
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import Entypo from '@expo/vector-icons/Entypo';
 
 export default function CabeceraListados({ 
   titulo,
@@ -65,23 +65,24 @@ export default function CabeceraListados({
 
           
           <TouchableOpacity
-            style={[
-              styles.botonAgregar,
-              {
-                backgroundColor: colors.navigation_estilos.color_fondo,
-                borderColor: estilos.boton_color_borde,
-              }
-            ]}
+            // style={[
+            //   styles.botonAgregar,
+            //   {
+            //     backgroundColor: colors.navigation_estilos.color_fondo,
+            //     borderColor: estilos.boton_color_borde,
+            //   }
+            // ]}
             onPress={() => navigate(destinoNavegacion, parametroNavegacion)}
             activeOpacity={0.8}
           >
-            <Text style={{ 
+            {/* <Text style={{ 
               fontFamily: estilos.font_negrita, 
               color: colors.navigation_estilos.color_texto, 
-              fontSize: 35 
+              fontSize: 30 
             }}>
               +
-            </Text>
+            </Text> */}
+            <Entypo name="circle-with-plus" size={40} color={colors.navigation_estilos.color_fondo} />
           </TouchableOpacity>
           
         </View>
@@ -122,40 +123,7 @@ export default function CabeceraListados({
       </Surface>
     </View>
   );
-// return(
-//     <Surface 
-//         style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo }]} 
-//         elevation={3}
-//       >
-//         <View style={styles.resumenBarra}>
-//           <View style={styles.resumenItem}>
-//             <Text style={[styles.resumenLabel, { fontFamily: estilos.font_normal }]}>
-//               {titulo_total}
-//             </Text>
-//             <Text style={[
-//               styles.resumenMonto, 
-//               { fontFamily: estilos.font_negrita, color: estilos.font_importe_color }
-//             ]}>
-//               Gs. {Number(totalGeneral).toLocaleString('es-ES')}
-//             </Text>
-//           </View>
 
-//           <View style={styles.resumenSeparador} />
-
-//           <View style={styles.resumenItem}>
-//             <Text style={[styles.resumenLabel, { fontFamily: estilos.font_normal }]}>
-//               {titulo_cantidad}
-//             </Text>
-//             <Text style={[
-//               styles.resumenMonto, 
-//               { fontFamily: estilos.font_negrita, color: estilos.font_color }
-//             ]}>
-//               {Number(cantidadRegistros).toLocaleString('es-ES')}
-//             </Text>
-//           </View>
-//         </View>
-//       </Surface>
-// )
 
 }
 
@@ -175,7 +143,7 @@ const styles = StyleSheet.create({
     
   },
   titulo: {
-    fontSize: 24,
+    fontSize: 20,
     flex: 1,
   },
   botonesRow: {
@@ -191,8 +159,8 @@ const styles = StyleSheet.create({
     height: 35,
     borderRadius: 20,
     borderWidth: 1.5,
-    justifyContent: 'center',
-    alignItems: 'center',
+    //justifyContent: 'center',
+    // alignItems: 'center',
   },
   card: {
     //marginBottom: 15,

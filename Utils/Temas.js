@@ -157,7 +157,7 @@ const screen_componente_estilos = {
 //    tema_10 – tema_12 → fondo claro crema      (#FAF7F0)
 //    tema_13 – tema_15 → fondo claro grisáceo   (#EDEEF2)
 // ─────────────────────────────────────────────────────────────
-const colores_temas = {
+export const colores_temas = {
 
   // ── OSCURO NEUTRO ────────────────────────────────────────────
 
@@ -478,6 +478,6 @@ tema_17: {
 // ─────────────────────────────────────────────────────────────
 //  TEMA ACTIVO — cambiá solo esta línea para cambiar el tema
 // ─────────────────────────────────────────────────────────────
-export const tema_colores_activo = colores_temas.tema_17
+// export const tema_colores_activo = colores_temas.tema_17
 
 // preferidos: 2,14,12,16,10

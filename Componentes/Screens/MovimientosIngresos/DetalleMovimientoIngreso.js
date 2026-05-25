@@ -25,6 +25,12 @@ import { AntDesign } from '@expo/vector-icons';
 
 export default function DetalleMovimientoIngreso({ navigation }) {
   const { colors, fonts } = useTheme();
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
+  const { actualizacion_registro_movimiento_ingreso } = useContext(AuthContext);
+
   const [datositem, setDatositem] = useState({});
   const [imageLoading, setImageLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,20 +43,19 @@ export default function DetalleMovimientoIngreso({ navigation }) {
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
   const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                            titulo:'',
-                                                            is_error:false,
-                                                            estado_actualizar:'bandera_registro_ingreso',
-                                                            valor_estado:'',
-                                                            navnivel1:'Home',
-                                                            navnivel2:'MovIngresosStackGroup',
-                                                            navnivel3:'ListadoMovimientosIngresos',
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'',
+                                                          valor_estado:'',
+                                                          navnivel1:'',
+                                                          navnivel2:'',
+                                                          navnivel3:'',
+                                                          type:'funcion',
+                                                          funcion_name:actualizacion_registro_movimiento_ingreso
                                                           })
   
 
-  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   
-  const { activarsesion, setActivarsesion } = useContext(AuthContext);
-  const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 

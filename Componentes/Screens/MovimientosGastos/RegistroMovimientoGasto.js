@@ -723,18 +723,21 @@ export default function RegistroMovimientoGasto({ navigation }) {
 
   
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  const { actualizacion_registro_movimiento_gasto } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
   const [tituloespera, setTituloespera] = useState('');
   const [estadonotificacion,setEstadonotificacion]=useState(false)
-  const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                                titulo:'',
-                                                                is_error:false,
-                                                                estado_actualizar:'bandera_registro_gasto',
-                                                                valor_estado:'',
-                                                                navnivel1:'Home',
-                                                                navnivel2:'MovGastosStackGroup',
-                                                                navnivel3:'ListadoMovimientosGastos',
-                                                              })
+  const [bodynotificacion,setBodynotificacion]=useState({ mensaje:'',
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'',
+                                                          valor_estado:'',
+                                                          navnivel1:'',
+                                                          navnivel2:'',
+                                                          navnivel3:'',
+                                                          type:'funcion',
+                                                          funcion_name:actualizacion_registro_movimiento_gasto
+                                                        })
   
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);

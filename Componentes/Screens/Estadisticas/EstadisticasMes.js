@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo,useCallback } from 'react';
 import { View, StyleSheet, Text, ScrollView, Dimensions } from 'react-native';
 import { Surface } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 import Handelstorage from '../../../Storage/HandelStorage';
@@ -89,22 +89,36 @@ export default function EstadisticasMes({ navigation }) {
             // asignar_opciones_alerta(true, 'ERROR', msj, 'Gastos', 'bandera_registro_gasto', false);
             // actualizarEstadocomponente('alerta_estado', true);
         }
-        
+        actualizarEstadocomponente('recarga_estadisticas_mes',false)
         setReady(true);
     };
 
-    useEffect(() => {
+    // useEffect(() => {
         
-        cargardatos();
+    //     cargardatos();
         
-    }, [estadocomponente.bandera_registro_gasto, estadocomponente.bandera_registro_ingreso]);
+    // }, [estadocomponente.bandera_registro_gasto, estadocomponente.bandera_registro_ingreso]);
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            actualizarEstadocomponente('ComponenteActivoBottonTab', 'EstadisticasMes');
-        });
-        return unsubscribe;
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = navigation.addListener('focus', () => {
+    //         actualizarEstadocomponente('ComponenteActivoBottonTab', 'EstadisticasMes');
+    //     });
+    //     return unsubscribe;
+    // }, []);
+    useFocusEffect(
+          useCallback(() => {
+            
+            if (estadocomponente.recarga_estadisticas_mes) {
+              
+              cargardatos();
+            } else {
+              setReady(true);
+              
+              
+            }
+          }, [estadocomponente.recarga_estadisticas_mes])
+      );
+    
 
     // ==========================================
     // PREPARACIÓN DE DATOS

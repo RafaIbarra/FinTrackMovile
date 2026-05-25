@@ -3,12 +3,17 @@ import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as Font from 'expo-font';
 import { AuthProvider } from './AuthContext';
+import { ThemeProvider } from './ThemeContext';
+import { obtenerTemaStorage } from './Storage/TemaStorage';
 import Navigation from './Navigation';
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [themeReady, setThemeReady] = useState(false);
+  const [themeName, setThemeName] = useState(null);
 
   useEffect(() => {
+    // Cargar fuentes
     Font.loadAsync({
       SenRegular: require('./assets/fonts/Gwendolyn-Regular.ttf'),
       SenBold: require('./assets/fonts/Gwendolyn-Bold.ttf'),
@@ -26,12 +31,24 @@ export default function App() {
     }).then(() => setFontsLoaded(true));
   }, []);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    // Leer tema del storage
+    const cargarTema = async () => {
+      
+      const tema = await obtenerTemaStorage();
+      setThemeName(tema);
+      setThemeReady(true);
+    };
+    cargarTema();
+  }, []);
+
+  // Mientras cargan fuentes o tema, mostrar pantalla de carga
+  if (!fontsLoaded || !themeReady) {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={styles.loading} edges={['top', 'bottom']}>
           <ActivityIndicator size="large" color="#fb7185" />
-          <Text>Cargando fuentes...</Text>
+          <Text>Cargando...</Text>
         </SafeAreaView>
       </SafeAreaProvider>
     );
@@ -40,11 +57,13 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <AuthProvider>
-          <Navigation />
-        </AuthProvider>
+        <ThemeProvider temaInicial={themeName}>
+          <AuthProvider>
+            <Navigation />
+          </AuthProvider>
+        </ThemeProvider>
       </SafeAreaView>
-  </SafeAreaProvider>
+    </SafeAreaProvider>
   );
 }
 

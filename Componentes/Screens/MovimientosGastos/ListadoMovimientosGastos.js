@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo,useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from "react-native";
 import { Surface } from 'react-native-paper';
 
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../../AuthContext";
 import { useTheme } from '@react-navigation/native';
 import Esperando from "../../Procesando/Espera";
 import Notificacion from "../../Notificacion/Notificacion";
 import Empty from "../../Empty/Empty";
+import CabeceraListados from "../../CabeceraListados/CabeceraListados";
 import LogoEmpresa from "../../LogoEmpresa/LogoEmpresa";
 import { useApi } from "../../../Apis/useApi";
 
@@ -21,7 +22,7 @@ export default function ListadoMovimientosGastos({ navigation }) {
   const [dataresumen, setDataresumen] = useState([]);
 
   const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  
+  const [busquedaVisible,setBusquedaVisible]=useState(false)
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
   const [ready, setReady] = useState(false);
@@ -90,25 +91,34 @@ export default function ListadoMovimientosGastos({ navigation }) {
           }));
           setEstadonotificacion(true)
     }
-    
+    actualizarEstadocomponente('recarga_movimientos_gastos',false)
     
   };
   const onOk=()=>{
     setEstadonotificacion(false)
   }
-  useEffect(() => {
-    
-    cargardatos();
-    
-  }, [estadocomponente.bandera_registro_gasto]);
+  const activar_busqueda=()=>{
+    setBusquedaVisible(true)
+  }
+  const desactivar_busqueda=()=>{
+    buscarEgresos('')
+    setBusquedaVisible(false)
+  }
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      setReady(true)
-      actualizarEstadocomponente('ComponenteActivoBottonTab', 'ListadoMovimientosGastos');
-    });
-    return unsubscribe;
-  }, []);
+
+  useFocusEffect(
+        useCallback(() => {
+          
+          if (estadocomponente.recarga_movimientos_gastos) {
+            
+            cargardatos();
+          } else {
+            setReady(true);
+            
+            
+          }
+        }, [estadocomponente.recarga_movimientos_gastos])
+    );
 
   const buscarEgresos = (texto) => {
     setQuery(texto);
@@ -143,57 +153,59 @@ export default function ListadoMovimientosGastos({ navigation }) {
     <View style={{ flex: 1, backgroundColor: colors.screen_componente_estilos.color_fondo }}>
       {estadonotificacion && <Notificacion navigation={navigation} bodynotificacion={bodynotificacion} onOk={onOk} />}
 
-      {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
-      <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
-        <View style={styles.resumenBarra}>
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Gastos</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#C0392B' }]}>
-              Gs. {Number(dataresumen[0]?.TotalGastos).toLocaleString('es-ES')}
-            </Text>
-          </View>
-          <View style={styles.resumenSeparador} />
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-              {Number(dataresumen[0]?.CantidadGastos).toLocaleString('es-ES')}
-            </Text>
-          </View>
-        </View>
-      </Surface>
+      
+      <CabeceraListados
+          titulo="Movimientos Gastos"
+          data_resumen={{
+            titulo_total: 'Total Gastos',
+            totalGeneral: dataresumen[0]?.TotalGastos,
+            titulo_cantidad: 'Cant Registros',
+            cantidadRegistros: dataresumen[0]?.CantidadGastos
+          }}
+          destinoNavegacion="RegistroMovimientoGasto"
+          parametroNavegacion={{ IdMovGasto: 0 }}
+          busquedaActiva={busquedaVisible}
+          activar_busqueda={activar_busqueda}
+          desactivar_busqueda={desactivar_busqueda}  
+        />
 
       {/* ═══ BUSCADOR ═══ */}
-      <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
-            borderColor: colors.screen_componente_estilos.color_borde_cards,
-          },
-        ]}
-      >
-        <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
-        <TextInput
-          value={query}
-          onChangeText={buscarEgresos}
-          placeholder="Por empresa, concepto, medio pago..."
-          underlineColorAndroid="transparent"
-          placeholderTextColor={estilos.font_sub_color}
-          style={{
-            fontFamily: estilos.font_normal,
-            color: estilos.font_color,
-            flex: 1,
-            paddingVertical: 2,
-            height: '70%',
-            paddingLeft: 5,
-          }}
-        />
-        {hayBusqueda && (
-          <TouchableOpacity onPress={() => buscarEgresos('')} style={{ padding: 4 }}>
-            <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {
+        busquedaVisible && (
+
+        <View
+          style={[
+            styles.searchBox,
+            {
+              backgroundColor: colors.screen_componente_estilos.color_fondo_cards,
+              borderColor: colors.screen_componente_estilos.color_borde_cards,
+            },
+          ]}
+        >
+          <Text style={{ marginRight: 6, color: estilos.font_sub_color }}>🔍</Text>
+          <TextInput
+            value={query}
+            onChangeText={buscarEgresos}
+            placeholder="Por empresa, concepto, medio pago..."
+            underlineColorAndroid="transparent"
+            placeholderTextColor={estilos.font_sub_color}
+            style={{
+              fontFamily: estilos.font_normal,
+              color: estilos.font_color,
+              flex: 1,
+              paddingVertical: 2,
+              height: '70%',
+              paddingLeft: 5,
+            }}
+          />
+          {hayBusqueda && (
+            <TouchableOpacity onPress={() => buscarEgresos('')} style={{ padding: 4 }}>
+              <Text style={{ color: estilos.font_sub_color, fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        )
+      }
 
       {/* ═══ INDICADOR DE RESULTADOS DE BÚSQUEDA ═══ */}
       {hayBusqueda && (

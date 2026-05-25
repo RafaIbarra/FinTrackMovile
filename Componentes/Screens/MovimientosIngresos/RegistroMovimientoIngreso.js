@@ -333,6 +333,7 @@ export default function RegistroMovimientoIngreso({ navigation }) {
   
   const { activarsesion, setActivarsesion } = useContext(AuthContext);
   const { reiniciarvalores } = useContext(AuthContext);
+  const { actualizacion_registro_movimiento_ingreso } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
   const { params: { IdMovIngreso } } = useRoute();
@@ -341,14 +342,16 @@ export default function RegistroMovimientoIngreso({ navigation }) {
   const [tituloespera, setTituloespera] = useState('');
   const [estadonotificacion,setEstadonotificacion]=useState(false)
   const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                              titulo:'',
-                                                              is_error:false,
-                                                              estado_actualizar:'bandera_registro_ingreso',
-                                                              valor_estado:'',
-                                                              navnivel1:'Home',
-                                                              navnivel2:'MovIngresosStackGroup',
-                                                              navnivel3:'ListadoMovimientosIngresos',
-                                                            })
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'',
+                                                          valor_estado:'',
+                                                          navnivel1:'',
+                                                          navnivel2:'',
+                                                          navnivel3:'',
+                                                          type:'funcion',
+                                                          funcion_name:actualizacion_registro_movimiento_ingreso
+                                                        })
   
 
   // ── Data registrada (para edición) ────────────────────────────────────────

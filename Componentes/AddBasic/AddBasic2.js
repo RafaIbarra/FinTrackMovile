@@ -163,7 +163,7 @@ function AddBasic({  }) {
   
   cerrar();
   setTimeout(() => {
-    console.log('debe ir a: ',screen)
+    
     navigate(screen, { [param]: 0  });
 
   //   navigate('TabBasicosGroup', {

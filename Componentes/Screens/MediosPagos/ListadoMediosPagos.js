@@ -102,11 +102,11 @@ export default function ListadoMediosPagos({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       if (estadocomponente.recarga_conceptos_medios) {
-        console.log("Medios carga!");
+        
         cargardatos();
       } else {
         setReady(true);
-        console.log("Medios NO carga!");
+        
       }
     }, [estadocomponente.recarga_conceptos_medios])
   );

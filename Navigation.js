@@ -9,6 +9,9 @@ import { useNavigation  } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from './AuthContext';
 
+import { colores_temas } from './Utils/Temas';
+import { temaUser } from './ThemeContext';
+
 import Svg, { Rect, Circle, Text as SvgText } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -71,13 +74,15 @@ import DetalleGasto from './Componentes/Screens/Gastos/DetalleGasto';
 import AddBasic from './Componentes/AddBasic/AddBasic2';
 import Alerta from './Componentes/Procesando/Alerta';
 
-import { tema_colores_activo } from './Utils/Temas';
+// import { tema_colores_activo } from './Utils/Temas';
+
 
 
 import RecorridoCategoria from './Componentes/Screens/Recorrido/RecorridoCategoria';
 import RecorridoConceptoGasto from './Componentes/Screens/Recorrido/RecorridoConceptoGasto';
 import RecorridoConceptoIngreso from './Componentes/Screens/Recorrido/RecorridoConceptoIngreso';
 import RecorridoMedioPago from './Componentes/Screens/Recorrido/RecorridoMedioPago';
+import SeleccionTema from './Componentes/Screens/Configuracion/SeleccionTema';
 
 //////////////iconos///////////////////////////////
 import { Ionicons } from "@expo/vector-icons";
@@ -92,40 +97,6 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 
 
-//tema_colores_activo=
-const MyTheme = {
-    ...DefaultTheme,
-    fonts: {
-  
-  
-      regular: { fontFamily: 'SenRegular', fontWeight: 'normal' },
-      regularroboto: { fontFamily: 'RobotoRegular', fontWeight: 'normal' },
-      regularrobotobold: { fontFamily: 'RobotoBold' },
-      regularbold: { fontFamily: 'SenBold', fontWeight: 'normal' }, 
-      bodyregular: { fontFamily: 'bodyRegular', fontWeight: 'normal' }, 
-      bodybold: { fontFamily: 'bodyBold', fontWeight: 'normal' }, 
-      mirandaregular: { fontFamily: 'MirandaRegular'}, 
-      mirandabold: { fontFamily: 'MirandaBold'}, 
-      mirandaitalic: { fontFamily: 'MirandaItalic'}, 
-      balsamiqregular: { fontFamily: 'BalsamiqSansRegular'}, 
-      balsamiqtalic: { fontFamily: 'BalsamiqSansItalic'}, 
-      balsamiqbold: { fontFamily: 'BalsamiqSansBold'}, 
-      // regular: { fontFamily: 'Roboto', fontWeight: 'normal' },
-      // regularbold: { fontFamily: 'Roboto', fontWeight: 'bold' },
-      
-    },
-      colors: {
-
-
-        //CARDS Y TEXTO CARD
-        ...DefaultTheme.colors,
-        background: tema_colores_activo.screen_componente_estilos.color_fondo,
-        card:tema_colores_activo.navigation_estilos.color_fondo,
-        ...tema_colores_activo,
-        
-      },
-      
-  };
 
 
 const DrawerNav = createDrawerNavigator();
@@ -186,7 +157,7 @@ function DrawerInicio({navigation}) {
     >
       <DrawerNav.Screen 
         name="Home" 
-        component={TabsHome} 
+        component={RootStackHomeNavigator} 
         options={{
          
           drawerLabel: ({ color, size,focused }) => {
@@ -231,7 +202,27 @@ function DrawerInicio({navigation}) {
 
        />
 
-      
+      <DrawerNav.Screen name="Preferencias" 
+        component={SeleccionTema}
+        options={{
+          drawerLabel: ({ color, size,focused }) => {
+            
+            let familyname
+            familyname= focused ? fonts.balsamiqbold.fontFamily : fonts.balsamiqregular.fontFamily;
+            
+            return(<View style={{height:div_heigth,alignContent:'center',justifyContent:'center'}}> 
+                      <Text style={{fontFamily: familyname,color:color_texto}}> 
+                        Preferencias
+                      </Text>
+                    </View>)
+          },
+          drawerIcon: ({size, color})=>(
+            <MaterialCommunityIcons name="palette-outline"  size={sizeicon} color={color_icono} />
+          ),
+          drawerItemStyle:{borderBottomWidth:1,borderBottomColor:color_linea,marginBottom:5}
+         }}
+
+       />
       
       <DrawerNav.Screen name="ConsultaIA" 
         component={Modelo}
@@ -264,87 +255,102 @@ function DrawerInicio({navigation}) {
 
 
 
-const BTN_R = 28;
-const OVERHANG = 27; // cuánto sobresale arriba del tab bar
-const TAB_H = 60;   // altura del tab bar
-const W = BTN_R * 3; // ancho del área SVG (112px)
-const cx = W / 2;
-
-// El círculo tiene centro en y=OVERHANG dentro del SVG
-// El SVG arranca OVERHANG px antes del tab bar (marginTop negativo)
-const CentralTabButton = ({ onPress, colors   }) => {
-  
-  const tabColor = colors.navigation_estilos.color_fondo;
-  const iconColor = colors.navigation_estilos.color_texto;
-  const borderColor = colors.screen_componente_estilos.color_fondo;
-  const navigation = useNavigation(); 
-  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  
-  
-  const handlePress = () => {
-    // Determinar a qué pantalla navegar según el componente activo
-    if (estadocomponente.ComponenteActivoBottonTab === 'ListadoMovimientosIngresos') {
-      const IdMovIngreso=0
-      // navigation.navigate('RegistroMovimientoIngreso',{IdMovIngreso});
-      navigation.navigate('MovIngresosStackGroup',{screen:'RegistroMovimientoIngreso',params:{IdMovIngreso}});
-
-    } else {
-      const IdMovGasto=0
-      // navigation.navigate('RegistroMovimientoGasto',{IdMovGasto});
-      navigation.navigate('MovGastosStackGroup',{screen:'RegistroMovimientoGasto',params:{IdMovGasto}});
-    }
-    
-  };
-
+const Stack = createNativeStackNavigator();
+function NavigationLogin(){
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.85}
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginTop: -10,
-        
-      }}
-    >
-      <Svg width={W} height={TAB_H + OVERHANG}>
-        {/* Fondo del tab bar dentro del SVG */}
-        <Rect
-          x={0}
-          y={OVERHANG}
-          width={W}
-          height={TAB_H}
-          fill={tabColor}
-        />
-
-        {/* Círculo con centro en y=OVERHANG → sobresale OVERHANG px arriba */}
-        <Circle
-          cx={cx}
-          cy={OVERHANG}
-          r={BTN_R}
-          fill={tabColor}
-          stroke={borderColor}
-          strokeWidth={3}
-        />
-
-        {/* Ícono + centrado en el círculo */}
-        <SvgText
-          x={cx}
-          y={OVERHANG}
-          textAnchor="middle"
-          alignmentBaseline="central"
-          fontSize={28}
-          fontWeight="bold"
-          fill={iconColor}
-        >
-          +
-        </SvgText>
-      </Svg>
-    </TouchableOpacity>
+    
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="RegistroUsuario" component={RegistroUsuario} />
+      </Stack.Navigator>
+    
   );
-};
 
+  
+  }
+
+
+
+
+// ... tus otros imports (Cargando, AddBasic, StackRecorrido, DrawerInicio, NavigationLogin, etc.)
+
+function Navigation({ notificationData, setNotificationData }) {
+    const { themeName } = temaUser();
+    const { activarsesion, estadocomponente, recorrido } = useContext(AuthContext);
+
+    // Obtener el objeto de colores actual basado en themeName
+    // Fallback a tema_17 si por alguna razón el nombre no existe en el catálogo
+    const temaActual = colores_temas[themeName] || colores_temas.tema_17;
+
+    // Construir el tema dinámicamente DENTRO del componente
+    const MyTheme = {
+        ...DefaultTheme,
+        fonts: {
+            regular: { fontFamily: 'SenRegular', fontWeight: 'normal' },
+            regularroboto: { fontFamily: 'RobotoRegular', fontWeight: 'normal' },
+            regularrobotobold: { fontFamily: 'RobotoBold' },
+            regularbold: { fontFamily: 'SenBold', fontWeight: 'normal' },
+            bodyregular: { fontFamily: 'bodyRegular', fontWeight: 'normal' },
+            bodybold: { fontFamily: 'bodyBold', fontWeight: 'normal' },
+            mirandaregular: { fontFamily: 'MirandaRegular' },
+            mirandabold: { fontFamily: 'MirandaBold' },
+            mirandaitalic: { fontFamily: 'MirandaItalic' },
+            balsamiqregular: { fontFamily: 'BalsamiqSansRegular' },
+            balsamiqtalic: { fontFamily: 'BalsamiqSansItalic' },
+            balsamiqbold: { fontFamily: 'BalsamiqSansBold' },
+        },
+        colors: {
+            ...DefaultTheme.colors,
+            background: temaActual.screen_componente_estilos.color_fondo,
+            card: temaActual.navigation_estilos.color_fondo,
+            ...temaActual,
+        },
+    };
+
+    return (
+        <NavigationContainer theme={MyTheme}>
+            {activarsesion ? (
+                <>
+                    {estadocomponente.loading && <Cargando />}
+                    {estadocomponente.componente_plus_basic && <AddBasic />}
+
+                    {recorrido ? (
+                        <StackRecorrido />
+                    ) : (
+                        <DrawerInicio />
+                    )}
+                </>
+            ) : (
+                <>
+                    {estadocomponente.loading && <Cargando />}
+                    <NavigationLogin />
+                </>
+            )}
+        </NavigationContainer>
+    );
+}
+
+export default Navigation;
+
+const RootStackHome=createNativeStackNavigator();
+function RootStackHomeNavigator() {
+  return (
+    <RootStackHome.Navigator screenOptions={{ headerShown: false }}>
+      {/* El TabNavigator es UNA pantalla del root */}
+      <RootStackHome.Screen name="TabsHome" component={TabsHome} />
+
+      {/* === GASTOS: Detalle y Registro como hermanos del Tab === */}
+      <RootStackHome.Screen name="DetalleMovimientoGasto" component={DetalleMovimientoGasto} />
+      <RootStackHome.Screen name="RegistroMovimientoGasto" component={RegistroMovimientoGasto} />
+
+      {/* === CATEGORÍAS === */}
+      <RootStackHome.Screen name="DetalleMovimientoIngreso" component={DetalleMovimientoIngreso} />
+      <RootStackHome.Screen name="RegistroMovimientoIngreso" component={RegistroMovimientoIngreso} />
+
+
+    </RootStackHome.Navigator>
+  );
+}
 const Tab = createBottomTabNavigator();
 function TabsHome({ navigation }) {
   
@@ -362,7 +368,7 @@ function TabsHome({ navigation }) {
   }
   return (
     <Tab.Navigator
-      initialRouteName="MovGastosStackGroup"
+      initialRouteName="ListadoMovimientosGastos"
       screenOptions={{
         tabBarStyle: {
           backgroundColor:colors.card,
@@ -376,8 +382,8 @@ function TabsHome({ navigation }) {
       }}
     >
       <Tab.Screen
-        name="MovGastosStackGroup"
-        component={MovGastosStackGroup}
+        name="ListadoMovimientosGastos"
+        component={ListadoMovimientosGastos}
          options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -401,8 +407,8 @@ function TabsHome({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="MovIngresosStackGroup"
-        component={MovIngresosStackGroup}
+        name="ListadoMovimientosIngresos"
+        component={ListadoMovimientosIngresos}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -432,27 +438,12 @@ function TabsHome({ navigation }) {
         }}
       />
 
-      <Tab.Screen
-              name="Agregar"
-              component={RegistroMovimientoGasto}
-              options={{
-                headerShown: false,
-                tabBarLabel: '',
-                tabBarButton: (props) => (
-                  <CentralTabButton
-                  onPress={props.onPress}
-                  colors={colors}
-                  
-                  
-                  />
-                ),
-              }}
-      />
+
 
 
       <Tab.Screen
-        name="ResumenStackGroup"
-        component={ResumenStackGroup}
+        name="ResumenMovimientos"
+        component={ResumenMovimientos}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -482,8 +473,8 @@ function TabsHome({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="EstadisticasMesStackGroup"
-        component={EstadisticasMesStackGroup}
+        name="EstadisticasMes"
+        component={EstadisticasMes}
         options={{ 
            tabBarIcon: ({focused, color, size }) => {
               let nombrreico,color_icono
@@ -518,165 +509,6 @@ function TabsHome({ navigation }) {
 
  
 }
-
-
-const MovGastosStack = createNativeStackNavigator();
-function MovGastosStackGroup(){
-  return(
-    <MovGastosStack.Navigator>
-      <MovGastosStack.Screen name="ListadoMovimientosGastos" component={ListadoMovimientosGastos} options={{ headerShown: false }} />
-      <MovGastosStack.Screen name="DetalleMovimientoGasto" component={DetalleMovimientoGasto} options={{ headerShown: false }} />
-      <MovGastosStack.Screen name="RegistroMovimientoGasto" component={RegistroMovimientoGasto} options={{ headerShown: false }} />
-    </MovGastosStack.Navigator>
-  )
-}
-
-const MovIngresosStack = createNativeStackNavigator();
-function MovIngresosStackGroup(){
-  return(
-    <MovIngresosStack.Navigator>
-      <MovIngresosStack.Screen name="ListadoMovimientosIngresos" component={ListadoMovimientosIngresos} options={{ headerShown: false }} />
-      <MovIngresosStack.Screen name="DetalleMovimientoIngreso" component={DetalleMovimientoIngreso} options={{ headerShown: false }} />
-      <MovIngresosStack.Screen name="RegistroMovimientoIngreso" component={RegistroMovimientoIngreso} options={{ headerShown: false }} />
-    </MovIngresosStack.Navigator>
-  )
-}
-
-
-const ResumenStack = createNativeStackNavigator();
-function ResumenStackGroup(){
-  return(
-    <ResumenStack.Navigator>
-      <ResumenStack.Screen name="ResumenMovimientos" component={ResumenMovimientos} options={{ headerShown: false }} />
-    </ResumenStack.Navigator>
-  )
-
-}
-
-const EstadisticasMesStack = createNativeStackNavigator();
-function EstadisticasMesStackGroup(){
-  return(
-    <EstadisticasMesStack.Navigator>
-      <EstadisticasMesStack.Screen name="EstadisticasMes" component={EstadisticasMes} options={{ headerShown: false }} />
-    </EstadisticasMesStack.Navigator>
-  )
-}
-
-
-
-const Stack = createNativeStackNavigator();
-function NavigationLogin(){
-  return (
-    
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="RegistroUsuario" component={RegistroUsuario} />
-      </Stack.Navigator>
-    
-  );
-
-  
-  }
-
-
-
-function Navigation({notificationData,setNotificationData}) {
-    
-    const { activarsesion, setActivarsesion } = useContext(AuthContext);
-    const { recorrido,setRecorrido } = useContext(AuthContext);
-    const { estadocomponente } = useContext(AuthContext);
-    return (
-  
-      <NavigationContainer theme={MyTheme}>
-            {activarsesion ? (
-                <>
-                    {estadocomponente.loading && <Cargando />}
-                    {estadocomponente.componente_plus_basic && <AddBasic />}
-                    
-                    {/* Si recorrido es true, muestra el stack de onboarding */}
-                    {/* Si es false, muestra el drawer principal */}
-                    {recorrido ? (
-                        <StackRecorrido />
-                    ) : (
-                        <DrawerInicio />
-                    )}
-                </>
-            ) : (
-                <>
-                    {estadocomponente.loading && <Cargando />}
-                    <NavigationLogin />
-                </>
-            )}
-        </NavigationContainer>
-    );
-
-    
-  }
-
-
-const CentralTabButtonBasic = ({ onPress, colors   }) => {
-  
-  const tabColor = colors.navigation_estilos.color_fondo;
-  const iconColor = colors.navigation_estilos.color_texto;
-  const borderColor = colors.screen_componente_estilos.color_fondo;
-  const navigation = useNavigation(); 
-  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
-  
-  
-  const handlePress = () => {
-    // Determinar a qué pantalla navegar según el componente activo
-    actualizarEstadocomponente('componente_plus_basic', true);
-    
-  };
-
-  return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.85}
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginTop: -10,
-        
-      }}
-    >
-      <Svg width={W} height={TAB_H + OVERHANG}>
-        {/* Fondo del tab bar dentro del SVG */}
-        <Rect
-          x={0}
-          y={OVERHANG}
-          width={W}
-          height={TAB_H}
-          fill={tabColor}
-        />
-
-        {/* Círculo con centro en y=OVERHANG → sobresale OVERHANG px arriba */}
-        <Circle
-          cx={cx}
-          cy={OVERHANG}
-          r={BTN_R}
-          fill={tabColor}
-          stroke={borderColor}
-          strokeWidth={3}
-        />
-
-        {/* Ícono + centrado en el círculo */}
-        <SvgText
-          x={cx}
-          y={OVERHANG}
-          textAnchor="middle"
-          alignmentBaseline="central"
-          fontSize={28}
-          fontWeight="bold"
-          fill={iconColor}
-        >
-          +
-        </SvgText>
-      </Svg>
-    </TouchableOpacity>
-  );
-};
 
 
 const RootStack = createNativeStackNavigator();
@@ -775,18 +607,6 @@ function TabBasicosGroup({ navigation }) {
         }}
       />
 
-      {/* <TabBasicos.Screen
-        name="Agregar"
-        component={CentralTabButtonBasic}
-        options={{
-          headerShown: false,
-          tabBarLabel: '',
-          tabBarButton: (props) => (
-            <CentralTabButtonBasic onPress={props.onPress} colors={colors} />
-          ),
-        }}
-      /> */}
-
       <TabBasicos.Screen
         name="ListadoMediosPagos"
         component={ListadoMediosPagos}
@@ -834,54 +654,6 @@ function TabBasicosGroup({ navigation }) {
 }
 
 
-// Stack Categorias
-const StackCategorias = createNativeStackNavigator();
-function StackCategoriasGroup() {
-  return (
-    <StackCategorias.Navigator>
-      <StackCategorias.Screen name="ListadoCategoriasGastos" component={ListadoCategoriasGastos} options={{ headerShown: false }} />
-      <StackCategorias.Screen name="DetalleCategoriaGasto" component={DetalleCategoriaGasto} options={{ headerShown: false }} />
-      <StackCategorias.Screen name="RegistroCategoria" component={RegistroCategoria} options={{ headerShown: false }} />
-    </StackCategorias.Navigator>
-  );
-}
-
-
-// Stack Gastos
-const StackGastos = createNativeStackNavigator();
-function StackGastosGroup() {
-  return (
-    <StackGastos.Navigator>
-      <StackGastos.Screen name="ListadosGastos" component={ListadosGastos} options={{ headerShown: false }} />
-      <StackCategorias.Screen name="DetalleGasto" component={DetalleGasto} options={{ headerShown: false }} />
-      <StackCategorias.Screen name="RegistroGasto" component={RegistroGasto} options={{ headerShown: false }} />
-    </StackGastos.Navigator>
-  );
-}
-
-// Stack Medios de Pago
-const StackMediosPagos = createNativeStackNavigator();
-function StackMediosPagosGroup() {
-  return (
-    <StackMediosPagos.Navigator>
-      <StackMediosPagos.Screen name="ListadoMediosPagos" component={ListadoMediosPagos} options={{ headerShown: false }} />
-      <StackMediosPagos.Screen name="DetalleMedioPago" component={DetalleMedioPago} options={{ headerShown: false }} />
-      <StackMediosPagos.Screen name="RegistroMedioPago" component={RegistroMedioPago} options={{ headerShown: false }} />
-    </StackMediosPagos.Navigator>
-  );
-}
-
-// Stack Ingresos
-const StackIngresos = createNativeStackNavigator();
-function StackIngresosGroup() {
-  return (
-    <StackIngresos.Navigator>
-      <StackIngresos.Screen name="ConceptosIngresos" component={ListadoIngresos} options={{ headerShown: false }} />
-      <StackIngresos.Screen name="DetalleIngreso" component={DetalleIngreso} options={{ headerShown: false }} />
-      <StackIngresos.Screen name="RegistroIngreso" component={RegistroIngreso} options={{ headerShown: false }} />
-    </StackIngresos.Navigator>
-  );
-}
 
 
 const Stackrecorrido = createNativeStackNavigator();
@@ -910,4 +682,4 @@ function StackRecorrido() {
       },
     
     });
-  export default Navigation;
+  

@@ -37,6 +37,12 @@ export const AuthProvider = ({ children }) => {
     recarga_conceptos_categorias:true,
     recarga_conceptos_medios:true,
     recarga_conceptos_ingresos:true,
+
+    recarga_movimientos_gastos:true,
+    recarga_movimientos_ingresos:true,
+    recarga_resumen_mes:true,
+    recarga_estadisticas_mes:true,
+
   });
 
   // 🔑 useCallback evita que las funciones se recreen en cada render
@@ -46,6 +52,29 @@ export const AuthProvider = ({ children }) => {
       [campo]: valor,
     }));
   }, []); // sin dependencias, nunca se recrea
+  const actualizacion_registro_movimiento_gasto = useCallback(() => {
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      recarga_movimientos_gastos: true,
+      recarga_resumen_mes: true,
+      recarga_estadisticas_mes:true,
+      recarga_conceptos_gastos: true,
+      recarga_conceptos_categorias:true,
+      recarga_conceptos_medios:true,
+      
+    }));
+  }, []); // 🔑 un solo setEstadocomponente en lugar de múltiples actualizarEstadocomponente
+
+  const actualizacion_registro_movimiento_ingreso = useCallback(() => {
+    setEstadocomponente(prevState => ({
+      ...prevState,
+      recarga_movimientos_ingresos: true,
+      recarga_resumen_mes: true,
+      recarga_estadisticas_mes:true,
+      recarga_conceptos_ingresos:true,
+    }));
+  }, []); // 🔑 un solo setEstadocomponente en lugar de múltiples actualizarEstadocomponente
+
 
   const reiniciarvalores = useCallback(() => {
     setEstadocomponente(prevState => ({
@@ -59,6 +88,15 @@ export const AuthProvider = ({ children }) => {
       IdDiaSeleccion: 0,
       comphome: true,
       datahome: [],
+      recarga_conceptos_gastos:true,
+      recarga_conceptos_categorias:true,
+      recarga_conceptos_medios:true,
+      recarga_conceptos_ingresos:true,
+
+      recarga_movimientos_gastos:true,
+      recarga_movimientos_ingresos:true,
+      recarga_resumen_mes:true,
+      recarga_estadisticas_mes:true,
     }));
   }, []); // 🔑 un solo setEstadocomponente en lugar de múltiples actualizarEstadocomponente
 
@@ -100,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     periodo, setPeriodo,
     sesiondatadate, setSesiondatadate,
     asignar_opciones_alerta,
+    actualizacion_registro_movimiento_gasto,
+    actualizacion_registro_movimiento_ingreso
   }), [
     activarsesion,
     recorrido,
@@ -112,6 +152,8 @@ export const AuthProvider = ({ children }) => {
     periodo,
     sesiondatadate,
     asignar_opciones_alerta,
+    actualizacion_registro_movimiento_gasto,
+    actualizacion_registro_movimiento_ingreso
   ]);
 
   return (

@@ -19,6 +19,8 @@ const { width } = Dimensions.get('window');
 
 export default function Notificacion({ navigation,bodynotificacion,onOk }) {
     const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+    // const { actualizacion_registro_movimiento_gasto } = useContext(AuthContext);
+    // const { actualizacion_registro_movimiento_ingreso } = useContext(AuthContext);
     const { colors, fonts } = useTheme();
     const { navigate } = useNavigation();
 
@@ -88,8 +90,12 @@ export default function Notificacion({ navigation,bodynotificacion,onOk }) {
             }),
         ]).start(() => {
             if (!isError) {
-                
-                actualizarEstadocomponente(bodynotificacion?.estado_actualizar,bodynotificacion?.valor_estado);
+                if (bodynotificacion?.type==='funcion'){
+                    bodynotificacion.funcion_name()
+                }else{
+                    actualizarEstadocomponente(bodynotificacion?.estado_actualizar,bodynotificacion?.valor_estado);
+                }
+                    
                 // navigate(estadocomponente.alerta_componente.nav_destino);
                 // navigate(estadocomponente.alerta_componente.nav_grupo, {screen: estadocomponente.alerta_componente.nav_destino});
                 
@@ -100,7 +106,10 @@ export default function Notificacion({ navigation,bodynotificacion,onOk }) {
                 // navigate(bodynotificacion?.navnivel1, {screen: bodynotificacion?.navnivel2,params: {screen: bodynotificacion?.navnivel3,}})
                 //  navigate(bodynotificacion?.navnivel2, {screen: bodynotificacion?.navnivel3})
                 // navigation.goBack();
-                navigation.popToTop()
+                if (!('omitirnavagacion' in bodynotificacion)){
+
+                    navigation.popToTop()
+                }
                 
             }
             onOk()

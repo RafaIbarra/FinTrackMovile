@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext, use } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, StyleSheet, Text, Alert, ImageBackground, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { TextInput, Button, Surface, Portal, Dialog, PaperProvider } from 'react-native-paper';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { useTheme } from '@react-navigation/native';
 import { AuthContext } from '../../../AuthContext';
 
@@ -118,21 +118,24 @@ export default function ResumenMovimientos({ navigation }) {
             // actualizarEstadocomponente('alerta_estado', true);
         }
         setReady(true);
+        actualizarEstadocomponente('recarga_resumen_mes',false)
+
         
     };
 
-    useEffect(() => {
+   useFocusEffect(
+        useCallback(() => {
         
-        cargardatos();
-        
-    }, [estadocomponente.bandera_registro_gasto, estadocomponente.bandera_registro_ingreso]);
-
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            actualizarEstadocomponente('ComponenteActivoBottonTab', 'ResumenMovimientos');
-        });
-        return unsubscribe;
-    }, []);
+        if (estadocomponente.recarga_resumen_mes) {
+            
+            cargardatos();
+        } else {
+            setReady(true);
+            
+            
+        }
+        }, [estadocomponente.recarga_resumen_mes])
+    );
 
   
     

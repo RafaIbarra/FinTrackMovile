@@ -105,11 +105,11 @@ export default function ListadoIngresos({ navigation }) {
     useCallback(() => {
       
       if (estadocomponente.recarga_conceptos_ingresos) {
-        console.log("Ingresos carga!")
+        
         cargardatos();
       } else {
         setReady(true);
-        console.log("ingresos NO carga!")
+        
         
       }
     }, [estadocomponente.recarga_conceptos_ingresos])

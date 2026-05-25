@@ -113,11 +113,11 @@ export default function ListadoCategoriasGastos({ navigation }) {
     useCallback(() => {
       
       if (estadocomponente.recarga_conceptos_categorias) {
-        console.log("categorias carga!")
+        
         cargardatos();
       } else {
         setReady(true);
-        console.log("categorias NO carga!")
+        
         
       }
     }, [estadocomponente.recarga_conceptos_categorias])

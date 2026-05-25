@@ -24,6 +24,11 @@ import { AntDesign } from '@expo/vector-icons';
 
 export default function DetalleMovimientoGasto({ navigation }) {
   const { colors, fonts } = useTheme();
+  const { actualizacion_registro_movimiento_gasto } = useContext(AuthContext);
+  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
+  
+  const { activarsesion, setActivarsesion } = useContext(AuthContext);
+  const { reiniciarvalores } = useContext(AuthContext);
   const [datositem, setDatositem] = useState({});
   const [detallegastos, setDetallegastos] = useState([]);
   const [detallemedios, setDetallemedios] = useState([]);
@@ -37,21 +42,21 @@ export default function DetalleMovimientoGasto({ navigation }) {
   const [tituloespera, setTituloespera] = useState('');
   const [ready, setReady] = useState(false);
   const[estadonotificacion,setEstadonotificacion]=useState(false)
+ 
   const [bodynotificacion,setBodynotificacion]=useState({mensaje:'',
-                                                                  titulo:'',
-                                                                  is_error:false,
-                                                                  estado_actualizar:'bandera_registro_gasto',
-                                                                  valor_estado:'',
-                                                                  navnivel1:'Home',
-                                                                  navnivel2:'MovGastosStackGroup',
-                                                                  navnivel3:'ListadoMovimientosGastos',
-                                                                })
+                                                          titulo:'',
+                                                          is_error:false,
+                                                          estado_actualizar:'',
+                                                          valor_estado:'',
+                                                          navnivel1:'',
+                                                          navnivel2:'',
+                                                          navnivel3:'',
+                                                          type:'funcion',
+                                                          funcion_name:actualizacion_registro_movimiento_gasto
+                                                        })
 
 
-  const { estadocomponente, actualizarEstadocomponente } = useContext(AuthContext);
   
-  const { activarsesion, setActivarsesion } = useContext(AuthContext);
-  const { reiniciarvalores } = useContext(AuthContext);
 
   const apiRequest = useApi({ setActivarsesion, reiniciarvalores, actualizarEstadocomponente });
 

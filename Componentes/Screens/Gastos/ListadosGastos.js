@@ -110,11 +110,11 @@ export default function ListadosGastos({ navigation }) {
       useCallback(() => {
         
         if (estadocomponente.recarga_conceptos_gastos) {
-          console.log("gastos carga!")
+          
           cargardatos();
         } else {
           setReady(true);
-          console.log("gastos NO carga!")
+          
           
         }
       }, [estadocomponente.recarga_conceptos_gastos])
@@ -166,26 +166,7 @@ export default function ListadosGastos({ navigation }) {
           desactivar_busqueda={desactivar_busqueda}  
       />
 
-      {/* ═══ BARRA DE RESUMEN COMPACTA ═══ */}
-
-
-      {/* <Surface style={[styles.card, { backgroundColor: estilos.pantalla_color_fondo}]} elevation={3}>
-        <View style={styles.resumenBarra}>
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Total Concepto Gasto</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: '#7B5EA7' }]}>
-              Gs. {Number(dataresumen?.TotalGeneral).toLocaleString('es-ES')}
-            </Text>
-          </View>
-          <View style={styles.resumenSeparador} />
-          <View style={styles.resumenItem}>
-            <Text style={[styles.resumenLabelBarra, { fontFamily: estilos.font_normal }]}>Registros</Text>
-            <Text style={[styles.resumenMontoBarra, { fontFamily: estilos.font_negrita, color: estilos.font_color }]}>
-              {Number(dataresumen?.CantidadGastos).toLocaleString('es-ES')}
-            </Text>
-          </View>
-        </View>
-      </Surface> */}
+      
 
       {/* ═══ BUSCADOR ═══ */}
       {
